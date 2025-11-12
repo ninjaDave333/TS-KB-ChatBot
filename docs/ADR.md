@@ -280,6 +280,46 @@
 
 ---
 
+## ADR-013: OPPORTUNITY close_date Field for Temporal Queries
+
+**Date**: 2025-11-12  
+**Status**: Accepted  
+**Context**: Temporal queries were using purchased_date (line item creation) instead of actual deal close date, causing inaccurate results for "2025 deals" queries
+
+**Decision**: Add close_date field to OPPORTUNITY relationships and use it as the primary field for all temporal queries
+
+**Field Distinction**:
+- **close_date**: Actual deal close date from Opportunity.CloseDate (authoritative for temporal queries)
+- **purchased_date**: Line item creation date from OpportunityLineItem.CreatedDate (rarely used)
+
+**Query Pattern Change**:
+```cypher
+# OLD (Incorrect)
+WHERE o.purchased_date CONTAINS '2025'
+
+# NEW (Correct)
+WHERE o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'
+```
+
+**Implementation**:
+- Updated schema_descriptions.py with close_date as primary temporal field
+- Changed all query examples to use close_date
+- Updated temporal_filtering pattern to use proper date range comparisons
+- Added temporal_queries section to OPPORTUNITY relationship documentation
+
+**Data Coverage**:
+- All 10,032 OPPORTUNITY relationships have close_date field
+- 100% coverage across all deal stages
+- Date range: 2022-11-30 to 2025-11-12
+
+**Consequences**:
+- ✅ Accurate temporal queries for "deals closed in 2025"
+- ✅ Proper date range filtering instead of string matching
+- ✅ Correct revenue reporting by time period
+- ✅ Clear distinction between close date and creation date
+
+---
+
 ## Decision Log Summary
 
 | ADR | Decision | Status | Impact |
@@ -296,6 +336,7 @@
 | 010 | RESTful API with OpenAPI | Accepted | Low |
 | 011 | Enhanced Schema Descriptions | Accepted | High |
 | 012 | Cost Field Correction | Accepted | High |
+| 013 | OPPORTUNITY close_date Field | Accepted | Critical |
 
 ---
 

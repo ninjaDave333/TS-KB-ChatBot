@@ -149,16 +149,22 @@ SCHEMA_DESCRIPTIONS = {
                 "sf_opportunity_line_item_id": "Unique OpportunityLineItem ID",
                 "opportunity_name": "Deal name",
                 "opportunity_stage": "Deal stage - USE 'Closed Won' for successful deals",
+                "close_date": "Actual deal close date (ISO) - USE THIS for temporal queries",
                 "quantity": "Number of units",
                 "unit_price": "Price per unit", 
                 "total_price": "Total deal value - USE THIS for cost/amount calculations, NOT 'amount'",
-                "purchased_date": "When deal closed (ISO date)",
+                "purchased_date": "Line item creation date (ISO) - rarely used",
                 "description": "Deal description"
             },
             "cost_calculation": {
                 "field_name": "total_price",
                 "note": "NO 'amount' field exists - always use o.total_price for deal costs",
                 "aggregation": "sum(toFloat(o.total_price)) for total cost"
+            },
+            "temporal_queries": {
+                "primary_field": "close_date",
+                "note": "ALWAYS use o.close_date for temporal queries, NOT o.purchased_date",
+                "year_filter": "o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'"
             },
             "common_stages": ["Closed Won", "Closed Lost", "Qualification", "Quote Preparation"],
             "query_examples": [
@@ -169,8 +175,8 @@ SCHEMA_DESCRIPTIONS = {
                 "",
                 "// Find 2025 deals",
                 "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)",
-                "WHERE o.opportunity_stage = 'Closed Won' AND o.purchased_date CONTAINS '2025'",
-                "RETURN c.sf_name, p.name, o.purchased_date"
+                "WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'",
+                "RETURN c.sf_name, p.name, o.close_date, o.total_price"
             ]
         },
         
@@ -317,7 +323,7 @@ SCHEMA_DESCRIPTIONS = {
             "template": "MATCH (c:Client)-[rel:OPPORTUNITY|HAS_INSTALLED]->(p:Product) WHERE toLower(p.vendor) CONTAINS toLower('{vendor_name}') OR toLower(p.name) CONTAINS toLower('{vendor_name}') RETURN DISTINCT c.sf_name",
             "count_template": "MATCH (c:Client)-[rel:OPPORTUNITY|HAS_INSTALLED]->(p:Product) WHERE toLower(p.vendor) CONTAINS toLower('{vendor_name}') OR toLower(p.name) CONTAINS toLower('{vendor_name}') RETURN count(DISTINCT c) as total",
             "count_and_sample_template": "MATCH (c:Client)-[rel:OPPORTUNITY|HAS_INSTALLED]->(p:Product) WHERE toLower(p.vendor) CONTAINS toLower('{vendor_name}') OR toLower(p.name) CONTAINS toLower('{vendor_name}') WITH DISTINCT c WITH count(c) as total, collect(c.sf_name)[0..5] as sample_names RETURN total, sample_names",
-            "vendor_year_deals_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND (toLower(p.vendor) CONTAINS '{vendor}' OR toLower(p.name) CONTAINS '{vendor}') AND o.purchased_date CONTAINS '{year}' WITH count(o) as total, collect({client: c.sf_name, product: p.name, date: o.purchased_date})[0..5] as samples RETURN total, samples",
+            "vendor_year_deals_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND (toLower(p.vendor) CONTAINS '{vendor}' OR toLower(p.name) CONTAINS '{vendor}') AND o.close_date >= '{year}-01-01' AND o.close_date < '{year+1}-01-01' WITH count(o) as total, collect({client: c.sf_name, product: p.name, date: o.close_date})[0..5] as samples RETURN total, samples",
             "example_complete_query": "MATCH (c:Client)-[rel:OPPORTUNITY|HAS_INSTALLED]->(p:Product) WHERE toLower(p.name) CONTAINS 'scaleops' WITH DISTINCT c WITH count(c) as total, collect(c.sf_name)[0..5] as samples RETURN total, samples"
         }
     },
@@ -340,10 +346,10 @@ SCHEMA_DESCRIPTIONS = {
         "syntax_rule": "Every RETURN statement must be complete - no trailing commas allowed",
         "mandatory_complete_return": "ALWAYS end queries with complete RETURN like 'RETURN total, samples' NEVER 'RETURN total,'",
         "cypher_validation": "Before generating, ensure RETURN statement has all required fields after commas",
-        "date_fields": "Use o.purchased_date for OPPORTUNITY dates, NOT o.close_date",
+        "date_fields": "Use o.close_date for OPPORTUNITY temporal queries (actual close date), NOT o.purchased_date (line item creation)",
         "cost_fields": "Use o.total_price for deal costs, NOT o.amount (amount field does not exist)",
         "cost_aggregation": "For total cost use: sum(toFloat(o.total_price)) as total_cost",
-        "temporal_filtering": "For year filtering use: o.purchased_date CONTAINS '2025'",
+        "temporal_filtering": "For year filtering use: o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'",
         "mandatory_filters": "ALWAYS include ALL user-specified filters - vendor AND year AND status",
         "filter_combination": "When user asks for 'hashicorp 2025 deals' include BOTH vendor filter AND year filter",
         "variable_consistency": "Use consistent variable names - if you collect as 'samples' return as 'samples', not 'deals'",

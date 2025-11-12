@@ -11,6 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docker deployment configuration
 - API documentation and testing
 
+## [0.4.0] - 2025-11-12
+
+### Added
+- OPPORTUNITY.close_date field for accurate temporal queries
+- Distinction between close_date (actual deal close) and purchased_date (line item creation)
+- Updated query patterns for 2025 deal tracking
+
+### Changed
+- Schema descriptions now use close_date for all temporal queries
+- Year filtering changed from CONTAINS to proper date range comparisons
+- Query examples updated to use close_date >= '2025-01-01' AND close_date < '2026-01-01'
+
+### Fixed
+- Temporal queries now use correct close_date field instead of purchased_date
+- 2025 deal tracking now accurately reflects actual close dates
+
 ## [0.3.1] - 2025-11-12
 
 ### Fixed
@@ -93,6 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 0.4.0 | 2025-11-12 | Added close_date field for temporal queries |
 | 0.3.1 | 2025-11-12 | Fixed cost field mapping (amount → total_price) |
 | 0.3.0 | 2025-11-12 | Query validation and filter injection |
 | 0.2.0 | 2025-11-12 | Enhanced schema descriptions for AI query generation |

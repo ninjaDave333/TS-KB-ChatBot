@@ -1,7 +1,7 @@
 # TSKB-RAG Schema Synchronization Guide
 
-**Version**: 2.3.0  
-**Last Updated**: 2025-11-10  
+**Version**: 2.4.0  
+**Last Updated**: 2025-11-12  
 **Purpose**: Complete schema reference for services consuming TSKB-RAG Neo4j knowledge graph
 
 ---
@@ -959,17 +959,20 @@ CREATE (p)-[:REQUIRES_SKILL]->(s)
   "sf_opportunity_line_item_id": "string (UNIQUE)",
   "opportunity_name": "string",
   "opportunity_stage": "string (Closed Won|Closed Lost|Qualification|etc.)",
+  "close_date": "string (ISO) - Actual deal close date (USE THIS for temporal queries)",
   "quantity": "number",
   "unit_price": "number",
   "total_price": "number (USE THIS for cost calculations, NOT 'amount')",
   "description": "string",
-  "purchased_date": "string (ISO)",
+  "purchased_date": "string (ISO) - Line item creation date (rarely used)",
   "created_at": "datetime",
   "updated_at": "datetime"
 }
 ```
 
-**CRITICAL**: No `amount` field exists. Always use `total_price` for cost/revenue calculations.
+**CRITICAL**: 
+- No `amount` field exists. Always use `total_price` for cost/revenue calculations.
+- Use `close_date` for temporal queries (actual deal close), NOT `purchased_date` (line item creation)
 
 **Cost Aggregation Pattern**:
 ```cypher
@@ -977,6 +980,16 @@ CREATE (p)-[:REQUIRES_SKILL]->(s)
 MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)
 WHERE o.opportunity_stage = 'Closed Won'
 RETURN sum(toFloat(o.total_price)) as total_revenue
+```
+
+**Temporal Query Pattern**:
+```cypher
+// Find deals closed in 2025
+MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)
+WHERE o.opportunity_stage = 'Closed Won'
+AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'
+RETURN c.sf_name, p.name, o.close_date, o.total_price
+ORDER BY o.close_date DESC
 ```
 
 **Example**:
@@ -1187,6 +1200,8 @@ When integrating with TSKB-RAG data:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.4.0 | 2025-11-12 | Added close_date field to OPPORTUNITY for accurate temporal queries |
+| 2.3.0 | 2025-11-10 | Updated cost field documentation (total_price) |
 | 2.2.0 | 2025-11-09 | Added PURCHASED/HAS_INSTALLED relationships, incremental sync, product version tracking |
 | 2.1.0 | 2025-11-04 | Added Client node schema, MANAGED_BY relationships, SyncMetadata system |
 | 2.0.1 | 2025-01-15 | Added source tag standardization, notification system |
