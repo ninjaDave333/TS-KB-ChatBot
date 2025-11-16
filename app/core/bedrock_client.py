@@ -38,7 +38,8 @@ class BedrockClient:
         
         filters = []
         if year_match:
-            filters.append(f"o.purchased_date CONTAINS '{year_match.group(1)}'")
+            year = year_match.group(1)
+            filters.append(f"o.close_date >= '{year}-01-01' AND o.close_date < '{int(year)+1}-01-01'")
         if vendor_match:
             vendor = vendor_match.group(1).lower()
             filters.append(f"toLower(p.name) CONTAINS '{vendor}'")
@@ -52,13 +53,14 @@ class BedrockClient:
 
 CRITICAL RULES:
 - Client names: c.sf_name (NOT c.name)
-- Dates: o.purchased_date (NOT o.close_date)
-- Account managers: (c:Client)-[:MANAGED_BY]->(e:Employee)
-- Israel clients: c.region = 'IL' (NOT c.country)
+- Dates: o.close_date for temporal queries (actual deal close date)
+- Extract year: substring(o.close_date, 0, 4) NOT YEAR() or extract()
+- Vendor filtering: Use p.vendor field directly
+- Exclude vendor: WHERE NOT toLower(p.vendor) CONTAINS 'vendorname'
 - Successful deals: o.opportunity_stage = 'Closed Won'{filter_hint}
 
 EXAMPLE:
-MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.purchased_date CONTAINS '2025' WITH count(o) as total, collect({{client: c.sf_name, product: p.name, date: o.purchased_date}})[0..5] as samples RETURN total, samples
+MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND NOT toLower(p.vendor) CONTAINS 'terasky' WITH o.close_date as date, c.sf_name as client, p.name as product ORDER BY date ASC LIMIT 1 RETURN substring(date, 0, 4) as year, client, product
 
 Cypher:"""
 
@@ -66,7 +68,7 @@ Cypher:"""
             body = {
                 "anthropic_version": "bedrock-2023-05-31",
                 "max_tokens": 4096,  # Maximum allowed by Claude
-                "system": "You are a precise Cypher query generator. You MUST include ALL filters mentioned in the user query, especially year filters. If user mentions 2025, you MUST add: AND o.purchased_date CONTAINS '2025'",
+                "system": "You are a precise Cypher query generator. Generate ONLY valid Cypher syntax. Do NOT add explanations. MUST include ALL filters from user query. For 'non-X vendor' use: WHERE NOT toLower(p.vendor) CONTAINS 'x'. Return ALL requested fields.",
                 "messages": [
                     {
                         "role": "user",
@@ -83,22 +85,31 @@ Cypher:"""
             result = json.loads(response['body'].read())
             cypher_query = result['content'][0]['text'].strip()
             
-            # Extract only the Cypher query
+            # Extract only the Cypher query - keep all lines, just clean up
             lines = cypher_query.split('\n')
             cypher_lines = []
+            in_query = False
             
             for line in lines:
                 line = line.strip()
-                if line and (line.startswith('MATCH') or line.startswith('WHERE') or 
-                           line.startswith('RETURN') or line.startswith('WITH') or
-                           line.startswith('ORDER') or line.startswith('LIMIT') or
-                           line.startswith('OPTIONAL') or line.startswith('UNWIND')):
-                    cypher_lines.append(line)
+                # Start collecting when we see MATCH
+                if line.startswith('MATCH'):
+                    in_query = True
+                
+                # Collect all lines once we're in the query
+                if in_query and line:
+                    # Skip lines that are just comments or explanations
+                    if not line.startswith('#') and not line.startswith('//'):
+                        cypher_lines.append(line)
             
             if cypher_lines:
-                cypher_query = '\n'.join(cypher_lines)
+                cypher_query = ' '.join(cypher_lines)  # Join with space to avoid syntax errors
+                # Clean up multiple spaces
+                cypher_query = re.sub(r'\s+', ' ', cypher_query)
+                # Remove markdown code fences
+                cypher_query = cypher_query.replace('```', '').strip()
             
-            print(f"Bedrock generated: {cypher_query}")
+            print(f"Bedrock cleaned: {cypher_query}")
             
             # Post-process: inject missing filters
             if filters:

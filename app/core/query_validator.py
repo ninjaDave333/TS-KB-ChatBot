@@ -49,9 +49,13 @@ class CypherValidator:
             issues.append("Client LOCATED_IN relationship doesn't exist")
             fixed_query = self._fix_location_pattern(fixed_query)
         
-        if 'close_date' in fixed_query:
-            issues.append("Wrong date field - should use purchased_date")
-            fixed_query = fixed_query.replace('close_date', 'purchased_date')
+        if 'YEAR(' in fixed_query:
+            issues.append("YEAR() function not available - using substring()")
+            fixed_query = re.sub(r'YEAR\(([^)]+)\)', r'substring(\1, 0, 4)', fixed_query)
+        
+        if 'extract(' in fixed_query.lower():
+            issues.append("extract() function not available - using substring()")
+            fixed_query = re.sub(r'extract\(\s*year\s+FROM\s+date\(([^)]+)\)\s*\)', r'substring(\1, 0, 4)', fixed_query, flags=re.IGNORECASE)
         
         # Basic structure validation
         if not self._has_valid_structure(fixed_query):
