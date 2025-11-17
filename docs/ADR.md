@@ -340,6 +340,7 @@ WHERE o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'
 | 014 | RAGAS Integration for RAG Evaluation | Accepted | High |
 | 015 | Intelligent Answer Generation | Accepted | Critical |
 | 016 | Teams Recording Integration | Accepted | High |
+| 017 | Dynamic RAG Enhancement | Planned | Critical |
 
 ---
 
@@ -548,6 +549,72 @@ def _generate_meeting_analytics_answer(self, query, data, query_type):
 - **Meeting Sentiment Analysis**: Emotional tone analysis from transcripts
 - **Action Item Extraction**: Automated task identification from meetings
 - **Meeting Effectiveness Metrics**: Duration, participation, and outcome analysis
+
+---
+
+---
+
+## ADR-017: Dynamic RAG Enhancement
+
+**Date**: 2025-11-17  
+**Status**: Planned  
+**Context**: Current RAG system has static query patterns and manual schema management. Need dynamic, self-learning system capable of handling new questions and evolving data patterns.
+
+**Decision**: Implement comprehensive Dynamic RAG Enhancement with adaptive query understanding, schema intelligence, and continuous RAGAS-driven improvement.
+
+**Technical Architecture**:
+- **Adaptive Query Classification**: Learn patterns from successful interactions
+- **Schema Evolution Engine**: Auto-discover new nodes, relationships, properties
+- **Continuous RAGAS Pipeline**: Real-time evaluation and improvement triggers
+- **Self-Learning Mechanisms**: Failure analysis and automatic knowledge updates
+
+**Implementation Strategy**:
+```python
+# Three-phase approach
+Phase 1: Adaptive Query Understanding (Week 1)
+Phase 2: Intelligent Schema Evolution (Week 2) 
+Phase 3: RAGAS Integration & Self-Learning (Week 3)
+```
+
+**Key Components**:
+- **AdaptiveQueryClassifier**: Pattern learning from successful queries
+- **SchemaEvolutionEngine**: Auto-discovery and adaptation
+- **ContinuousRAGAS**: Real-time evaluation and improvement
+- **SelfLearningRAG**: Failure analysis and knowledge updates
+
+**Success Metrics**:
+- Query Success Rate: >95% (current: ~85%)
+- RAGAS Scores: Maintain >0.9 across all metrics
+- Pattern Learning: 5+ new patterns per week
+- Schema Coverage: Auto-detect 90% of new elements
+
+**Risk Mitigation**:
+- **Modular Design**: Separate enhancement modules
+- **Validation Gates**: Confidence thresholds and quality checks
+- **Rollback Mechanisms**: Safe deployment and recovery
+- **Performance Monitoring**: Continuous system health tracking
+
+**Expected Outcomes**:
+- **Short Term (1 Month)**: Dynamic query recognition and schema adaptation
+- **Medium Term (3 Months)**: 95%+ success rate, minimal manual intervention
+- **Long Term (6 Months)**: Fully autonomous RAG handling novel questions
+
+**Implementation Timeline**: 3 weeks development + 1 week validation
+
+**Consequences**:
+- ✅ **Dramatically Improved Intelligence**: Self-learning and adaptation capabilities
+- ✅ **Reduced Maintenance**: Automatic handling of new data patterns
+- ✅ **Better User Experience**: Higher success rate for novel questions
+- ✅ **Continuous Improvement**: RAGAS-driven optimization
+- ❌ **Increased Complexity**: More sophisticated system architecture
+- ❌ **Development Effort**: Significant initial implementation investment
+- ❌ **Monitoring Requirements**: Need for comprehensive intelligence metrics
+
+**Dependencies**:
+- Current Teams Recording integration (COMPLETE)
+- RAGAS evaluation framework (available)
+- Neo4j schema introspection capabilities (available)
+- AWS Bedrock for enhanced AI capabilities (available)
 
 ---
 
