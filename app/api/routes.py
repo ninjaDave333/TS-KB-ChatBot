@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from typing import Optional
 from app.database.neo4j_client import Neo4jClient
 from app.core.query_generator import QueryGenerator
+from app.core.enhanced_query_generator import EnhancedQueryGenerator
+from app.core.production_learning_loader import ProductionLearningLoader
 from app.core.bedrock_client import BedrockClient
 from app.core.query_validator import CypherValidator
 from app.core.answer_generator import AnswerGenerator
@@ -12,6 +14,11 @@ import time
 router = APIRouter()
 neo4j_client = Neo4jClient()
 query_generator = QueryGenerator()
+enhanced_generator = EnhancedQueryGenerator()
+
+# Load production learning patterns
+ProductionLearningLoader.load_production_patterns(enhanced_generator)
+
 bedrock_client = BedrockClient()
 query_validator = CypherValidator()
 answer_generator = AnswerGenerator()
@@ -70,6 +77,73 @@ async def detailed_health():
         "metrics_summary": performance_monitor.get_performance_summary(hours=1)
     }
 
+@router.get("/learning/insights")
+async def get_learning_insights():
+    """Get insights about the learning process."""
+    try:
+        insights = enhanced_generator.get_learning_insights()
+        return insights
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/learning/patterns")
+async def get_pattern_suggestions():
+    """Get suggestions for new query patterns."""
+    try:
+        suggestions = enhanced_generator.get_pattern_suggestions()
+        return {"suggestions": suggestions}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/learning/trends")
+async def analyze_query_trends(hours: int = 24):
+    """Analyze recent query trends."""
+    try:
+        trends = enhanced_generator.analyze_query_trends(hours)
+        return trends
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/learning/export")
+async def export_learning_data():
+    """Export learning data for analysis or backup."""
+    try:
+        data = enhanced_generator.export_learning_data()
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/learning/suggest")
+async def suggest_query_improvements(request: QueryRequest):
+    """Get suggestions for query improvements based on production patterns."""
+    try:
+        suggestions = enhanced_generator.optimizer.suggest_query_improvements(request.query)
+        return {"query": request.query, "suggestions": suggestions}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class FeedbackRequest(BaseModel):
+    query: str
+    cypher: str
+    execution_time: float
+    data_count: int
+    user_rating: Optional[float] = None
+
+@router.post("/learning/feedback")
+async def record_feedback(request: FeedbackRequest):
+    """Record feedback for query learning."""
+    try:
+        enhanced_generator.record_query_success(
+            query=request.query,
+            cypher=request.cypher,
+            execution_time=request.execution_time,
+            data_count=request.data_count,
+            user_feedback=request.user_rating
+        )
+        return {"status": "feedback_recorded"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest):
     start_time = time.time()
@@ -78,25 +152,37 @@ async def process_query(request: QueryRequest):
         schema = neo4j_client.get_schema()
         error_msg = None
         
-        # Generate Cypher query
+        # Generate Cypher query with dynamic learning
         if request.use_ai:
             try:
                 print(f"Attempting AI generation for: {request.query}")
-                cypher_query = bedrock_client.generate_cypher(request.query, schema)
-                print(f"AI generated successfully: {cypher_query}")
-                method = "ai_generated"
+                # First try enhanced generator with learning
+                enhanced_result = enhanced_generator.generate_cypher_with_learning(request.query)
+                
+                if enhanced_result['method'] == 'learned_pattern' and enhanced_result['confidence'] > 0.8:
+                    cypher_query = enhanced_result['cypher']
+                    method = f"learned_pattern (confidence: {enhanced_result['confidence']:.2f})"
+                    print(f"Using learned pattern: {cypher_query}")
+                else:
+                    # Fall back to AI generation
+                    cypher_query = bedrock_client.generate_cypher(request.query, schema)
+                    print(f"AI generated successfully: {cypher_query}")
+                    method = "ai_generated"
             except Exception as e:
-                # Fallback to basic generator
+                # Fallback to enhanced generator traditional method
                 error_msg = f"AI failed: {str(e)}"
                 print(f"Bedrock error: {e}")
                 print(f"Error type: {type(e).__name__}")
                 import traceback
                 traceback.print_exc()
-                cypher_query = query_generator.generate_cypher(request.query)
-                method = "fallback_basic"
+                enhanced_result = enhanced_generator.generate_cypher_with_learning(request.query)
+                cypher_query = enhanced_result['cypher']
+                method = f"enhanced_fallback ({enhanced_result['method']})"
         else:
-            cypher_query = query_generator.generate_cypher(request.query)
-            method = "basic_rules"
+            # Use enhanced generator for better pattern recognition
+            enhanced_result = enhanced_generator.generate_cypher_with_learning(request.query)
+            cypher_query = enhanced_result['cypher']
+            method = f"enhanced_basic ({enhanced_result['method']})"
         
         # Validate and fix query
         try:
@@ -154,6 +240,15 @@ async def process_query(request: QueryRequest):
             success=True
         )
         
+        # Record successful query for learning (if data was returned)
+        if len(result) > 0:
+            enhanced_generator.record_query_success(
+                query=request.query,
+                cypher=cypher_query,
+                execution_time=execution_time,
+                data_count=len(result)
+            )
+        
         return QueryResponse(
             query=request.query,
             answer=answer,
@@ -165,4 +260,14 @@ async def process_query(request: QueryRequest):
         )
     
     except Exception as e:
+        # Record query failure for learning
+        try:
+            enhanced_generator.record_query_failure(
+                query=request.query,
+                error_type=type(e).__name__,
+                error_details=str(e)
+            )
+        except:
+            pass  # Don't let learning failure affect main error handling
+        
         raise HTTPException(status_code=500, detail=str(e))

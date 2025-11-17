@@ -1,0 +1,258 @@
+{
+  "patterns": {
+    "{\"complexity\": 2, \"entities\": [\"client\"], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (c:Client) RETURN count(c) as total",
+      "success_rate": 1.0,
+      "avg_execution_time": 0.0005005,
+      "usage_count": 2,
+      "data_count": 10,
+      "example_queries": [
+        "How many clients do we have?"
+      ],
+      "created_at": "2025-11-17T16:07:50.967264",
+      "last_used": "2025-11-17T16:08:03.267723"
+    },
+    "{\"complexity\": 2, \"entities\": [\"product\"], \"query_types\": [\"list_queries\"]}": {
+      "cypher_template": "MATCH (p:Product) RETURN p.name as name LIMIT 10",
+      "success_rate": 1.0,
+      "avg_execution_time": 0.25,
+      "usage_count": 2,
+      "data_count": 12,
+      "example_queries": [
+        "Show me products from 2024",
+        "Display products for HashiCorp"
+      ],
+      "created_at": "2025-11-17T16:08:03.268789",
+      "last_used": "2025-11-17T16:08:03.311723"
+    },
+    "{\"complexity\": 2, \"entities\": [\"client\"], \"query_types\": [\"comparison_queries\"]}": {
+      "cypher_template": "MATCH (n) RETURN count(n) as total_nodes",
+      "success_rate": 1.0,
+      "avg_execution_time": 0.0,
+      "usage_count": 1,
+      "data_count": 14,
+      "example_queries": [
+        "Who are our top clients?"
+      ],
+      "created_at": "2025-11-17T16:08:03.281917"
+    },
+    "{\"complexity\": 2, \"entities\": [\"client\"], \"query_types\": [\"list_queries\"]}": {
+      "cypher_template": "MATCH (c:Client) RETURN c.name as name LIMIT 10",
+      "success_rate": 1.0,
+      "avg_execution_time": 0.25,
+      "usage_count": 2,
+      "data_count": 16,
+      "example_queries": [
+        "List all clients",
+        "Show me all clients from Israel"
+      ],
+      "created_at": "2025-11-17T16:08:03.292987",
+      "last_used": "2025-11-17T16:08:03.298989"
+    },
+    "{\"complexity\": 2, \"entities\": [\"deal\"], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (n) RETURN count(n) as total_nodes",
+      "success_rate": 1.0,
+      "avg_execution_time": 0.5,
+      "usage_count": 1,
+      "data_count": 5,
+      "example_queries": [
+        "How many deals were closed?"
+      ],
+      "created_at": "2025-11-17T16:08:03.293992"
+    },
+    "{\"complexity\": 1, \"entities\": [], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (n) RETURN count(n) as total_nodes",
+      "success_rate": 1.0,
+      "avg_execution_time": 0.5,
+      "usage_count": 1,
+      "data_count": 5,
+      "example_queries": [
+        "Count the opportunities"
+      ],
+      "created_at": "2025-11-17T16:08:03.294988"
+    },
+    "{\"complexity\": 2, \"entities\": [\"meeting\"], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (n) RETURN count(n) as total_nodes",
+      "success_rate": 1.0,
+      "avg_execution_time": 0.5,
+      "usage_count": 1,
+      "data_count": 5,
+      "example_queries": [
+        "Total number of meetings"
+      ],
+      "created_at": "2025-11-17T16:08:03.295986"
+    },
+    "{\"complexity\": 2, \"entities\": [\"recording\"], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (n) RETURN count(n) as total_nodes",
+      "success_rate": 1.0,
+      "avg_execution_time": 0.5,
+      "usage_count": 1,
+      "data_count": 5,
+      "example_queries": [
+        "How many recordings do we have?"
+      ],
+      "created_at": "2025-11-17T16:08:03.297000"
+    },
+    "{\"complexity\": 2, \"entities\": [\"employee\"], \"query_types\": [\"list_queries\"]}": {
+      "cypher_template": "MATCH (e:Employee) RETURN e.name as name LIMIT 10",
+      "success_rate": 1.0,
+      "avg_execution_time": 0.5,
+      "usage_count": 1,
+      "data_count": 5,
+      "example_queries": [
+        "List employees in Tel Aviv"
+      ],
+      "created_at": "2025-11-17T16:08:03.310713"
+    },
+    "{\"complexity\": 2, \"entities\": [\"deal\"], \"query_types\": [\"list_queries\"]}": {
+      "cypher_template": "MATCH (n) RETURN count(n) as total_nodes",
+      "success_rate": 1.0,
+      "avg_execution_time": 0.5,
+      "usage_count": 1,
+      "data_count": 5,
+      "example_queries": [
+        "Get all deals from 2024"
+      ],
+      "created_at": "2025-11-17T16:08:03.312715"
+    },
+    "{\"complexity\": 3, \"entities\": [\"client\"], \"query_types\": [\"list_queries\", \"filter_queries\"], \"auto_filters\": [\"no_unknown_managers\"]}": {
+      "cypher_template": "MATCH (c:Client)-[:MANAGED_BY]->(e:Employee) WHERE c.region = \"IL\" AND e.name IS NOT NULL AND toLower(e.name) <> \"unknown\" RETURN c.sf_name as client_name, e.name as manager_name",
+      "success_rate": 0.9,
+      "avg_execution_time": 1.7,
+      "usage_count": 3,
+      "data_count": 25,
+      "example_queries": [
+        "List Israeli clients with managers",
+        "Israeli clients with account managers"
+      ],
+      "created_at": "2025-11-17T16:45:00.000000",
+      "production_optimized": true
+    },
+    "{\"complexity\": 2, \"entities\": [\"meeting\", \"recording\"], \"query_types\": [\"count_queries\"], \"meeting_type\": \"external\"}": {
+      "cypher_template": "MATCH (r:Recording)-[:LINKED_TO]->(c:CalendarEvent) WHERE size(c.externalParticipants) > 0 RETURN count(r) as external_meetings_recorded",
+      "success_rate": 1.0,
+      "avg_execution_time": 1.5,
+      "usage_count": 5,
+      "data_count": 1,
+      "example_queries": [
+        "How many external meetings recorded?",
+        "Count external meetings"
+      ],
+      "created_at": "2025-11-17T16:45:00.000000",
+      "production_optimized": true
+    },
+    "{\"complexity\": 2, \"entities\": [\"meeting\", \"recording\"], \"query_types\": [\"count_queries\"], \"meeting_type\": \"internal\"}": {
+      "cypher_template": "MATCH (r:Recording)-[:LINKED_TO]->(c:CalendarEvent) WHERE size(c.externalParticipants) = 0 RETURN count(r) as internal_meetings_recorded",
+      "success_rate": 1.0,
+      "avg_execution_time": 1.3,
+      "usage_count": 3,
+      "data_count": 1,
+      "example_queries": [
+        "How many internal meetings recorded?",
+        "Count internal meetings"
+      ],
+      "created_at": "2025-11-17T16:45:00.000000",
+      "production_optimized": true
+    },
+    "{\"complexity\": 3, \"entities\": [\"client\"], \"query_types\": [\"list_queries\", \"filter_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[:MANAGED_BY]->(e:Employee) WHERE c.region = \"IL\" AND e.name IS NOT NULL AND toLower(e.name) <> \"unknown\" RETURN c.sf_name as client_name, e.name as manager_name",
+      "success_rate": 0.9,
+      "avg_execution_time": 1.7,
+      "usage_count": 3,
+      "data_count": 25,
+      "example_queries": [
+        "List Israeli clients with managers",
+        "List 10 Israeli clients with managers"
+      ],
+      "created_at": "2025-11-17T16:45:00.000000",
+      "production_optimized": true
+    },
+    "{\"complexity\": 4, \"entities\": [\"client\"], \"query_types\": [\"comparison_queries\", \"temporal_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' WITH c, count(o) as deal_count ORDER BY deal_count DESC LIMIT 10 RETURN c.sf_name as client_name, deal_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 1.6,
+      "usage_count": 2,
+      "data_count": 10,
+      "example_queries": [
+        "who are the top 10 most active clients in 2025?",
+        "top active clients 2025"
+      ],
+      "created_at": "2025-11-17T16:45:00.000000",
+      "production_optimized": true
+    }
+  },
+  "success_history": {},
+  "failure_analysis": {
+    "{\"complexity\": 2, \"entities\": [\"employee\"], \"query_types\": [\"list_queries\"]}": {
+      "failure_count": 1,
+      "error_types": {
+        "SyntaxError": 1
+      },
+      "example_failures": [
+        {
+          "query": "List all employees",
+          "error": "Invalid Cypher syntax"
+        }
+      ],
+      "first_failure": "2025-11-17T16:08:03.268254"
+    },
+    "{\"complexity\": 2, \"entities\": [\"deal\"], \"query_types\": [\"count_queries\"]}": {
+      "failure_count": 1,
+      "error_types": {
+        "SyntaxError": 1
+      },
+      "example_failures": [
+        {
+          "query": "Count total deals",
+          "error": "Invalid Cypher syntax"
+        }
+      ],
+      "first_failure": "2025-11-17T16:08:03.280918"
+    },
+    "{\"complexity\": 2, \"entities\": [\"employee\"], \"query_types\": [\"count_queries\"]}": {
+      "failure_count": 1,
+      "error_types": {
+        "SyntaxError": 1
+      },
+      "example_failures": [
+        {
+          "query": "How many employees work here?",
+          "error": "Invalid Cypher syntax"
+        }
+      ],
+      "first_failure": "2025-11-17T16:08:03.291982"
+    },
+    "{\"complexity\": 2, \"entities\": [\"product\"], \"query_types\": [\"list_queries\"]}": {
+      "failure_count": 1,
+      "error_types": {
+        "SyntaxError": 1
+      },
+      "example_failures": [
+        {
+          "query": "Show products from 2025",
+          "error": "Invalid Cypher syntax"
+        }
+      ],
+      "first_failure": "2025-11-17T16:08:03.293992"
+    },
+    "{\"complexity\": 3, \"entities\": [\"client\"], \"query_types\": [\"list_queries\", \"filter_queries\"]}": {
+      "failure_count": 2,
+      "error_types": {
+        "DataQualityIssue": 2
+      },
+      "example_failures": [
+        {
+          "query": "List 10 Israeli clients with managers",
+          "error": "Returned Unknown managers despite filtering"
+        },
+        {
+          "query": "List Israeli clients with managers that is not Unknown and not managed by Unknown",
+          "error": "Still returning Unknown managers in results"
+        }
+      ],
+      "first_failure": "2025-11-17T16:30:00.000000",
+      "last_failure": "2025-11-17T16:30:00.000000"
+    }
+  },
+  "last_updated": "2025-11-17T16:16:23.171018"
+}

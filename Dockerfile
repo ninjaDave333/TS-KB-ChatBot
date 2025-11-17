@@ -13,9 +13,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY app/ ./app/
+COPY data/ ./data/
 
 # Create directories for volumes
-RUN mkdir -p /app/logs /app/ssl
+RUN mkdir -p /app/logs /app/ssl /app/data
 
 # Expose port
 EXPOSE 8002

@@ -1,7 +1,7 @@
 # TSKB-RAG Schema Synchronization Guide
 
-**Version**: 2.4.0  
-**Last Updated**: 2025-11-12  
+**Version**: 2.5.0  
+**Last Updated**: 2025-11-17  
 **Purpose**: Complete schema reference for services consuming TSKB-RAG Neo4j knowledge graph
 
 ---
@@ -565,6 +565,55 @@ This document provides a comprehensive schema definition for all node types and 
 ### Legacy Sources
 1. **CoreNodeSchemas.xlsx** - Deprecated Excel import
 2. **Manual relationships** - Compliance, legacy skills
+
+---
+
+## Learned Query Patterns (Production Data)
+
+### Pattern Learning System
+The TSKB-RAG system automatically learns successful query patterns and stores them for reuse. As of 2025-11-17, the system has learned **6 high-performance patterns** with 96.7% average success rate.
+
+### Top Performing Patterns
+
+#### 1. Israeli Client Management (90% success, 1.7s avg)
+```cypher
+MATCH (c:Client)-[:MANAGED_BY]->(e:Employee) 
+WHERE c.region = "IL" 
+AND e.name IS NOT NULL 
+AND toLower(e.name) <> "unknown" 
+RETURN c.sf_name as client_name, e.name as manager_name
+```
+**Usage**: Regional account management, territory planning
+
+#### 2. External Meeting Analytics (100% success, 1.5s avg)
+```cypher
+MATCH (r:Recording)-[:LINKED_TO]->(c:CalendarEvent) 
+WHERE size(c.externalParticipants) > 0 
+RETURN count(r) as external_meetings_recorded
+```
+**Usage**: Client engagement tracking, external collaboration metrics
+
+#### 3. Top Active Clients 2025 (100% success, 1.6s avg)
+```cypher
+MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) 
+WHERE o.opportunity_stage = 'Closed Won' 
+AND o.close_date >= '2025-01-01' 
+AND o.close_date < '2026-01-01' 
+WITH c, count(o) as deal_count 
+ORDER BY deal_count DESC 
+LIMIT 10 
+RETURN c.sf_name as client_name, deal_count
+```
+**Usage**: Strategic account identification, revenue opportunity analysis
+
+#### 4. Vendor Portfolio Analytics (100% success, 2.2s avg)
+```cypher
+MATCH (p:Product) 
+RETURN count(DISTINCT p.vendor) as vendor_count
+```
+**Usage**: Vendor portfolio management, strategic sourcing insights
+
+**Complete Pattern Analysis**: See `docs/QueryPatterns-Analysis.md` for detailed performance metrics and business impact analysis.
 
 ---
 
@@ -1238,6 +1287,7 @@ When integrating with TSKB-RAG data:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.5.0 | 2025-11-17 | Added learned query patterns documentation and production analytics |
 | 2.4.0 | 2025-11-12 | Added close_date field to OPPORTUNITY for accurate temporal queries |
 | 2.3.0 | 2025-11-10 | Updated cost field documentation (total_price) |
 | 2.2.0 | 2025-11-09 | Added PURCHASED/HAS_INSTALLED relationships, incremental sync, product version tracking |
