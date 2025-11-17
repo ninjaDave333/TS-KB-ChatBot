@@ -19,7 +19,7 @@ class AnswerGenerator:
         
         # Handle Teams Recording queries first
         query_type = self._detect_query_type(user_query)
-        if query_type in ['external_meeting_analytics', 'employee_activity_ranking', 'meeting_breakdown', 'client_meeting_ranking']:
+        if query_type in ['external_meeting_analytics', 'employee_activity_ranking', 'meeting_breakdown', 'client_meeting_ranking', 'recording_list']:
             return self._generate_meeting_analytics_answer(user_query, data, query_type)
         
         # Handle count queries
@@ -189,6 +189,8 @@ class AnswerGenerator:
             return "meeting_breakdown"
         elif 'top' in query_lower and 'client' in query_lower and 'meeting' in query_lower:
             return "client_meeting_ranking"
+        elif any(term in query_lower for term in ['recording', 'recordings']) and any(term in query_lower for term in ['list', 'names', 'latest', 'owner']):
+            return "recording_list"
         
         # Original query types
         elif any(keyword in query_lower for keyword in ["how many", "count", "number of"]):
@@ -254,6 +256,16 @@ class AnswerGenerator:
                     count = record.get('recorded_meetings', record.get('meeting_count', 0))
                     client_info.append(f"{i}. {client}: {count} meetings")
                 return f"Top clients by meeting count:\n{chr(10).join(client_info)}"
+        
+        elif query_type == "recording_list":
+            # Handle recording list queries with owner names
+            if data:
+                recording_info = []
+                for i, record in enumerate(data, 1):
+                    recording_name = record.get('recording_name', record.get('r.name', record.get('name', 'Unknown')))
+                    owner_name = record.get('owner_name', record.get('e.name', record.get('owner', 'Unknown')))
+                    recording_info.append(f"{i}. {recording_name} (Owner: {owner_name})")
+                return f"Latest recordings with their owners:\n{chr(10).join(recording_info)}"
         
         # Fallback to default formatting
         return self._generate_default_answer(user_query, data)

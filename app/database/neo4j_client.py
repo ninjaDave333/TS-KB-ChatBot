@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
+from neo4j.time import DateTime
 from typing import List, Dict, Any
 
 # Load environment variables
@@ -27,7 +28,17 @@ class Neo4jClient:
     def execute_query(self, query: str, parameters: Dict[str, Any] = None) -> List[Dict]:
         with self.connect().session() as session:
             result = session.run(query, parameters or {})
-            return [record.data() for record in result]
+            return [self._serialize_record(record.data()) for record in result]
+    
+    def _serialize_record(self, record: Dict) -> Dict:
+        """Convert Neo4j types to JSON-serializable types"""
+        serialized = {}
+        for key, value in record.items():
+            if isinstance(value, DateTime):
+                serialized[key] = value.isoformat()
+            else:
+                serialized[key] = value
+        return serialized
     
     def get_schema(self) -> Dict[str, Any]:
         """Get basic schema information"""
