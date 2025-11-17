@@ -138,6 +138,75 @@ SCHEMA_DESCRIPTIONS = {
                 "name": "BU name - links from Employee.sf_team, Employee.sf_group, Product.sf_business_unit",
                 "sf_source": "group|team - source type"
             }
+        },
+        
+        "Recording": {
+            "purpose": "Teams meeting recordings with transcription and analysis (490 nodes)",
+            "primary_key": "name",
+            "name_field": "name",
+            "key_properties": {
+                "name": "Recording filename - unique identifier",
+                "title": "Meeting title/subject",
+                "contentUrl": "Microsoft Graph URL to recording file",
+                "status": "Processing status: new|processing|processed|failed",
+                "createdDateTime": "Recording creation timestamp (ISO)",
+                "size": "File size in bytes (NOT sizeInBytes)",
+                "meetingId": "Teams meeting identifier",
+                "meetingOwner": "Meeting organizer email",
+                "transcriptUrl": "Direct URL to transcript file (empty until processed)",
+                "analysisUrl": "Direct URL to analysis results (empty until processed)",
+                "language": "Recording language (e.g. en-US)",
+                "processingStarted": "Processing start timestamp",
+                "processingFailed": "Processing failure timestamp",
+                "errorMessage": "Error details if processing failed"
+            },
+            "search_patterns": [
+                "MATCH (r:Recording) WHERE toLower(r.title) CONTAINS toLower('searchterm')",
+                "MATCH (r:Recording {status: 'processed'}) WHERE r.transcriptUrl <> ''"
+            ],
+            "common_values": {
+                "status": ["processed", "new", "processing", "failed"],
+                "common_errors": ["Meeting Bot API call failed", "Recording file not accessible", "Transcription service unavailable"]
+            }
+        },
+        
+        "CalendarEvent": {
+            "purpose": "Meeting events from Microsoft Graph calendar (470 nodes)",
+            "primary_key": "name",
+            "name_field": "title",
+            "key_properties": {
+                "name": "iCalUid - unique calendar identifier",
+                "title": "Meeting subject/title (NOT subject)",
+                "startTime": "Meeting start time (ISO)",
+                "endTime": "Meeting end time (ISO)",
+                "owner": "Meeting organizer email (NOT organizer)",
+                "category": "Meeting category",
+                "internalParticipants": "Array of @terasky.com email strings",
+                "externalParticipants": "Array of external email strings"
+            },
+            "search_patterns": [
+                "MATCH (c:CalendarEvent) WHERE toLower(c.title) CONTAINS toLower('searchterm')",
+                "MATCH (c:CalendarEvent) WHERE c.startTime >= '2024-11-01T00:00:00Z'",
+                "MATCH (c:CalendarEvent) WHERE ANY(email IN c.internalParticipants WHERE email CONTAINS 'searchterm')"
+            ],
+            "participant_queries": {
+                "internal_search": "ANY(email IN c.internalParticipants WHERE email CONTAINS 'term')",
+                "external_search": "ANY(email IN c.externalParticipants WHERE email CONTAINS 'term')"
+            }
+        },
+        
+        "ScanMetadata": {
+            "purpose": "Teams recording scan execution tracking (2 nodes)",
+            "primary_key": "type",
+            "name_field": "type",
+            "key_properties": {
+                "type": "Scan type identifier (full|incremental)",
+                "lastScanTime": "Last successful scan timestamp",
+                "totalRecordingsFound": "Total recordings discovered",
+                "newRecordingsProcessed": "New recordings processed in last scan",
+                "scanCount": "Total number of scans performed",
+                "source": "RecordingScanner"
+            }
         }
     },
     
@@ -252,6 +321,51 @@ SCHEMA_DESCRIPTIONS = {
         "SUPPORTS": {
             "pattern": "(Product)-[:SUPPORTS]->(Compliance)",
             "purpose": "Product supports compliance standards (legacy)"
+        },
+        
+        "LINKED_TO": {
+            "pattern": "(Recording)-[:LINKED_TO]->(CalendarEvent)",
+            "purpose": "Recording files linked to their calendar events via iCalUid",
+            "matching_logic": [
+                "Recording extracted iCalUid matches CalendarEvent.name"
+            ],
+            "cardinality": "Many-to-One (multiple recordings per meeting)",
+            "query_examples": [
+                "// Find recording with meeting context",
+                "MATCH (r:Recording)-[:LINKED_TO]->(c:CalendarEvent)",
+                "WHERE toLower(r.title) CONTAINS 'terraform'",
+                "RETURN r.name, r.status, c.title, c.startTime"
+            ]
+        },
+        
+        "OWNER_OF": {
+            "pattern": "(Employee)-[:OWNER_OF]->(CalendarEvent)",
+            "purpose": "Employee owns/organizes calendar events",
+            "matching_logic": [
+                "Employee.email matches CalendarEvent.owner"
+            ],
+            "cardinality": "One-to-Many (employee owns multiple meetings)",
+            "query_examples": [
+                "// Find employee's organized meetings",
+                "MATCH (e:Employee)-[:OWNER_OF]->(c:CalendarEvent)",
+                "WHERE toLower(e.name) CONTAINS 'john'",
+                "RETURN e.name, c.title, c.startTime ORDER BY c.startTime DESC"
+            ]
+        },
+        
+        "INVITED_TO": {
+            "pattern": "(Employee)-[:INVITED_TO]->(CalendarEvent)",
+            "purpose": "Employee invited to/participated in calendar events",
+            "matching_logic": [
+                "Employee.email in CalendarEvent.internalParticipants"
+            ],
+            "cardinality": "Many-to-Many (employees attend multiple meetings)",
+            "query_examples": [
+                "// Find employee's meeting participation",
+                "MATCH (e:Employee)-[:INVITED_TO]->(c:CalendarEvent)",
+                "WHERE toLower(e.name) CONTAINS 'jane'",
+                "RETURN e.name, c.title, c.startTime ORDER BY c.startTime DESC LIMIT 10"
+            ]
         }
     },
     
@@ -265,6 +379,31 @@ SCHEMA_DESCRIPTIONS = {
             "query": "how many clients use scaleops products",
             "cypher": "MATCH (c:Client)-[rel:OPPORTUNITY|HAS_INSTALLED]->(p:Product) WHERE toLower(p.name) CONTAINS 'scaleops' RETURN count(DISTINCT c) as total",
             "result": "Returns just the count"
+        },
+        "processed_recordings_count": {
+            "query": "how many recordings have been processed",
+            "cypher": "MATCH (r:Recording) WHERE r.status = 'processed' RETURN count(r) as total",
+            "result": "Returns count of successfully processed recordings"
+        },
+        "recent_meeting_recordings": {
+            "query": "show recent terraform meeting recordings",
+            "cypher": "MATCH (r:Recording)-[:LINKED_TO]->(c:CalendarEvent) WHERE toLower(c.title) CONTAINS 'terraform' RETURN r.name, r.status, c.title, c.startTime ORDER BY c.startTime DESC LIMIT 5",
+            "result": "Returns recent terraform-related meeting recordings with context"
+        },
+        "employee_meeting_activity": {
+            "query": "show john's recent meeting activity",
+            "cypher": "MATCH (e:Employee)-[rel:OWNER_OF|INVITED_TO]->(c:CalendarEvent) WHERE toLower(e.name) CONTAINS 'john' RETURN e.name, c.title, c.startTime, type(rel) as role ORDER BY c.startTime DESC LIMIT 10",
+            "result": "Returns employee's recent meeting participation"
+        },
+        "recordings_with_transcripts": {
+            "query": "show processed recordings with transcripts",
+            "cypher": "MATCH (r:Recording {status: 'processed'}) WHERE r.transcriptUrl <> '' AND r.transcriptUrl IS NOT NULL RETURN r.name, r.title, r.transcriptUrl ORDER BY r.createdDateTime DESC LIMIT 5",
+            "result": "Returns recordings that have completed transcription"
+        },
+        "meeting_participants_search": {
+            "query": "find meetings with smith in participants",
+            "cypher": "MATCH (c:CalendarEvent) WHERE ANY(email IN c.internalParticipants WHERE email CONTAINS 'smith') RETURN c.title, c.internalParticipants, c.startTime ORDER BY c.startTime DESC LIMIT 5",
+            "result": "Returns meetings where smith participated"
         }
     },
     
@@ -332,6 +471,66 @@ SCHEMA_DESCRIPTIONS = {
             "count_and_sample_template": "MATCH (c:Client)-[rel:OPPORTUNITY|HAS_INSTALLED]->(p:Product) WHERE toLower(p.vendor) CONTAINS toLower('{vendor_name}') OR toLower(p.name) CONTAINS toLower('{vendor_name}') WITH DISTINCT c WITH count(c) as total, collect(c.sf_name)[0..5] as sample_names RETURN total, sample_names",
             "vendor_year_deals_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND (toLower(p.vendor) CONTAINS '{vendor}' OR toLower(p.name) CONTAINS '{vendor}') AND o.close_date >= '{year}-01-01' AND o.close_date < '{year+1}-01-01' WITH count(o) as total, collect({client: c.sf_name, product: p.name, date: o.close_date})[0..5] as samples RETURN total, samples",
             "example_complete_query": "MATCH (c:Client)-[rel:OPPORTUNITY|HAS_INSTALLED]->(p:Product) WHERE toLower(p.name) CONTAINS 'scaleops' WITH DISTINCT c WITH count(c) as total, collect(c.sf_name)[0..5] as samples RETURN total, samples"
+        },
+        
+        "recordings_by_status": {
+            "description": "Find recordings by processing status",
+            "template": "MATCH (r:Recording) WHERE r.status = '{status}' RETURN r.name, r.title, r.createdDateTime ORDER BY r.createdDateTime DESC",
+            "statuses": ["new", "processing", "processed", "failed"]
+        },
+        
+        "recordings_with_meetings": {
+            "description": "Find recordings with their meeting context",
+            "template": "MATCH (r:Recording)-[:LINKED_TO]->(c:CalendarEvent) WHERE toLower(r.title) CONTAINS toLower('{search_term}') RETURN r.name, r.status, c.title, c.startTime, c.endTime"
+        },
+        
+        "employee_meetings_organized": {
+            "description": "Find meetings organized by employee",
+            "template": "MATCH (e:Employee)-[:OWNER_OF]->(c:CalendarEvent) WHERE toLower(e.name) CONTAINS toLower('{employee_name}') RETURN e.name, c.title, c.startTime ORDER BY c.startTime DESC"
+        },
+        
+        "employee_meetings_attended": {
+            "description": "Find meetings attended by employee",
+            "template": "MATCH (e:Employee)-[:INVITED_TO]->(c:CalendarEvent) WHERE toLower(e.name) CONTAINS toLower('{employee_name}') RETURN e.name, c.title, c.startTime ORDER BY c.startTime DESC"
+        },
+        
+        "recordings_by_date_range": {
+            "description": "Find recordings in date range",
+            "template": "MATCH (r:Recording) WHERE r.createdDateTime >= '{start_date}' AND r.createdDateTime <= '{end_date}' RETURN r.name, r.title, r.status, r.createdDateTime ORDER BY r.createdDateTime DESC"
+        },
+        
+        "failed_recordings": {
+            "description": "Find failed recordings with error details",
+            "template": "MATCH (r:Recording) WHERE r.status = 'failed' RETURN r.name, r.title, r.errorMessage, r.processingFailed ORDER BY r.processingFailed DESC"
+        },
+        
+        "meeting_recordings_with_participants": {
+            "description": "Find meeting recordings with organizer and participants",
+            "template": "MATCH (r:Recording)-[:LINKED_TO]->(c:CalendarEvent) OPTIONAL MATCH (owner:Employee)-[:OWNER_OF]->(c) OPTIONAL MATCH (participant:Employee)-[:INVITED_TO]->(c) WHERE toLower(c.title) CONTAINS toLower('{meeting_topic}') RETURN r.name, r.status, c.title, owner.name as organizer, collect(DISTINCT participant.name) as participants"
+        },
+        
+        "external_meetings_recorded_by_year": {
+            "description": "Count external meetings recorded in specific year",
+            "template": "MATCH (r:Recording)-[:LINKED_TO]->(c:CalendarEvent) WHERE r.createdDateTime >= '{year}-01-01T00:00:00Z' AND r.createdDateTime < '{year+1}-01-01T00:00:00Z' AND size(c.externalParticipants) > 0 RETURN count(r) as external_meetings_recorded",
+            "note": "External meetings have externalParticipants array size > 0"
+        },
+        
+        "employee_meeting_breakdown_by_year": {
+            "description": "Employee's owned meetings breakdown (internal/external) for specific year",
+            "template": "MATCH (e:Employee)-[:OWNER_OF]->(c:CalendarEvent)<-[:LINKED_TO]-(r:Recording) WHERE toLower(e.name) CONTAINS toLower('{employee_name}') AND r.createdDateTime >= '{year}-01-01T00:00:00Z' AND r.createdDateTime < '{year+1}-01-01T00:00:00Z' WITH c, r RETURN count(r) as total_recorded_meetings, sum(CASE WHEN size(c.externalParticipants) = 0 THEN 1 ELSE 0 END) as internal_meetings, sum(CASE WHEN size(c.externalParticipants) > 0 THEN 1 ELSE 0 END) as external_meetings"
+        },
+        
+        "most_active_employee_by_period": {
+            "description": "Find most active employee by meeting participation in time period",
+            "template": "MATCH (e:Employee)-[rel:OWNER_OF|INVITED_TO]->(c:CalendarEvent) WHERE c.startTime >= '{start_date}' AND c.startTime < '{end_date}' WITH e, count(DISTINCT c) as total_meetings, sum(CASE WHEN type(rel) = 'OWNER_OF' THEN 1 ELSE 0 END) as owned_meetings, sum(CASE WHEN type(rel) = 'INVITED_TO' THEN 1 ELSE 0 END) as participated_meetings RETURN e.name, total_meetings, owned_meetings, participated_meetings ORDER BY total_meetings DESC LIMIT 1",
+            "yearly": "start_date: '2025-01-01T00:00:00Z', end_date: '2026-01-01T00:00:00Z'",
+            "monthly": "start_date: '2025-07-01T00:00:00Z', end_date: '2025-08-01T00:00:00Z'"
+        },
+        
+        "top_clients_by_recorded_meetings": {
+            "description": "Top clients with most recorded meetings via employee relationships",
+            "template": "MATCH (c:Client)-[:MANAGED_BY]->(e:Employee)-[:OWNER_OF|INVITED_TO]->(ce:CalendarEvent)<-[:LINKED_TO]-(r:Recording) WHERE r.createdDateTime >= '{year}-01-01T00:00:00Z' AND r.createdDateTime < '{year+1}-01-01T00:00:00Z' WITH c, count(DISTINCT r) as recorded_meetings, collect(DISTINCT ce.title)[0..5] as sample_subjects RETURN c.sf_name as client_name, recorded_meetings, sample_subjects ORDER BY recorded_meetings DESC LIMIT 3",
+            "note": "Links clients via account manager (MANAGED_BY) participation in meetings"
         }
     },
     
@@ -362,6 +561,21 @@ SCHEMA_DESCRIPTIONS = {
         "variable_consistency": "Use consistent variable names - if you collect as 'samples' return as 'samples', not 'deals'",
         "collection_syntax": "collect({...})[0..5] as samples RETURN total, samples (NOT deals[..5])",
         "israel_queries": "For Israeli/Israel clients ALWAYS use c.region = 'IL' NEVER c.country = 'Israel'",
-        "account_manager_queries": "For account managers use Employee node, NEVER AccountManager node"
+        "account_manager_queries": "For account managers use Employee node, NEVER AccountManager node",
+        "recording_status": "Recording status values: new, processing, processed, failed",
+        "meeting_recordings": "Use Recording-[:LINKED_TO]->CalendarEvent for meeting context",
+        "meeting_participants": "Use Employee-[:OWNER_OF|INVITED_TO]->CalendarEvent for meeting roles",
+        "recording_search": "Search recordings by title, status, or linked meeting subject",
+        "meeting_timeline": "Use CalendarEvent.startTime/endTime for temporal meeting queries",
+        "transcript_access": "Check r.transcriptUrl <> '' AND r.transcriptUrl IS NOT NULL for available transcripts",
+        "participant_arrays": "Use ANY(email IN c.internalParticipants WHERE condition) for participant searches",
+        "recording_linking": "85-95% of recordings linked to calendar events via LINKED_TO relationship",
+        "processing_status": "Most recordings are 'processed', check status before accessing transcriptUrl/analysisUrl",
+        "property_names": "Use 'size' not 'sizeInBytes', 'title' not 'subject', 'owner' not 'organizer'",
+        "date_filtering": "Recording dates: 2024-08-22 to 2025-11-16, use r.createdDateTime for recording dates",
+        "external_meetings": "300 meetings have external participants (avg 3.6 external per meeting)",
+        "meeting_analytics": "Use CalendarEvent.startTime for meeting dates, Recording.createdDateTime for recording dates",
+        "client_meeting_linking": "Link clients to meetings via MANAGED_BY employee relationships",
+        "activity_ranking": "Combine OWNER_OF and INVITED_TO for total employee meeting activity"
     }
 }

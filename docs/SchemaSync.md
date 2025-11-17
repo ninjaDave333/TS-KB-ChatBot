@@ -10,8 +10,8 @@
 
 This document provides a comprehensive schema definition for all node types and relationships in the TSKB-RAG knowledge graph. Use this as the authoritative source for integrating with TSKB data.
 
-**Total Node Types**: 9 (Region, Skill, BU, Employee, Product, Vendor, Client, Compliance, SyncMetadata)  
-**Total Relationship Types**: 9 (LOCATED_IN, HAS_SKILL, BELONGS_TO, MAKES, MANAGED_BY, SUPPORTS, REQUIRES_SKILL, OPPORTUNITY, HAS_INSTALLED)
+**Total Node Types**: 12 (Region, Skill, BU, Employee, Product, Vendor, Client, Compliance, SyncMetadata, Recording, CalendarEvent, ScanMetadata)  
+**Total Relationship Types**: 12 (LOCATED_IN, HAS_SKILL, BELONGS_TO, MAKES, MANAGED_BY, SUPPORTS, REQUIRES_SKILL, OPPORTUNITY, HAS_INSTALLED, LINKED_TO, OWNER_OF, INVITED_TO)
 
 ---
 
@@ -650,12 +650,50 @@ RETURN s.type, s.status, s.error_details
 
 ---
 
+## Teams Recording Integration (NEW)
+
+### Node Counts (Validated 2025-11-17)
+- **Recording**: 490 nodes (Teams meeting recordings)
+- **CalendarEvent**: 470 nodes (Meeting events)
+- **ScanMetadata**: 2 nodes (Scan tracking)
+
+### Key Relationships
+- **LINKED_TO**: 490 (Recording → CalendarEvent)
+- **OWNER_OF**: 468 (Employee → CalendarEvent)
+- **INVITED_TO**: 1353 (Employee → CalendarEvent)
+
+### Integration Status
+- ✅ **Schema Validated**: All nodes and relationships confirmed
+- ✅ **Employee Integration**: Uses existing Employee nodes (143 linked)
+- ✅ **RAG Ready**: Query patterns and examples implemented
+- ✅ **Documentation**: Complete integration guide available
+
+### Query Examples
+```cypher
+-- Find processed recordings with transcripts
+MATCH (r:Recording {status: 'processed'})
+WHERE r.transcriptUrl <> '' AND r.transcriptUrl IS NOT NULL
+RETURN r.name, r.title, r.transcriptUrl
+
+-- Find employee's organized meetings
+MATCH (e:Employee)-[:OWNER_OF]->(c:CalendarEvent)
+WHERE toLower(e.name) CONTAINS 'john'
+RETURN e.name, c.title, c.startTime
+ORDER BY c.startTime DESC
+
+-- Find meetings by participant
+MATCH (c:CalendarEvent)
+WHERE ANY(email IN c.internalParticipants WHERE email CONTAINS 'smith')
+RETURN c.title, c.internalParticipants, c.startTime
+```
+
 ## Integration Guidelines
 
 ### Data Freshness
 - **Employee Data**: Updated via MS Graph + Salesforce APIs
 - **Product Data**: Updated via Salesforce API
 - **Client Data**: Updated via Salesforce API
+- **Recording Data**: Updated via Teams Recording Scanner
 - **Reference Data**: Manual CSV updates
 
 ### Primary Keys
