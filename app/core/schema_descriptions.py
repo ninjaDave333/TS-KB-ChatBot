@@ -404,6 +404,21 @@ SCHEMA_DESCRIPTIONS = {
             "query": "find meetings with smith in participants",
             "cypher": "MATCH (c:CalendarEvent) WHERE ANY(email IN c.internalParticipants WHERE email CONTAINS 'smith') RETURN c.title, c.internalParticipants, c.startTime ORDER BY c.startTime DESC LIMIT 5",
             "result": "Returns meetings where smith participated"
+        },
+        "external_meetings_2024": {
+            "query": "how many external meetings recorded during 2024",
+            "cypher": "MATCH (r:Recording)-[:LINKED_TO]->(c:CalendarEvent) WHERE r.createdDateTime >= '2024-01-01T00:00:00Z' AND r.createdDateTime < '2025-01-01T00:00:00Z' AND size(c.externalParticipants) > 0 RETURN count(r) as external_meetings_recorded",
+            "result": "Returns count of external meetings recorded in 2024"
+        },
+        "employee_meeting_breakdown": {
+            "query": "david gidony meetings breakdown 2024 internal external",
+            "cypher": "MATCH (e:Employee)-[:OWNER_OF]->(c:CalendarEvent)<-[:LINKED_TO]-(r:Recording) WHERE toLower(e.name) CONTAINS 'david' AND r.createdDateTime >= '2024-01-01T00:00:00Z' AND r.createdDateTime < '2025-01-01T00:00:00Z' WITH c, r RETURN count(r) as total_recorded_meetings, sum(CASE WHEN size(c.externalParticipants) = 0 THEN 1 ELSE 0 END) as internal_meetings, sum(CASE WHEN size(c.externalParticipants) > 0 THEN 1 ELSE 0 END) as external_meetings",
+            "result": "Returns meeting breakdown for David with internal/external counts"
+        },
+        "most_active_employee_2024": {
+            "query": "most active employee meeting wise 2024",
+            "cypher": "MATCH (e:Employee)-[rel:OWNER_OF|INVITED_TO]->(c:CalendarEvent) WHERE c.startTime >= '2024-01-01T00:00:00Z' AND c.startTime < '2025-01-01T00:00:00Z' WITH e, count(DISTINCT c) as total_meetings, sum(CASE WHEN type(rel) = 'OWNER_OF' THEN 1 ELSE 0 END) as owned_meetings, sum(CASE WHEN type(rel) = 'INVITED_TO' THEN 1 ELSE 0 END) as participated_meetings RETURN e.name, total_meetings, owned_meetings, participated_meetings ORDER BY total_meetings DESC LIMIT 1",
+            "result": "Returns most active employee with meeting participation breakdown"
         }
     },
     
@@ -534,6 +549,18 @@ SCHEMA_DESCRIPTIONS = {
         }
     },
     
+    "teams_recording_requirements": {
+        "external_meeting_detection": "Use size(c.externalParticipants) > 0 to identify external meetings",
+        "date_range_actual": "Recordings available from 2024-08-22 to 2025-11-16 (490 total)",
+        "employee_activity_calculation": "Combine OWNER_OF + INVITED_TO relationships for total activity",
+        "client_meeting_linking": "Link clients via account manager participation: Client-[:MANAGED_BY]->Employee-[:OWNER_OF|INVITED_TO]->CalendarEvent",
+        "internal_vs_external": "Internal: size(externalParticipants) = 0, External: size(externalParticipants) > 0",
+        "date_field_usage": "Use r.createdDateTime for recording dates, c.startTime for meeting dates",
+        "meeting_subjects": "Use collect(DISTINCT ce.title)[0..5] for sample meeting subjects",
+        "activity_ranking": "Order by total_meetings DESC for most active employees",
+        "name_matching": "Use toLower(e.name) CONTAINS toLower('partial_name') for flexible employee matching"
+    },
+    
     "critical_notes": {
         "client_names": "ALWAYS use Client.sf_name for name searches, NEVER use Client.name (often empty)",
         "opportunity_stages": "Use exact values: 'Closed Won', 'Closed Lost', 'Qualification'",
@@ -562,6 +589,8 @@ SCHEMA_DESCRIPTIONS = {
         "collection_syntax": "collect({...})[0..5] as samples RETURN total, samples (NOT deals[..5])",
         "israel_queries": "For Israeli/Israel clients ALWAYS use c.region = 'IL' NEVER c.country = 'Israel'",
         "account_manager_queries": "For account managers use Employee node, NEVER AccountManager node",
+        "teams_recording_dates": "Actual data range: 2024-08-22 to 2025-11-16, adjust queries accordingly",
+        "external_meeting_criteria": "External meetings: size(c.externalParticipants) > 0 (300 meetings have external participants)",
         "recording_status": "Recording status values: new, processing, processed, failed",
         "meeting_recordings": "Use Recording-[:LINKED_TO]->CalendarEvent for meeting context",
         "meeting_participants": "Use Employee-[:OWNER_OF|INVITED_TO]->CalendarEvent for meeting roles",
