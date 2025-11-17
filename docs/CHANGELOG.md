@@ -11,6 +11,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docker deployment configuration
 - API documentation and testing
 
+## [0.5.0] - 2025-11-17
+
+### Added
+- RAGAS (Retrieval Augmented Generation Assessment) integration for comprehensive RAG evaluation
+- Five RAG-specific evaluation metrics: faithfulness, answer relevancy, context precision, context recall, answer correctness
+- Automated evaluation script (Tests/ragas_evaluation.py) with AWS Bedrock LLM integration
+- PowerShell runner script (Tests/run_ragas_evaluation.ps1) for easy execution
+- Comprehensive evaluation dataset with ground truth references
+- Detailed evaluation reporting with actionable insights and recommendations
+
+### Changed
+- Enhanced requirements.txt with RAGAS dependencies (ragas, langchain-aws, datasets, pandas)
+- Extended testing capabilities beyond syntax validation to include answer quality assessment
+- Added systematic benchmarking against industry-standard RAG metrics
+
+### Documentation
+- Updated ADR.md with ADR-014: RAGAS Integration decision
+- Added comprehensive evaluation methodology documentation
+- Enhanced testing strategy with RAG-specific quality metrics
+
 ## [0.4.0] - 2025-11-12
 
 ### Added
@@ -109,6 +129,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 0.5.0 | 2025-11-17 | RAGAS integration for comprehensive RAG evaluation |
 | 0.4.0 | 2025-11-12 | Added close_date field for temporal queries |
 | 0.3.1 | 2025-11-12 | Fixed cost field mapping (amount → total_price) |
 | 0.3.0 | 2025-11-12 | Query validation and filter injection |

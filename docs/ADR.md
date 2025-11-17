@@ -337,6 +337,51 @@ WHERE o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'
 | 011 | Enhanced Schema Descriptions | Accepted | High |
 | 012 | Cost Field Correction | Accepted | High |
 | 013 | OPPORTUNITY close_date Field | Accepted | Critical |
+| 014 | RAGAS Integration for RAG Evaluation | Accepted | High |
+
+---
+
+## ADR-014: RAGAS Integration for RAG Evaluation
+
+**Date**: 2025-11-17  
+**Status**: Accepted  
+**Context**: Current testing approach lacks comprehensive RAG-specific evaluation metrics for answer quality, faithfulness, and retrieval effectiveness
+
+**Decision**: Integrate RAGAS (Retrieval Augmented Generation Assessment) framework for systematic RAG evaluation
+
+**Rationale**:
+- **RAG-Specific Metrics**: Faithfulness, context precision, answer relevancy, context recall, answer correctness
+- **Automated Evaluation**: Systematic assessment using LLM-based evaluation
+- **Standardized Benchmarking**: Industry-standard metrics for RAG systems
+- **Enhanced Testing**: Complements existing batch testing with quality metrics
+
+**Implementation**:
+- Added RAGAS dependencies to requirements.txt
+- Created comprehensive evaluation script (Tests/ragas_evaluation.py)
+- Integrated with existing AWS Bedrock LLM for evaluation
+- PowerShell runner script for easy execution
+
+**Evaluation Metrics**:
+- **Faithfulness**: Answer alignment with retrieved contexts
+- **Answer Relevancy**: Response relevance to user questions
+- **Context Precision**: Retrieval precision and context quality
+- **Context Recall**: Context completeness for answering questions
+- **Answer Correctness**: Factual accuracy against ground truth
+
+**Test Coverage**:
+- Temporal deals queries (2025 successful deals)
+- Location-based queries (Israeli clients with managers)
+- Vendor-specific queries (HashiCorp products)
+- Aggregation queries (top client managers)
+- Installation queries (Wix product installations)
+
+**Consequences**:
+- ✅ Comprehensive RAG quality assessment
+- ✅ Automated evaluation with actionable insights
+- ✅ Standardized metrics for continuous improvement
+- ✅ Enhanced testing beyond syntax/data validation
+- ❌ Additional LLM API costs for evaluation
+- ❌ Increased evaluation complexity and runtime
 
 ---
 
