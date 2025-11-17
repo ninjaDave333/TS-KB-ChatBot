@@ -17,6 +17,11 @@ class AnswerGenerator:
         # Extract query intent
         query_lower = user_query.lower()
         
+        # Handle Teams Recording queries first
+        query_type = self._detect_query_type(user_query)
+        if query_type in ['external_meeting_analytics', 'employee_activity_ranking', 'meeting_breakdown', 'client_meeting_ranking']:
+            return self._generate_meeting_analytics_answer(user_query, data, query_type)
+        
         # Handle count queries
         if self._is_count_query(query_lower, data):
             return self._generate_count_answer(user_query, data)
@@ -170,3 +175,85 @@ class AnswerGenerator:
             return f"Found {count} results. Sample: {sample_info}"
         else:
             return f"Query executed successfully, found {count} results."
+    
+    def _detect_query_type(self, query: str) -> str:
+        """Detect the type of query for performance monitoring"""
+        query_lower = query.lower()
+        
+        # Teams Recording query types
+        if any(term in query_lower for term in ['external meeting', 'external participant', 'external recorded']):
+            return "external_meeting_analytics"
+        elif any(term in query_lower for term in ['most active', 'meeting wise', 'activity']) and 'employee' in query_lower:
+            return "employee_activity_ranking"
+        elif 'breakdown' in query_lower and any(term in query_lower for term in ['internal', 'external']):
+            return "meeting_breakdown"
+        elif 'top' in query_lower and 'client' in query_lower and 'meeting' in query_lower:
+            return "client_meeting_ranking"
+        
+        # Original query types
+        elif any(keyword in query_lower for keyword in ["how many", "count", "number of"]):
+            return "count"
+        elif any(keyword in query_lower for keyword in ["list", "show", "display"]):
+            return "list"
+        elif any(keyword in query_lower for keyword in ["hashicorp", "microsoft", "aws", "vendor"]):
+            return "vendor"
+        else:
+            return "general"
+    
+    def _generate_meeting_analytics_answer(self, user_query: str, data: List[Dict], query_type: str) -> str:
+        """Generate answers for Teams Recording analytics queries"""
+        if not data:
+            return "No meeting data found for your query."
+        
+        query_lower = user_query.lower()
+        
+        if query_type == "external_meeting_analytics":
+            # Handle external meeting count queries
+            if len(data) == 1 and 'external_meetings_recorded' in data[0]:
+                count = data[0]['external_meetings_recorded']
+                return f"There were {count} external meetings recorded during the specified period."
+            else:
+                return f"Found {len(data)} external meeting records."
+        
+        elif query_type == "employee_activity_ranking":
+            # Handle most active employee queries
+            if data:
+                employee_data = data[0]
+                employee_name = employee_data.get('employee', employee_data.get('e.name', employee_data.get('name', 'Unknown')))
+                meeting_count = employee_data.get('meeting_count', employee_data.get('total_meetings', 0))
+                
+                if 'david gidony' in query_lower:
+                    # Special handling for David Gidony breakdown
+                    if len(data) >= 2:
+                        breakdown_info = []
+                        for record in data:
+                            meeting_type = record.get('meeting_type', 'Unknown')
+                            count = record.get('meeting_count', 0)
+                            breakdown_info.append(f"{meeting_type}: {count}")
+                        return f"David Gidony's meeting breakdown - {', '.join(breakdown_info)}"
+                
+                return f"The most active employee is {employee_name} with {meeting_count} meetings."
+        
+        elif query_type == "meeting_breakdown":
+            # Handle internal/external breakdown
+            if len(data) >= 2:
+                breakdown_info = []
+                for record in data:
+                    meeting_type = record.get('meeting_type', 'Unknown')
+                    count = record.get('meeting_count', 0)
+                    breakdown_info.append(f"{meeting_type}: {count}")
+                return f"Meeting breakdown - {', '.join(breakdown_info)}"
+        
+        elif query_type == "client_meeting_ranking":
+            # Handle top clients by meeting count
+            if data:
+                client_info = []
+                for i, record in enumerate(data[:3], 1):
+                    client = record.get('client', record.get('sf_name', 'Unknown'))
+                    # Try multiple possible field names for count
+                    count = record.get('recorded_meetings', record.get('meeting_count', 0))
+                    client_info.append(f"{i}. {client}: {count} meetings")
+                return f"Top clients by meeting count:\n{chr(10).join(client_info)}"
+        
+        # Fallback to default formatting
+        return self._generate_default_answer(user_query, data)
