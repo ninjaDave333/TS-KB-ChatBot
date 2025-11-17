@@ -35,6 +35,7 @@ class BedrockClient:
         import re
         year_match = re.search(r'\b(20\d{2})\b', user_query)
         vendor_match = re.search(r'\b(hashicorp|aws|microsoft|google|vmware)\b', user_query, re.IGNORECASE)
+        israel_match = re.search(r'\b(israel|israeli)\b', user_query, re.IGNORECASE)
         
         filters = []
         if year_match:
@@ -43,6 +44,8 @@ class BedrockClient:
         if vendor_match:
             vendor = vendor_match.group(1).lower()
             filters.append(f"toLower(p.name) CONTAINS '{vendor}'")
+        if israel_match:
+            filters.append("c.region = 'IL'")
         
         filter_hint = f"\n\nREQUIRED FILTERS: {' AND '.join(filters)}" if filters else ""
         
@@ -53,6 +56,8 @@ class BedrockClient:
 
 CRITICAL RULES:
 - Client names: c.sf_name (NOT c.name)
+- Israeli clients: c.region = 'IL' (NOT c.country = 'Israel')
+- Account managers: Employee node (NOT AccountManager)
 - Dates: o.close_date for temporal queries (actual deal close date)
 - Extract year: substring(o.close_date, 0, 4) NOT YEAR() or extract()
 - Vendor filtering: Use p.vendor field directly

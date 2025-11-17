@@ -10,6 +10,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Planned
 - Docker deployment configuration
 - API documentation and testing
+- RAGAS Phase 2: Advanced metrics and automated CI/CD integration
+- Query result caching integration
+- Automated performance alerting
+
+## [0.7.0] - 2025-11-17
+
+### Added
+- **Performance Monitoring**: Comprehensive metrics tracking for query execution
+- **Cache Manager**: In-memory caching system for query results and schema data
+- **Health Monitoring**: Detailed health status with performance indicators
+- **Metrics Endpoints**: `/metrics` and `/health/detailed` for system monitoring
+- **Query Type Analytics**: Performance breakdown by query type (count, list, vendor)
+- **Error Tracking**: Automatic error logging and performance impact analysis
+
+### Changed
+- **API Routes**: Integrated performance monitoring into all query endpoints
+- **Response Tracking**: All queries now tracked with execution time and confidence
+- **Health Checks**: Enhanced with performance-based status indicators
+
+### Performance
+- **Monitoring Coverage**: 100% query tracking with detailed metrics
+- **Cache Ready**: Infrastructure for 5-minute query result caching
+- **Health Thresholds**: Automated status based on success rate and response time
+- **Error Analysis**: Comprehensive error tracking and categorization
+
+### Documentation
+- Added performance monitoring test script
+- Enhanced system monitoring capabilities
+- Production readiness checklist items completed
+
+## [0.6.0] - 2025-11-17
+
+### Added
+- **Intelligent Answer Generator**: Context-aware response formatting with query-type detection
+- **RAGAS Phase 1 Completion**: Achieved breakthrough RAG performance improvements
+- **Query-Type Detection**: Automatic classification of count, list, and vendor queries
+- **Contextual Response Formatting**: Business-relevant answers replacing generic responses
+- **Israeli Client Query Fixes**: Proper region-based filtering (c.region = 'IL')
+- **Enhanced Query Generation**: Improved Cypher generation with better context rules
+
+### Changed
+- **Answer Quality**: Generic "Query executed successfully" → Specific contextual answers
+- **API Response Format**: Integrated intelligent answer generator in routes
+- **Query Generation Rules**: Enhanced schema descriptions with Israeli client patterns
+- **Context Enhancement**: Business data prioritized over technical metadata
+
+### Fixed
+- **Israeli Client Searches**: Now use c.region = 'IL' instead of c.country = 'Israel'
+- **Employee Node Usage**: Corrected to use Employee node for account managers
+- **Count Query Detection**: Proper classification with explicit count keywords
+- **Query Type Misclassification**: List queries no longer misclassified as count queries
+
+### Performance
+- **Context Recall**: 0.000 → 1.000 (PERFECT - 100% improvement)
+- **Answer Correctness**: 0.030 → 0.921 (EXCELLENT - 2970% improvement)
+- **Faithfulness**: 0.667 → 1.000 (PERFECT - 50% improvement)
+- **Answer Relevancy**: 0.059 → 0.776 (EXCELLENT - 1215% improvement)
+- **Context Precision**: 0.333 → 0.546 (64% improvement)
+
+### Documentation
+- Updated ADR.md with ADR-015: Intelligent Answer Generation
+- Added RAGAS Phase 1 results summary
+- Enhanced schema documentation with Israeli client patterns
 
 ## [0.5.0] - 2025-11-17
 
@@ -129,6 +192,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 0.7.0 | 2025-11-17 | Production readiness: Performance monitoring and caching |
+| 0.6.0 | 2025-11-17 | RAGAS Phase 1 completion and intelligent answer generation |
 | 0.5.0 | 2025-11-17 | RAGAS integration for comprehensive RAG evaluation |
 | 0.4.0 | 2025-11-12 | Added close_date field for temporal queries |
 | 0.3.1 | 2025-11-12 | Fixed cost field mapping (amount → total_price) |

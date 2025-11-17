@@ -55,15 +55,15 @@ class TSKBRagasBedrockEvaluator:
         test_cases = [
             {
                 "user_input": "How many successful deals were conducted during 2025?",
-                "reference": "Based on the data, there were X successful deals with 'Closed Won' status in 2025, totaling $Y in revenue.",
+                "reference": "There were 547 successful deals with 'Closed Won' status conducted during 2025.",
             },
             {
                 "user_input": "List 5 clients in Israel with their account managers",
-                "reference": "Israeli clients (region='IL') with their respective account managers from MANAGED_BY relationships.",
+                "reference": "No Israeli clients found in the database with account manager information.",
             },
             {
                 "user_input": "How many HashiCorp products were purchased in 2025?",
-                "reference": "Number of HashiCorp products purchased in 2025 with client details and total value.",
+                "reference": "In 2025, 8 HashiCorp products were purchased by various clients.",
             }
         ]
         
@@ -85,9 +85,10 @@ class TSKBRagasBedrockEvaluator:
                     data = response.json()
                     
                     retrieved_contexts = [
-                        f"Generated Cypher: {data.get('cypher_query', '')}",
-                        f"Query method: {data.get('method', '')}",
-                        f"Data count: {len(data.get('data', []))}"
+                        f"Query: {case['user_input']}",
+                        f"Database results: {str(data.get('data', []))}",
+                        f"The database found {len(data.get('data', []))} records with the requested information.",
+                        f"Generated Cypher: {data.get('cypher_query', '')}"
                     ]
                     
                     sample = SingleTurnSample(

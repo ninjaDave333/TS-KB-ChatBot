@@ -5,12 +5,16 @@ from app.database.neo4j_client import Neo4jClient
 from app.core.query_generator import QueryGenerator
 from app.core.bedrock_client import BedrockClient
 from app.core.query_validator import CypherValidator
+from app.core.answer_generator import AnswerGenerator
+from app.core.performance_monitor import performance_monitor
+import time
 
 router = APIRouter()
 neo4j_client = Neo4jClient()
 query_generator = QueryGenerator()
 bedrock_client = BedrockClient()
 query_validator = CypherValidator()
+answer_generator = AnswerGenerator()
 
 class QueryRequest(BaseModel):
     query: str
@@ -41,8 +45,33 @@ async def get_schema():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/metrics")
+async def get_metrics():
+    """Get system performance metrics."""
+    return performance_monitor.get_performance_summary()
+
+@router.get("/health/detailed")
+async def detailed_health():
+    """Get detailed health status including performance metrics."""
+    try:
+        # Test Neo4j connection
+        neo4j_result = neo4j_client.execute_query("RETURN 1 as test")
+        neo4j_status = "connected"
+    except Exception as e:
+        neo4j_status = f"error: {str(e)}"
+    
+    health_status = performance_monitor.get_health_status()
+    
+    return {
+        "status": health_status["status"],
+        "neo4j": neo4j_status,
+        "performance": health_status,
+        "metrics_summary": performance_monitor.get_performance_summary(hours=1)
+    }
+
 @router.post("/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest):
+    start_time = time.time()
     try:
         # Get schema for AI context
         schema = neo4j_client.get_schema()
@@ -107,17 +136,22 @@ async def process_query(request: QueryRequest):
             else:
                 raise e
         
-        # Format response
-        if result and len(result) > 0:
-            if "total" in result[0]:
-                answer = f"Found {result[0]['total']} results"
-            elif "name" in result[0]:
-                names = [r["name"] for r in result]
-                answer = f"Found {len(names)} items: {', '.join(names[:5])}"
-            else:
-                answer = f"Query executed successfully, returned {len(result)} results"
-        else:
-            answer = "No results found"
+        # Generate natural language answer
+        answer = answer_generator.generate_answer(request.query, cypher_query, result)
+        
+        # Record performance metrics
+        execution_time = time.time() - start_time
+        query_type = answer_generator._detect_query_type(request.query)
+        confidence = 85 if method.startswith("ai_") else 70
+        
+        performance_monitor.record_query(
+            query=request.query,
+            query_type=query_type,
+            execution_time=execution_time,
+            confidence=confidence,
+            data_count=len(result),
+            success=True
+        )
         
         return QueryResponse(
             query=request.query,

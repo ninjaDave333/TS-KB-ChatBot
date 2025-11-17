@@ -1,0 +1,50 @@
+[
+  {
+    "user_input":"How many successful deals were conducted during 2025?",
+    "retrieved_contexts":[
+      "Query: How many successful deals were conducted during 2025?",
+      "Database results: [{'successful_deals_2025': 547}]",
+      "The database found 1 records with the requested information.",
+      "Generated Cypher: MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' RETURN count(o) as successful_deals_2025"
+    ],
+    "response":"There were 547 successful deals conducted during 2025.",
+    "reference":"Based on the data, there were X successful deals with 'Closed Won' status in 2025, totaling $Y in revenue.",
+    "faithfulness":1.0,
+    "answer_relevancy":1.0,
+    "context_precision":0.0,
+    "context_recall":0.0,
+    "answer_correctness":0.1792166545
+  },
+  {
+    "user_input":"List 5 clients in Israel with their account managers",
+    "retrieved_contexts":[
+      "Query: List 5 clients in Israel with their account managers",
+      "Database results: []",
+      "The database found 0 records with the requested information.",
+      "Generated Cypher: MATCH (c:Client)-[:MANAGED_BY]->(am:AccountManager) WHERE c.country = 'Israel' RETURN c.sf_name as client, am.name as account_manager LIMIT 5"
+    ],
+    "response":"No results found for your query.",
+    "reference":"Israeli clients (region='IL') with their respective account managers from MANAGED_BY relationships.",
+    "faithfulness":1.0,
+    "answer_relevancy":0.0,
+    "context_precision":0.0,
+    "context_recall":0.0,
+    "answer_correctness":0.0357685589
+  },
+  {
+    "user_input":"How many HashiCorp products were purchased in 2025?",
+    "retrieved_contexts":[
+      "Query: How many HashiCorp products were purchased in 2025?",
+      "Database results: [{'hashicorp_products_purchased': 8}]",
+      "The database found 1 records with the requested information.",
+      "Generated Cypher: MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE toLower(p.name) CONTAINS 'hashicorp' AND o.opportunity_stage = 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' AND toLower(p.vendor) CONTAINS 'hashicorp' RETURN count(*) as hashicorp_products_purchased"
+    ],
+    "response":"In 2025, 8 HashiCorp products were purchased by clients.",
+    "reference":"Number of HashiCorp products purchased in 2025 with client details and total value.",
+    "faithfulness":1.0,
+    "answer_relevancy":0.9575807483,
+    "context_precision":0.0,
+    "context_recall":0.0,
+    "answer_correctness":0.5838647974
+  }
+]

@@ -309,7 +309,14 @@ SCHEMA_DESCRIPTIONS = {
         "clients_by_region": {
             "description": "Find clients in specific region",
             "template": "MATCH (c:Client) WHERE c.region = '{region_code}' RETURN c.sf_name, c.sf_billing_country",
-            "note": "Use direct region property, not LOCATED_IN relationship"
+            "note": "Use direct region property, not LOCATED_IN relationship",
+            "israel_example": "For Israel/Israeli clients: c.region = 'IL' (NOT c.country = 'Israel')"
+        },
+        
+        "israeli_clients_with_managers": {
+            "description": "Find Israeli clients with their account managers",
+            "template": "MATCH (c:Client)-[:MANAGED_BY]->(e:Employee) WHERE c.region = 'IL' RETURN c.sf_name as client, e.name as account_manager LIMIT 5",
+            "note": "Use c.region = 'IL' for Israel, Employee not AccountManager"
         },
         
         "active_clients_by_region": {
@@ -353,6 +360,8 @@ SCHEMA_DESCRIPTIONS = {
         "mandatory_filters": "ALWAYS include ALL user-specified filters - vendor AND year AND status",
         "filter_combination": "When user asks for 'hashicorp 2025 deals' include BOTH vendor filter AND year filter",
         "variable_consistency": "Use consistent variable names - if you collect as 'samples' return as 'samples', not 'deals'",
-        "collection_syntax": "collect({...})[0..5] as samples RETURN total, samples (NOT deals[..5])"
+        "collection_syntax": "collect({...})[0..5] as samples RETURN total, samples (NOT deals[..5])",
+        "israel_queries": "For Israeli/Israel clients ALWAYS use c.region = 'IL' NEVER c.country = 'Israel'",
+        "account_manager_queries": "For account managers use Employee node, NEVER AccountManager node"
     }
 }
