@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  tskb-rag:
+    build: .
+    container_name: tskb-rag
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./logs:/app/logs
+      - ./ssl:/app/ssl:ro
+    env_file:
+      - .env
+    networks:
+      - TS_AI_network
+    depends_on:
+      - neo4j
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  TS_AI_network:
+    external: true

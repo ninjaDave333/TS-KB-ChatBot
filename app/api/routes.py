@@ -26,6 +26,7 @@ class QueryResponse(BaseModel):
     data: list
     cypher_query: str
     method: str
+    execution_time: float
     error: Optional[str] = None
 
 @router.get("/health")
@@ -159,6 +160,7 @@ async def process_query(request: QueryRequest):
             data=result,
             cypher_query=cypher_query,
             method=method,
+            execution_time=execution_time,
             error=error_msg
         )
     
