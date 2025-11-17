@@ -82,6 +82,24 @@ class TSKBRagasEvaluator:
                 "reference": "List of products installed by Wix with installation details.",
                 "expected_cypher_pattern": "WHERE c.sf_name CONTAINS 'Wix'.*HAS_INSTALLED",
                 "category": "client_installations"
+            },
+            {
+                "user_input": "How many external meetings recorded?",
+                "reference": "Total count of external meetings with external participants recorded in the system.",
+                "expected_cypher_pattern": "size(c.externalParticipants) > 0",
+                "category": "teams_recording_analytics"
+            },
+            {
+                "user_input": "Most active employee meeting wise",
+                "reference": "Employee with the highest number of meeting participations (owner or invited).",
+                "expected_cypher_pattern": "OWNER_OF|INVITED_TO.*count.*ORDER BY.*DESC",
+                "category": "teams_employee_analytics"
+            },
+            {
+                "user_input": "David Gidony meetings breakdown internal external",
+                "reference": "Breakdown of David Gidony's meetings categorized as internal vs external.",
+                "expected_cypher_pattern": "Employee.*David Gidony.*CASE WHEN size.*externalParticipants",
+                "category": "teams_meeting_breakdown"
             }
         ]
         
@@ -158,6 +176,11 @@ class TSKBRagasEvaluator:
             if metric in df.columns:
                 score = df[metric].mean()
                 analysis["overall_scores"][metric] = round(score, 3)
+        
+        # Calculate overall RAG score
+        if analysis["overall_scores"]:
+            overall_score = sum(analysis["overall_scores"].values()) / len(analysis["overall_scores"])
+            analysis["overall_scores"]["overall_rag_score"] = round(overall_score, 3)
         
         # Metric analysis
         for metric, score in analysis["overall_scores"].items():

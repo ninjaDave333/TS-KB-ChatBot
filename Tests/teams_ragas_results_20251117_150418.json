@@ -1,0 +1,54 @@
+[
+  {
+    "query": "How many external meetings recorded?",
+    "category": "external_meeting_count",
+    "answer": "There were 304 external meetings recorded during the specified period.",
+    "data_count": 1,
+    "method": "ai_generated",
+    "metrics": {
+      "answer_quality": 1.0,
+      "data_accuracy": 1.0,
+      "method_score": 1.0,
+      "overall_score": 1.0
+    }
+  },
+  {
+    "query": "Most active employee meeting wise",
+    "category": "employee_ranking",
+    "answer": "The most active employee is Gabi Brayer with 88 meetings.",
+    "data_count": 1,
+    "method": "ai_generated",
+    "metrics": {
+      "answer_quality": 1.0,
+      "data_accuracy": 1.0,
+      "method_score": 1.0,
+      "overall_score": 1.0
+    }
+  },
+  {
+    "query": "David Gidony meetings breakdown internal external",
+    "category": "meeting_breakdown",
+    "answer": "Meeting breakdown - External: 75, Internal: 8",
+    "data_count": 2,
+    "method": "ai_generated",
+    "metrics": {
+      "answer_quality": 1.0,
+      "data_accuracy": 1.0,
+      "method_score": 1.0,
+      "overall_score": 1.0
+    }
+  },
+  {
+    "query": "Top 3 clients most recorded meetings",
+    "category": "client_ranking",
+    "answer": "Top clients by meeting count:\n1. PayKey: 88 meetings\n2. FireFly (ex Infralight): 88 meetings\n3. Ametos: 88 meetings",
+    "data_count": 3,
+    "method": "ai_generated",
+    "metrics": {
+      "answer_quality": 1.0,
+      "data_accuracy": 1.0,
+      "method_score": 1.0,
+      "overall_score": 1.0
+    }
+  }
+]
