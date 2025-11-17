@@ -13,9 +13,9 @@ sudo docker run --rm \
   --network-alias tskb-rag \
   -v /home/ubuntu/meetingsBotLogs:/app/logs \
   -v /home/ubuntu/ssl:/app/ssl:ro \
-  -p 8000:8000 \
+  -p 8002:8002 \
   tskb-rag
 
 echo "TSKB-RAG is running at:"
-echo "- API: http://localhost:8000"
-echo "- Web UI: http://localhost:8000/promptui"
+echo "- API: http://localhost:8002"
+echo "- Web UI: http://localhost:8002/promptui"

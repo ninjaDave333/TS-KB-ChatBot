@@ -1,3 +1,4 @@
+# Minimal production requirements - no RAGAS conflicts
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 neo4j==5.15.0

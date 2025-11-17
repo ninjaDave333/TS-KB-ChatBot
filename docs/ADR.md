@@ -454,6 +454,7 @@ class AnswerGenerator:
 ## Future Decisions
 
 ### Pending Decisions
+- **Conversational Context Management**: Session-based conversation memory and context-aware query processing
 - **Authentication Strategy**: OAuth2 vs API Keys vs JWT
 - **Rate Limiting**: Strategy and implementation approach
 - **Monitoring**: Metrics collection and alerting strategy
@@ -463,6 +464,7 @@ class AnswerGenerator:
 - **Multi-tenancy**: Support for multiple organizations
 - **Query History**: Storage and analysis of user queries
 - **Advanced Analytics**: Query pattern analysis and optimization
+- **Vector Search Integration**: ChromaDB integration for semantic search
 
 ---
 

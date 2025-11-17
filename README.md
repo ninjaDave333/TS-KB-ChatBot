@@ -35,17 +35,17 @@ copy .env.example .env
 venv\Scripts\activate
 
 # Start server
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8002
 ```
 
-API available at: `http://localhost:8000`  
-Web UI available at: `http://localhost:8000/promptui`
+API available at: `http://localhost:8002`  
+Web UI available at: `http://localhost:8002/promptui`
 
 ## Usage
 
 ### Web Interface
 
-Access the interactive chat interface at `http://localhost:8000/promptui` for:
+Access the interactive chat interface at `http://localhost:8002/promptui` for:
 - Real-time query testing
 - Chat-style interaction
 - Query history (session-based)
@@ -138,7 +138,7 @@ sudo docker run --rm \
   --network-alias tskb-rag \
   -v /home/ubuntu/meetingsBotLogs:/app/logs \
   -v /home/ubuntu/ssl:/app/ssl:ro \
-  -p 8000:8000 \
+  -p 8002:8002 \
   tskb-rag
 
 # Or use the provided script
@@ -151,8 +151,8 @@ docker-compose up -d
 ```
 
 After deployment, access:
-- API: `http://localhost:8000`
-- Web UI: `http://localhost:8000/promptui`
+- API: `http://localhost:8002`
+- Web UI: `http://localhost:8002/promptui`
 
 ### Network Configuration
 The application is configured to work with the TS_AI_network containing:
