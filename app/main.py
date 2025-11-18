@@ -28,6 +28,10 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 async def root():
     return {"message": "TSKB-RAG Chatbot API", "version": "0.1.0"}
 
+@app.get("/health")
+async def health():
+    return {"status": "healthy", "version": "1.1.0"}
+
 @app.get("/promptui")
 async def prompt_ui(user: dict = Depends(get_current_user)):
     return FileResponse("app/static/promptui.html")
@@ -41,10 +45,15 @@ if __name__ == "__main__":
     ssl_key = os.getenv("SSL_KEY_PATH", "/app/ssl/key.pem")
     https_port = int(os.getenv("HTTPS_PORT", "8002"))
     
+    print(f"Checking SSL certificates: {ssl_cert}, {ssl_key}")
+    print(f"SSL cert exists: {os.path.exists(ssl_cert)}")
+    print(f"SSL key exists: {os.path.exists(ssl_key)}")
+    
     if os.path.exists(ssl_cert) and os.path.exists(ssl_key):
         print(f"Starting HTTPS server on port {https_port} with SSL certificates")
         uvicorn.run(app, host="0.0.0.0", port=https_port, 
                    ssl_certfile=ssl_cert, ssl_keyfile=ssl_key)
     else:
-        print(f"SSL certificates not found, starting HTTP server on port {https_port}")
+        print(f"SSL certificates not found at {ssl_cert} and {ssl_key}")
+        print("Starting HTTP server - OAuth will not work without HTTPS")
         uvicorn.run(app, host="0.0.0.0", port=https_port)
