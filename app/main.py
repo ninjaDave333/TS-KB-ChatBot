@@ -67,22 +67,20 @@ if __name__ == "__main__":
     import os
     
     # SSL configuration for OAuth (required for HTTPS)
-    ssl_cert = os.getenv("SSL_CERT_PATH", "/app/ssl/cert.pem")
-    ssl_key = os.getenv("SSL_KEY_PATH", "/app/ssl/key.pem")
-    https_port = int(os.getenv("HTTPS_PORT", "8002"))
+    ssl_cert = "/app/ssl/cert.pem"
+    ssl_key = "/app/ssl/key.pem"
+    port = 8002
     
-    import logging
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
-    
-    logger.info(f"Checking SSL certificates: {ssl_cert}, {ssl_key}")
+    print(f"\n🔍 Checking SSL certificates...")
+    print(f"Cert: {ssl_cert} - Exists: {os.path.exists(ssl_cert)}")
+    print(f"Key: {ssl_key} - Exists: {os.path.exists(ssl_key)}")
     
     if os.path.exists(ssl_cert) and os.path.exists(ssl_key):
-        logger.info("SSL certificates loaded successfully")
-        logger.info("SSL OK - Starting HTTPS server for OAuth compatibility")
-        uvicorn.run(app, host="0.0.0.0", port=https_port, 
+        print(f"✅ SSL certificates found - Starting HTTPS server on port {port}")
+        print(f"🔐 OAuth ready at https://localhost:{port}/promptui")
+        uvicorn.run(app, host="0.0.0.0", port=port, 
                    ssl_certfile=ssl_cert, ssl_keyfile=ssl_key)
     else:
-        logger.error(f"SSL certificates not found at {ssl_cert} and {ssl_key}")
-        logger.warning("Starting HTTP server - OAuth will not work without HTTPS")
-        uvicorn.run(app, host="0.0.0.0", port=https_port)
+        print(f"❌ SSL certificates not found - Starting HTTP server")
+        print(f"⚠️  OAuth will NOT work without HTTPS")
+        uvicorn.run(app, host="0.0.0.0", port=port)
