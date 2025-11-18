@@ -1,8 +1,10 @@
 # Centralized OAuth Architecture for TeraSky AI Services
 
 **Date**: 2025-11-18  
-**Status**: Design Phase  
+**Status**: Implementation Ready ✅  
 **Goal**: Implement shared JWT authentication between meetingsBot and TSKB-RAG for seamless single sign-on
+
+**Update**: 2025-11-18 - meetingsBot team confirmed implementation approach and provided complete code
 
 ---
 
@@ -28,9 +30,10 @@ User → meetingsBot (OAuth) → JWT Token → TSKB-RAG (JWT Validation)
 
 ## Implementation Plan
 
-### Phase 1: meetingsBot Integration
+### Phase 1: meetingsBot Integration ✅ CONFIRMED
 **Responsibility**: meetingsBot team  
-**Timeline**: TBD
+**Timeline**: 1-2 days (ready to start immediately)  
+**Status**: Complete implementation details provided
 
 ### Phase 2: TSKB-RAG JWT Validation
 **Responsibility**: TSKB-RAG team  
@@ -52,12 +55,13 @@ JWT_SECRET=<shared-secret-key-32-chars>
 JWT_EXPIRY=3600  # 1 hour
 ```
 
-**JWT Payload Structure:**
+**JWT Payload Structure (CONFIRMED):**
 ```json
 {
   "sub": "user_azure_id",
   "email": "user@terasky.com", 
   "name": "User Display Name",
+  "authMode": "global",
   "iss": "meetingsBot",
   "aud": "tskb-rag",
   "exp": 1234567890,
@@ -65,6 +69,12 @@ JWT_EXPIRY=3600  # 1 hour
   "domain_verified": true
 }
 ```
+
+**Field Mapping (CONFIRMED):**
+- `req.user.id` → `JWT.sub` (Azure user ID)
+- `req.user.email` → `JWT.email`
+- `req.user.displayName` → `JWT.name`
+- `req.authMode` → `JWT.authMode` (always "global" in production)
 
 ### 2. New API Endpoint
 
@@ -443,9 +453,10 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
 
 ---
 
-**Document Version**: 1.0  
+**Document Version**: 2.0  
 **Last Updated**: 2025-11-18  
-**Next Review**: After Phase 1 completion
+**Status**: Implementation Ready - All requirements confirmed by meetingsBot team  
+**Next Review**: After successful deployment
 
 ---
 
