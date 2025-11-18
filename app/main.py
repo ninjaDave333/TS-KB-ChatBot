@@ -34,4 +34,17 @@ async def prompt_ui(user: dict = Depends(get_current_user)):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8002)
+    import os
+    
+    # SSL configuration for OAuth (required for HTTPS)
+    ssl_cert = os.getenv("SSL_CERT_PATH", "/app/ssl/cert.pem")
+    ssl_key = os.getenv("SSL_KEY_PATH", "/app/ssl/key.pem")
+    https_port = int(os.getenv("HTTPS_PORT", "8002"))
+    
+    if os.path.exists(ssl_cert) and os.path.exists(ssl_key):
+        print(f"Starting HTTPS server on port {https_port} with SSL certificates")
+        uvicorn.run(app, host="0.0.0.0", port=https_port, 
+                   ssl_certfile=ssl_cert, ssl_keyfile=ssl_key)
+    else:
+        print(f"SSL certificates not found, starting HTTP server on port {https_port}")
+        uvicorn.run(app, host="0.0.0.0", port=https_port)
