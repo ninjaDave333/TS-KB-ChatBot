@@ -45,15 +45,18 @@ if __name__ == "__main__":
     ssl_key = os.getenv("SSL_KEY_PATH", "/app/ssl/key.pem")
     https_port = int(os.getenv("HTTPS_PORT", "8002"))
     
-    print(f"Checking SSL certificates: {ssl_cert}, {ssl_key}")
-    print(f"SSL cert exists: {os.path.exists(ssl_cert)}")
-    print(f"SSL key exists: {os.path.exists(ssl_key)}")
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"Checking SSL certificates: {ssl_cert}, {ssl_key}")
     
     if os.path.exists(ssl_cert) and os.path.exists(ssl_key):
-        print(f"Starting HTTPS server on port {https_port} with SSL certificates")
+        logger.info("SSL certificates loaded successfully")
+        logger.info("SSL OK - Starting HTTPS server for OAuth compatibility")
         uvicorn.run(app, host="0.0.0.0", port=https_port, 
                    ssl_certfile=ssl_cert, ssl_keyfile=ssl_key)
     else:
-        print(f"SSL certificates not found at {ssl_cert} and {ssl_key}")
-        print("Starting HTTP server - OAuth will not work without HTTPS")
+        logger.error(f"SSL certificates not found at {ssl_cert} and {ssl_key}")
+        logger.warning("Starting HTTP server - OAuth will not work without HTTPS")
         uvicorn.run(app, host="0.0.0.0", port=https_port)
