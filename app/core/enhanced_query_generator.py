@@ -73,35 +73,11 @@ class EnhancedQueryGenerator(QueryGenerator):
         """Adapt a learned pattern to the current query"""
         base_cypher = similar_pattern['data']['cypher_template']
         
-        # Simple adaptation - replace entity names
-        adapted_cypher = base_cypher
+        # For now, return the base cypher without risky adaptations
+        # The pattern adaptation logic was causing syntax errors with undefined variables
+        # TODO: Implement safer pattern adaptation that validates variable existence
         
-        # Extract entities from current query
-        current_entities = self.extract_entities(query)
-        
-        # Try to adapt the cypher based on current entities
-        query_lower = query.lower()
-        
-        # Replace node types if different
-        if 'client' in query_lower and 'Employee' in base_cypher:
-            adapted_cypher = base_cypher.replace('Employee', 'Client').replace('e:', 'c:')
-        elif 'employee' in query_lower and 'Client' in base_cypher:
-            adapted_cypher = base_cypher.replace('Client', 'Employee').replace('c:', 'e:')
-        elif 'product' in query_lower and ('Client' in base_cypher or 'Employee' in base_cypher):
-            adapted_cypher = base_cypher.replace('Client', 'Product').replace('Employee', 'Product')
-            adapted_cypher = adapted_cypher.replace('c:', 'p:').replace('e:', 'p:')
-        
-        # Handle temporal adaptations
-        if current_entities['temporal']:
-            year = current_entities['temporal'][0]
-            if 'WHERE' in adapted_cypher:
-                # Add year filter to existing WHERE clause
-                adapted_cypher = adapted_cypher.replace('WHERE', f'WHERE toString(n.year) = \"{year}\" AND')
-            else:
-                # Add WHERE clause before RETURN
-                adapted_cypher = adapted_cypher.replace('RETURN', f'WHERE toString(n.year) = \"{year}\" RETURN')
-        
-        return adapted_cypher
+        return base_cypher
     
     def record_query_success(self, query: str, cypher: str, execution_time: float, 
                            data_count: int, user_feedback: Optional[float] = None):

@@ -13,6 +13,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time query performance optimization
 - Enhanced RAGAS evaluation automation
 
+## [2.0.2] - 2025-11-18
+
+### Enhanced - Response Consistency Improvements
+- **Multi-part Query Handling**: Enhanced detection and processing of complex queries with multiple questions
+- **User-friendly Field Names**: Automatic conversion of database field names to readable descriptions
+- **Contextual Response Formatting**: Specialized responses for failed opportunities, external meetings, and other query types
+- **Consistent Natural Language**: All responses now use natural language instead of raw data formats
+
+### Fixed
+- **Raw Field Exposure**: Database field names like "failed_opportunities: 865" now display as "There were 865 failed opportunities during 2025"
+- **Generic Responses**: "The query returned 83 results" replaced with specific, actionable information
+- **Incomplete Multi-part Answers**: Queries asking "how many X and what is most popular Y" now attempt to answer both parts
+- **Response Format Inconsistency**: Standardized all count, list, and analytical query responses
+
+### Technical Implementation
+- **Field Name Mapping**: Added comprehensive mapping from database fields to user-friendly terms
+- **Multi-part Detection**: Automatic identification of queries with "and", "most popular", "top", etc.
+- **Enhanced Count Responses**: Context-aware formatting based on query content and data type
+- **Graceful Degradation**: Suggests breaking complex queries into parts when complete answers aren't possible
+
+### Response Quality Examples
+- **Before**: "failed_opportunities: 865" → **After**: "There were 865 failed opportunities during 2025"
+- **Before**: "The query returned 83 results" → **After**: "Found 83 failed opportunities. Most failed products: Product A (25 failures), Product B (18 failures)"
+- **Before**: "external_meetings_recorded: 314" → **After**: "There were 314 external meetings recorded during the specified period"
+
+### Backward Compatibility
+- **No Breaking Changes**: All existing query patterns continue to work
+- **Enhanced Responses**: Existing queries now return more user-friendly answers
+- **API Structure**: Response JSON structure remains unchanged
+
+### Performance Impact
+- **Response Generation**: Minimal overhead for enhanced formatting
+- **User Experience**: Significantly improved readability and actionability
+- **Maintenance**: Field mappings require updates as schema evolves
+
+## [2.0.1] - 2025-11-18
+
+### Enhanced
+- **Prompt Examples Refinement**: Updated web UI examples based on production usage patterns
+- **Query Clarity**: Improved example queries for better user guidance
+- **User Experience**: More intuitive prompt suggestions reflecting successful query types
+
+### Changed
+- Web UI welcome message now includes 6 refined example queries
+- Examples now cover external meetings, failed opportunities, product analysis, client management, and employee analytics
+- Improved query phrasing for better AI understanding and response accuracy
+
 ## [2.0.0] - 2025-11-18
 
 ### Added - Centralized OAuth Authentication 🎉 PRODUCTION READY
@@ -23,6 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Frontend Integration**: Automatic token handling from URL parameters
 - **User Context**: Displays authenticated user information (name, email)
 - **HTTPS Security**: SSL certificate integration for secure token transmission
+- **Persistent Learning Storage**: Volume mount `/home/ubuntu/meetingsBotLogs/persistentData:/app/data`
 
 ### Enhanced
 - **Authentication Flow**: Replaced OAuth popup with seamless JWT redirect
@@ -418,11 +466,10 @@ app/api/
 
 | Version | Date | Description |
 |---------|------|-------------|
-| 2.0.0 | 2025-11-18 | Centralized OAuth: Single sign-on via meetingsBot JWT authentication |
+| 2.0.1 | 2025-11-18 | Prompt Examples Refinement: Updated web UI with production-tested queries |
+| 2.0.0 | 2025-11-18 | Centralized OAuth + Persistent Learning: JWT auth + 8 learned patterns |
 | 1.1.0 | 2025-11-18 | Microsoft OAuth Authentication: Enterprise security with domain restriction |
-| 1.0.2 | 2025-11-17 | Query Patterns Analytics: Production performance documentation and business insights |
-| 1.0.1 | 2025-11-17 | Persistent Learning: Requirements and validation documentation |
-| 1.0.0 | 2025-11-17 | Dynamic RAG Enhancement: Self-learning and adaptive intelligence (COMPLETE) |
+| 1.0.0 | 2025-11-17 | Dynamic RAG Phase 1 + Teams Recording + RAGAS Integration (COMPLETE) |
 | 0.9.0 | 2025-11-17 | Teams Recording integration: Meeting analytics and transcript access (COMPLETE) |
 | 0.8.0 | 2025-11-17 | RAGAS Phase 2: Advanced evaluation and CI/CD integration |
 | 0.7.0 | 2025-11-17 | Production readiness: Performance monitoring and caching |
@@ -459,7 +506,7 @@ app/api/
 ---
 
 **Changelog Maintained By**: TeraSky AI Team  
-**Last Updated**: 2025-11-17
+**Last Updated**: 2025-11-18
 
 ---
 
