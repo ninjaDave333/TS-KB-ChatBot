@@ -96,20 +96,32 @@
         
         async function validateTokenAndUpdateUI() {
             try {
-                const response = await fetch('/health', {
+                // Test token with a simple API call
+                const response = await fetch('/api/v1/health', {
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
                 
                 if (response.ok) {
-                    currentUser = { displayName: "Authenticated User" };
+                    // Extract user info from JWT payload (simple decode)
+                    try {
+                        const payload = JSON.parse(atob(accessToken.split('.')[1]));
+                        currentUser = { 
+                            displayName: payload.name || "Authenticated User",
+                            email: payload.email
+                        };
+                    } catch (e) {
+                        currentUser = { displayName: "Authenticated User" };
+                    }
                     updateUI();
                 } else {
+                    console.log('Token validation failed:', response.status);
                     // Token invalid, show auth screen
                     accessToken = null;
                     currentUser = null;
                     updateUI();
                 }
             } catch (error) {
+                console.error('Token validation error:', error);
                 // Token validation failed
                 accessToken = null;
                 currentUser = null;
