@@ -59,7 +59,7 @@ async def health():
     return {"status": "healthy", "version": "1.1.0", "ssl": "enabled" if os.path.exists("/app/ssl/cert.pem") else "disabled"}
 
 @app.get("/promptui")
-async def prompt_ui(user: dict = Depends(get_current_user)):
+async def prompt_ui():
     return FileResponse("app/static/promptui.html")
 
 if __name__ == "__main__":
