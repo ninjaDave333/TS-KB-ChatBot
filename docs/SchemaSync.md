@@ -1,7 +1,7 @@
 # TSKB-RAG Schema Synchronization Guide
 
-**Version**: 2.5.0  
-**Last Updated**: 2025-11-17  
+**Version**: 2.6.0  
+**Last Updated**: 2025-11-18  
 **Purpose**: Complete schema reference for services consuming TSKB-RAG Neo4j knowledge graph
 
 ---
@@ -736,6 +736,57 @@ WHERE ANY(email IN c.internalParticipants WHERE email CONTAINS 'smith')
 RETURN c.title, c.internalParticipants, c.startTime
 ```
 
+## Authentication & Security
+
+### OAuth Authentication (NEW - v1.1.0)
+The TSKB-RAG system now requires Microsoft OAuth authentication for all access:
+
+**Authentication Requirements**:
+- **Domain Restriction**: Only `@terasky.com` users can access the system
+- **Bearer Tokens**: All API requests must include `Authorization: Bearer <token>` header
+- **Token Validation**: Server-side validation via Microsoft Graph API
+- **Session Management**: Client-side token storage with automatic inclusion
+
+**Protected Endpoints**:
+- `GET /promptui` - Web interface requires authentication
+- `POST /api/v1/query` - Main RAG API requires Bearer token
+- **Unprotected**: `/health`, `/schema`, `/auth/*` endpoints
+
+**Integration Impact**:
+- **API Clients**: Must implement OAuth flow to obtain Bearer tokens
+- **Service Integration**: Compatible with meetingsBot OAuth infrastructure
+- **Multi-Service**: Same tokens work across TeraSky AI service ecosystem
+
+**Authentication Flow**:
+1. Redirect to `/auth/login` to get Microsoft OAuth URL
+2. Complete OAuth flow via popup or redirect
+3. Receive Bearer token from `/auth/callback`
+4. Include token in all API requests: `Authorization: Bearer <token>`
+
+**Error Handling**:
+```json
+// Missing token
+{
+  "error": "Authentication required",
+  "code": "MISSING_TOKEN"
+}
+
+// Invalid/expired token
+{
+  "error": "Token validation failed", 
+  "code": "TOKEN_VALIDATION_FAILED"
+}
+```
+
+**Environment Variables**:
+```env
+MS_CLIENT_ID=<your-azure-app-client-id>
+MS_TENANT_ID=<your-tenant-id>
+MS_CLIENT_SECRET=<your-azure-app-client-secret>
+MS_REDIRECT_URI=https://aipg.dudelabz.com/auth/callback
+ALLOWED_DOMAIN=terasky.com
+```
+
 ## Integration Guidelines
 
 ### Data Freshness
@@ -1287,6 +1338,7 @@ When integrating with TSKB-RAG data:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.6.0 | 2025-11-18 | Added OAuth authentication requirements and security documentation |
 | 2.5.0 | 2025-11-17 | Added learned query patterns documentation and production analytics |
 | 2.4.0 | 2025-11-12 | Added close_date field to OPPORTUNITY for accurate temporal queries |
 | 2.3.0 | 2025-11-10 | Updated cost field documentation (total_price) |

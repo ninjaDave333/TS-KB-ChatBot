@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
@@ -8,6 +8,8 @@ import os
 load_dotenv()
 
 from app.api.routes import router
+from app.api.auth_routes import router as auth_router
+from app.auth.dependencies import get_current_user
 
 app = FastAPI(
     title="TSKB-RAG Chatbot",
@@ -17,6 +19,7 @@ app = FastAPI(
 
 # Include API routes
 app.include_router(router, prefix="/api/v1")
+app.include_router(auth_router)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -26,9 +29,9 @@ async def root():
     return {"message": "TSKB-RAG Chatbot API", "version": "0.1.0"}
 
 @app.get("/promptui")
-async def prompt_ui():
+async def prompt_ui(user: dict = Depends(get_current_user)):
     return FileResponse("app/static/promptui.html")
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8002)

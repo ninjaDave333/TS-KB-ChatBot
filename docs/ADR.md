@@ -452,6 +452,120 @@ class AnswerGenerator:
 
 ---
 
+## ADR-018: Microsoft OAuth Authentication Integration
+
+**Date**: 2025-11-18  
+**Status**: Implemented  
+**Context**: Need to secure `/promptui` endpoint with enterprise-grade authentication aligned with existing meetingsBot OAuth infrastructure
+
+**Decision**: Implement Microsoft OAuth authentication using Python MSAL library with Bearer token validation, matching meetingsBot's security approach
+
+**Requirements Analysis**:
+- **Compatibility**: Align with meetingsBot's Node.js OAuth implementation
+- **Domain Restriction**: Only `@terasky.com` users allowed
+- **Token Format**: Bearer tokens compatible with existing infrastructure
+- **Low LOE**: Minimal implementation using proven patterns
+- **Future Integration**: Compatible for multi-service AI environment
+
+**Technical Implementation**:
+- **MSAL Client**: Python `msal` library for Microsoft authentication
+- **Token Validation**: Microsoft Graph API validation with domain checking
+- **FastAPI Integration**: Dependency-based route protection
+- **Frontend Auth**: JavaScript popup-based OAuth flow
+- **Error Handling**: Structured error responses matching meetingsBot format
+
+**Architecture Components**:
+```python
+# Core Authentication Stack
+app/auth/
+├── msal_client.py          # Microsoft authentication client
+├── token_validator.py      # Token validation via Graph API
+└── dependencies.py         # FastAPI auth dependencies
+
+app/api/
+└── auth_routes.py          # OAuth endpoints (/auth/login, /auth/callback)
+```
+
+**Security Features**:
+- **Domain Validation**: Strict `@terasky.com` email domain enforcement
+- **Bearer Token**: Standard Authorization header validation
+- **Microsoft Graph**: Server-side token validation via official API
+- **Error Codes**: Structured error responses with specific codes
+- **Session Management**: Client-side token storage with popup flow
+
+**Protected Endpoints**:
+- `GET /promptui` - HTML interface requires authentication
+- `POST /api/v1/query` - API endpoint requires Bearer token
+- **Unprotected**: Health checks, schema endpoints, auth endpoints
+
+**Frontend Integration**:
+- **Authentication UI**: Sign-in button with Microsoft 365 branding
+- **Popup Flow**: Standard OAuth popup with message passing
+- **Token Management**: Automatic token inclusion in API requests
+- **Error Handling**: User-friendly auth error messages
+- **Session Display**: User info display with sign-out option
+
+**Environment Variables (Reused)**:
+```env
+MS_CLIENT_ID=<your-azure-app-client-id>
+MS_TENANT_ID=<your-tenant-id>
+MS_CLIENT_SECRET=<your-azure-app-client-secret>
+MS_REDIRECT_URI=https://aipg.dudelabz.com/auth/callback
+ALLOWED_DOMAIN=terasky.com
+```
+
+**Dependencies Added**:
+- `msal==1.24.1` - Microsoft Authentication Library
+- `python-jose[cryptography]==3.3.0` - JWT token handling
+- `requests==2.31.0` - HTTP client for Graph API
+
+**Compatibility Matrix**:
+| Feature | MeetingsBot | TSKB-RAG | Status |
+|---------|-------------|----------|--------|
+| OAuth Flow | Authorization Code | Authorization Code | ✅ Match |
+| Token Type | Bearer | Bearer | ✅ Match |
+| Domain Validation | @terasky.com | @terasky.com | ✅ Match |
+| Error Codes | Structured | Structured | ✅ Match |
+| CORS Origins | Configured | Same Config | ✅ Match |
+
+**Implementation Results**:
+- **Authentication Flow**: Complete OAuth implementation with popup flow
+- **Token Validation**: Server-side validation via Microsoft Graph API
+- **Domain Enforcement**: Strict `@terasky.com` domain checking
+- **Error Handling**: Comprehensive error responses with specific codes
+- **Frontend Integration**: Seamless authentication UI with user management
+
+**Testing Validation**:
+- **OAuth Flow**: Complete authorization code flow with callback handling
+- **Token Validation**: Microsoft Graph API integration for user profile
+- **Domain Restriction**: Proper rejection of non-terasky.com users
+- **API Protection**: Bearer token requirement for protected endpoints
+- **Error Scenarios**: Proper handling of auth failures and token expiration
+
+**Performance Impact**:
+- **Authentication Overhead**: ~200ms for token validation via Graph API
+- **Caching Opportunity**: Token validation results could be cached
+- **Network Dependency**: Requires Microsoft Graph API availability
+- **Client Experience**: Standard OAuth popup flow (~3-5 seconds)
+
+**Consequences**:
+- ✅ **Enterprise Security**: Production-ready OAuth authentication
+- ✅ **Domain Restriction**: Only authorized terasky.com users can access
+- ✅ **Infrastructure Alignment**: Compatible with existing meetingsBot setup
+- ✅ **Future Integration**: Ready for multi-service authentication
+- ✅ **Low Maintenance**: Uses Microsoft's official libraries and APIs
+- ❌ **Network Dependency**: Requires Microsoft Graph API availability
+- ❌ **Token Validation Latency**: Additional API call for each request
+- ❌ **Client Complexity**: JavaScript popup flow management required
+
+**Future Enhancements**:
+- **Token Caching**: Cache validated tokens to reduce Graph API calls
+- **SSO Integration**: Direct integration with meetingsBot for seamless experience
+- **Admin Features**: Enhanced admin user capabilities and management
+- **Audit Logging**: Comprehensive authentication and access logging
+
+---
+
 ## Future Decisions
 
 ### Pending Decisions

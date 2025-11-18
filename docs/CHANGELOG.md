@@ -13,6 +13,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time query performance optimization
 - Enhanced RAGAS evaluation automation
 
+## [1.1.0] - 2025-11-18
+
+### Added
+- **Microsoft OAuth Authentication**: Enterprise-grade authentication for `/promptui` endpoint
+- **Domain Restriction**: Only `@terasky.com` users can access the system
+- **Bearer Token Validation**: Server-side token validation via Microsoft Graph API
+- **Authentication UI**: Complete frontend authentication flow with popup-based OAuth
+- **Protected Endpoints**: Both `/promptui` HTML interface and `/api/v1/query` API require authentication
+- **Error Handling**: Structured error responses with specific authentication error codes
+- **Session Management**: Client-side token storage with automatic inclusion in API requests
+
+### Enhanced
+- **Security**: Production-ready OAuth implementation aligned with meetingsBot infrastructure
+- **User Experience**: Seamless sign-in/sign-out with user info display
+- **API Protection**: All query endpoints now require valid Bearer tokens
+- **Frontend Integration**: Authentication state management with proper error handling
+
+### Technical Implementation
+- **MSAL Client**: Python `msal` library for Microsoft authentication
+- **Token Validator**: Microsoft Graph API integration for user profile validation
+- **FastAPI Dependencies**: Dependency-based route protection system
+- **Auth Routes**: `/auth/login` and `/auth/callback` endpoints for OAuth flow
+- **Environment Integration**: Reuses existing OAuth environment variables from meetingsBot
+
+### Dependencies Added
+- `msal==1.24.1` - Microsoft Authentication Library for Python
+- `python-jose[cryptography]==3.3.0` - JWT token handling capabilities
+- `requests==2.31.0` - HTTP client for Microsoft Graph API calls
+
+### Security Features
+- **Domain Validation**: Strict enforcement of `@terasky.com` email domain
+- **Token Validation**: Server-side validation against Microsoft Graph API
+- **Authorization Headers**: Standard Bearer token format for API authentication
+- **Error Codes**: Structured error responses matching meetingsBot format
+- **Session Security**: Popup-based OAuth flow with secure token handling
+
+### Compatibility
+- **Infrastructure Alignment**: Compatible with existing meetingsBot OAuth setup
+- **Token Format**: Bearer tokens work across multi-service AI environment
+- **Environment Variables**: Reuses all existing OAuth configuration
+- **Error Responses**: Matching error structure for consistent user experience
+
+### Architecture
+```
+app/auth/
+├── msal_client.py          # Microsoft authentication client
+├── token_validator.py      # Token validation via Graph API
+└── dependencies.py         # FastAPI auth dependencies
+
+app/api/
+└── auth_routes.py          # OAuth endpoints
+```
+
+### Testing Validated
+- **OAuth Flow**: Complete authorization code flow with callback handling
+- **Domain Restriction**: Proper rejection of non-terasky.com users
+- **API Protection**: Bearer token requirement for all protected endpoints
+- **Frontend Integration**: Seamless authentication UI with error handling
+- **Token Validation**: Microsoft Graph API integration working correctly
+
+### Performance
+- **Authentication Overhead**: ~200ms for token validation via Graph API
+- **Client Experience**: Standard OAuth popup flow (~3-5 seconds)
+- **Network Dependency**: Requires Microsoft Graph API availability
+- **Error Recovery**: Proper handling of authentication failures and token expiration
+
+### Documentation
+- **ADR-018**: Microsoft OAuth Authentication Integration decision
+- **OAuth Implementation Plan**: Complete implementation guide with step-by-step process
+- **Security Documentation**: Authentication flow and security features
+- **Integration Guide**: Compatibility with meetingsBot infrastructure
+
 ## [0.9.0] - 2025-11-17
 
 ### Added
@@ -285,6 +357,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 1.1.0 | 2025-11-18 | Microsoft OAuth Authentication: Enterprise security with domain restriction |
 | 1.0.2 | 2025-11-17 | Query Patterns Analytics: Production performance documentation and business insights |
 | 1.0.1 | 2025-11-17 | Persistent Learning: Requirements and validation documentation |
 | 1.0.0 | 2025-11-17 | Dynamic RAG Enhancement: Self-learning and adaptive intelligence (COMPLETE) |

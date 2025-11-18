@@ -24,6 +24,11 @@
         .metadata { font-size: 12px; color: #6b7280; margin-top: 5px; }
         .clear-btn { background: #ef4444; margin-left: 10px; }
         .clear-btn:hover { background: #dc2626; }
+        .auth-section { padding: 20px; text-align: center; }
+        .auth-btn { padding: 12px 24px; background: #059669; color: white; border: none; border-radius: 25px; cursor: pointer; margin: 10px; }
+        .auth-btn:hover { background: #047857; }
+        .user-info { background: #f3f4f6; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -33,7 +38,15 @@
             <p>Ask questions about clients, deals, products, and Teams meetings</p>
         </div>
         
-        <div class="chat-container" id="chatContainer">
+        <div id="authSection" class="auth-section">
+            <h2>Authentication Required</h2>
+            <p>Please sign in with your Microsoft 365 account to access the TSKB RAG system.</p>
+            <button id="signInBtn" class="auth-btn">Sign in with Microsoft 365</button>
+        </div>
+        
+        <div id="userInfo" class="user-info hidden"></div>
+        
+        <div class="chat-container hidden" id="chatContainer">
             <div class="message bot-message">
                 <div class="bot-bubble">
                     Welcome! I can help you query the TeraSky Knowledge Base. Try asking:
@@ -45,7 +58,7 @@
             </div>
         </div>
         
-        <div class="input-container">
+        <div class="input-container hidden" id="inputContainer">
             <input type="text" id="messageInput" class="input-field" placeholder="Ask about clients, deals, products, or meetings..." />
             <button id="sendBtn" class="send-btn">Send</button>
             <button id="clearBtn" class="send-btn clear-btn">Clear</button>
@@ -57,8 +70,82 @@
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const clearBtn = document.getElementById('clearBtn');
+        const authSection = document.getElementById('authSection');
+        const userInfo = document.getElementById('userInfo');
+        const inputContainer = document.getElementById('inputContainer');
+        const signInBtn = document.getElementById('signInBtn');
         
         let chatHistory = [];
+        let accessToken = null;
+        let currentUser = null;
+        
+        class AuthManager {
+            async signIn() {
+                try {
+                    const response = await fetch('/auth/login');
+                    const { authUrl } = await response.json();
+                    
+                    const popup = window.open(authUrl, 'msauth', 'width=600,height=700');
+                    
+                    return new Promise((resolve, reject) => {
+                        const messageHandler = (event) => {
+                            if (event.origin !== window.location.origin) return;
+                            
+                            if (event.data.success && event.data.accessToken) {
+                                accessToken = event.data.accessToken;
+                                currentUser = {
+                                    displayName: event.data.account.name,
+                                    email: event.data.account.username
+                                };
+                                window.removeEventListener('message', messageHandler);
+                                resolve(currentUser);
+                            } else if (event.data.error) {
+                                window.removeEventListener('message', messageHandler);
+                                reject(new Error(event.data.error));
+                            }
+                        };
+                        
+                        window.addEventListener('message', messageHandler);
+                        
+                        const checkClosed = setInterval(() => {
+                            if (popup.closed) {
+                                clearInterval(checkClosed);
+                                window.removeEventListener('message', messageHandler);
+                                reject(new Error('Authentication cancelled'));
+                            }
+                        }, 1000);
+                    });
+                } catch (error) {
+                    throw new Error(`Sign-in failed: ${error.message}`);
+                }
+            }
+            
+            signOut() {
+                accessToken = null;
+                currentUser = null;
+                updateUI();
+            }
+        }
+        
+        const authManager = new AuthManager();
+        
+        function updateUI() {
+            if (currentUser && accessToken) {
+                authSection.classList.add('hidden');
+                chatContainer.classList.remove('hidden');
+                inputContainer.classList.remove('hidden');
+                userInfo.classList.remove('hidden');
+                userInfo.innerHTML = `
+                    <span>Signed in as: ${currentUser.displayName} (${currentUser.email})</span>
+                    <button onclick="authManager.signOut()" style="margin-left: 10px; padding: 5px 10px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Sign Out</button>
+                `;
+            } else {
+                authSection.classList.remove('hidden');
+                chatContainer.classList.add('hidden');
+                inputContainer.classList.add('hidden');
+                userInfo.classList.add('hidden');
+            }
+        }
 
         function addMessage(content, isUser = false, metadata = null) {
             const messageDiv = document.createElement('div');
@@ -115,7 +202,10 @@
             try {
                 const response = await fetch('/api/v1/query', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
                     body: JSON.stringify({ query: message })
                 });
 
@@ -129,6 +219,9 @@
                         executionTime: data.execution_time ? data.execution_time.toFixed(2) : '0.00'
                     };
                     addMessage(data.answer, false, metadata);
+                } else if (response.status === 401) {
+                    addMessage('Authentication expired. Please sign in again.', false);
+                    authManager.signOut();
                 } else {
                     addMessage('Sorry, there was an error processing your request.', false);
                 }
@@ -155,11 +248,22 @@
         sendBtn.addEventListener('click', sendMessage);
         clearBtn.addEventListener('click', clearChat);
         
+        signInBtn.addEventListener('click', async () => {
+            try {
+                await authManager.signIn();
+                updateUI();
+                messageInput.focus();
+            } catch (error) {
+                alert('Sign-in failed: ' + error.message);
+            }
+        });
+        
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
         });
 
-        messageInput.focus();
+        // Initialize UI
+        updateUI();
     </script>
 </body>
 </html>
