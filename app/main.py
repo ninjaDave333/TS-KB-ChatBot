@@ -27,14 +27,21 @@ async def startup_event():
     ssl_cert = os.getenv("SSL_CERT_PATH", "/app/ssl/cert.pem")
     ssl_key = os.getenv("SSL_KEY_PATH", "/app/ssl/key.pem")
     
-    logger.info(f"Checking SSL certificates: {ssl_cert}, {ssl_key}")
+    print(f"\n=== SSL Certificate Check ===")
+    print(f"Cert path: {ssl_cert}")
+    print(f"Key path: {ssl_key}")
+    print(f"Cert exists: {os.path.exists(ssl_cert)}")
+    print(f"Key exists: {os.path.exists(ssl_key)}")
     
     if os.path.exists(ssl_cert) and os.path.exists(ssl_key):
-        logger.info("SSL certificates loaded successfully")
-        logger.info("SSL OK - HTTPS ready for OAuth compatibility")
+        print("✅ SSL certificates loaded successfully")
+        print("✅ SSL OK - HTTPS ready for OAuth compatibility")
+        logger.info("SSL certificates loaded successfully - OAuth ready")
     else:
-        logger.error(f"SSL certificates not found at {ssl_cert} and {ssl_key}")
-        logger.warning("OAuth will not work without HTTPS certificates")
+        print("❌ SSL certificates not found")
+        print("❌ OAuth will not work without HTTPS certificates")
+        logger.error(f"SSL certificates missing - OAuth disabled")
+    print(f"==============================\n")
 
 # Include API routes
 app.include_router(router, prefix="/api/v1")
@@ -49,11 +56,7 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "version": "1.1.0"}
-
-@app.get("/api/v1/health")
-async def api_health():
-    return {"status": "healthy", "version": "1.1.0"}
+    return {"status": "healthy", "version": "1.1.0", "ssl": "enabled" if os.path.exists("/app/ssl/cert.pem") else "disabled"}
 
 @app.get("/promptui")
 async def prompt_ui(user: dict = Depends(get_current_user)):
