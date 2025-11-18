@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional
-from ..auth.dependencies import get_current_user
+from ..auth.jwt_dependencies import get_jwt_user
 from app.database.neo4j_client import Neo4jClient
 from app.core.query_generator import QueryGenerator
 from app.core.enhanced_query_generator import EnhancedQueryGenerator
@@ -146,7 +146,7 @@ async def record_feedback(request: FeedbackRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/query", response_model=QueryResponse)
-async def process_query(request: QueryRequest, user: dict = Depends(get_current_user)):
+async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user)):
     start_time = time.time()
     try:
         # Get schema for AI context

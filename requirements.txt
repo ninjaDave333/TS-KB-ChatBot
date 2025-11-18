@@ -5,7 +5,10 @@ boto3>=1.34.0
 pydantic==2.5.0
 python-dotenv==1.0.0
 
-# OAuth Dependencies
+# JWT Dependencies (Centralized OAuth)
+PyJWT==2.8.0
+requests==2.31.0
+
+# OAuth Dependencies (Legacy - will be removed)
 msal==1.24.1
 python-jose[cryptography]==3.3.0
-requests==2.31.0

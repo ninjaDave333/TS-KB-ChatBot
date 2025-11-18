@@ -79,6 +79,44 @@
         let accessToken = null;
         let currentUser = null;
         
+        // Check for JWT token in URL params (from meetingsBot)
+        const urlParams = new URLSearchParams(window.location.search);
+        const authToken = urlParams.get('auth_token');
+        
+        if (authToken) {
+            // Store token and remove from URL
+            accessToken = authToken;
+            
+            // Clean URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // Validate token by making a test API call
+            validateTokenAndUpdateUI();
+        }
+        
+        async function validateTokenAndUpdateUI() {
+            try {
+                const response = await fetch('/health', {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                
+                if (response.ok) {
+                    currentUser = { displayName: "Authenticated User" };
+                    updateUI();
+                } else {
+                    // Token invalid, show auth screen
+                    accessToken = null;
+                    currentUser = null;
+                    updateUI();
+                }
+            } catch (error) {
+                // Token validation failed
+                accessToken = null;
+                currentUser = null;
+                updateUI();
+            }
+        }
+        
         class AuthManager {
             async signIn() {
                 try {
@@ -262,8 +300,10 @@
             if (e.key === 'Enter') sendMessage();
         });
 
-        // Initialize UI
-        updateUI();
+        // Initialize UI (unless JWT token was found)
+        if (!authToken) {
+            updateUI();
+        }
     </script>
 </body>
 </html>
