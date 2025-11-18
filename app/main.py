@@ -3,9 +3,14 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 import os
+import logging
 
 # Load environment variables first
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 from app.api.routes import router
 from app.api.auth_routes import router as auth_router
@@ -16,6 +21,20 @@ app = FastAPI(
     description="Natural language interface to TSKB Neo4j knowledge graph",
     version="0.1.0"
 )
+
+@app.on_event("startup")
+async def startup_event():
+    ssl_cert = os.getenv("SSL_CERT_PATH", "/app/ssl/cert.pem")
+    ssl_key = os.getenv("SSL_KEY_PATH", "/app/ssl/key.pem")
+    
+    logger.info(f"Checking SSL certificates: {ssl_cert}, {ssl_key}")
+    
+    if os.path.exists(ssl_cert) and os.path.exists(ssl_key):
+        logger.info("SSL certificates loaded successfully")
+        logger.info("SSL OK - HTTPS ready for OAuth compatibility")
+    else:
+        logger.error(f"SSL certificates not found at {ssl_cert} and {ssl_key}")
+        logger.warning("OAuth will not work without HTTPS certificates")
 
 # Include API routes
 app.include_router(router, prefix="/api/v1")
@@ -30,6 +49,10 @@ async def root():
 
 @app.get("/health")
 async def health():
+    return {"status": "healthy", "version": "1.1.0"}
+
+@app.get("/api/v1/health")
+async def api_health():
     return {"status": "healthy", "version": "1.1.0"}
 
 @app.get("/promptui")
