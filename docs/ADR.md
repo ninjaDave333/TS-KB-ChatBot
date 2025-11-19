@@ -348,6 +348,7 @@ WHERE o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'
 | 022 | Self-Improving RAG Engine Phase 2 LLM Abstraction | Implemented | High |
 | 023 | Self-Improving RAG Engine Phase 3 Multi-Model Support | Implemented | High |
 | 024 | Self-Improving RAG Engine Phase 4 Tracing & Evaluation | Implemented | Critical |
+| 025 | Self-Improving RAG Engine Phase 5 Evaluation Daemon | Implemented | High |
 
 ---
 
