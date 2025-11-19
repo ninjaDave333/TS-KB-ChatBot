@@ -1315,5 +1315,132 @@ result = await judge_answer(llm_client, question, answer, context)
 
 ---
 
+## ADR-025: Self-Improving RAG Engine - Phase 6 Config Auto-Tuning
+
+**Date**: 2025-11-19  
+**Status**: Implemented  
+**Context**: Need intelligent optimization of RAG configuration parameters based on evaluation results to automatically improve system performance
+
+**Decision**: Implement config auto-tuning system starting with retrieval limits per intent, with comprehensive safety guardrails
+
+**Problem Analysis**:
+- **Manual Tuning**: Configuration parameters required manual adjustment based on performance observations
+- **Performance Optimization**: No systematic approach to optimize retrieval limits based on evaluation data
+- **Operational Overhead**: Manual monitoring and adjustment of configuration parameters
+- **Data-Driven Decisions**: Need to leverage evaluation results for intelligent configuration optimization
+
+**Solution Architecture**:
+- **Tuning Engine**: Core logic for stats computation and suggestion generation (`app/monitoring/tuning.py`)
+- **CLI Runner**: Operational tooling with suggest-only and apply modes (`app/monitoring/tuning_runner.py`)
+- **Safety Guardrails**: Automatic backups, minimum evaluation counts, maximum limits
+- **Intelligent Rules**: Data-driven suggestions based on error rates and performance scores
+
+**Implementation Details**:
+```python
+# Core data models
+@dataclass
+class IntentStats:
+    intent: str
+    eval_count: int
+    avg_overall_score: float
+    avg_factual_correctness: float
+    avg_grounded_in_context: float
+    avg_helpfulness: float
+    error_type_distribution: Dict[str, float]
+
+@dataclass
+class TuningSuggestion:
+    intent: str
+    current_limit: int
+    suggested_limit: int
+    reason: str
+```
+
+**Tuning Rules Implemented**:
+- **Increase Limit**: When retrieval error ratio > 0.3 AND avg score < 7.5 AND current limit < max_limit
+- **Decrease Limit**: When retrieval error ratio < 0.1 AND avg score > 8.5 AND current limit > step
+- **No Change**: When performance is moderate or insufficient evaluation data
+
+**CLI Interface**:
+```bash
+# Generate suggestions (dry run)
+python -m app.monitoring.tuning_runner --suggest-only
+
+# Apply changes with automatic backup
+python -m app.monitoring.tuning_runner --apply
+
+# Custom parameters
+python -m app.monitoring.tuning_runner --apply --min-eval-count 15 --max-limit 40
+```
+
+**Safety Mechanisms**:
+- **Minimum Evaluation Count**: Default 10 evaluations required per intent
+- **Maximum Limits**: Configurable maximum retrieval limit (default: 50)
+- **Automatic Backups**: Timestamped config backups before any changes
+- **Guardrail Enforcement**: Never exceed limits, require sufficient data
+- **Change Logging**: Comprehensive audit trail of all modifications
+
+**Files Created**:
+- **Core Engine**: `app/monitoring/tuning.py` - Stats computation and suggestion logic
+- **CLI Runner**: `app/monitoring/tuning_runner.py` - Operational interface with safety features
+- **Comprehensive Tests**: `Tests/test_tuning.py` - 16/16 unit tests passing
+- **Documentation**: `docs/Self-ImprovingRAG/Phase6-Config-Auto-Tuning.md`
+
+**Testing Validation**:
+- **Unit Tests**: 16/16 tests passing with full coverage
+  - IntentStats and TuningSuggestion data models
+  - Stats computation from JSONL evaluation results
+  - Suggestion rules (increase/decrease/no-change logic)
+  - Configuration application with guardrails
+  - Error handling and edge cases
+- **CLI Interface**: Fully functional with help documentation
+- **Sample Data**: Tested with realistic evaluation data showing correct suggestions
+
+**Operational Features**:
+- **Suggest-Only Mode**: Generate JSON suggestions without applying changes
+- **Apply Mode**: Automatic backup and configuration modification
+- **Human-Readable Output**: Clear summaries of suggestions and rationale
+- **JSON Integration**: Machine-readable output for automation
+- **Comprehensive Logging**: Audit trail for all tuning operations
+
+**Sample Output**:
+```
+[TUNING] Generated 1 tuning suggestions:
+[INTENT] CLIENT_HISTORY
+   Current limit: 10
+   Suggested limit: 15
+   Reason: High retrieval error ratio (0.92) and low overall score (6.7)
+   Evaluations: 12
+   Avg score: 6.7
+   Retrieval errors: 91.7%
+```
+
+**Success Criteria Met**:
+- ✅ **Tuning Engine**: IntentStats and TuningSuggestion models with pure functions
+- ✅ **Stats Computation**: Accurate computation from evaluation results JSONL
+- ✅ **Suggestion Generation**: Intelligent rules with configurable parameters
+- ✅ **Suggest-Only Mode**: JSON output without configuration changes
+- ✅ **Apply Mode**: Automatic backups and safe configuration modification
+- ✅ **Comprehensive Testing**: 16/16 unit tests with full coverage
+- ✅ **CLI Interface**: Production-ready operational tooling
+- ✅ **Safety Guardrails**: Multiple layers of protection and validation
+
+**Consequences**:
+- ✅ **Automated Optimization**: Data-driven configuration improvements without manual intervention
+- ✅ **Production Safety**: Comprehensive backup and rollback capabilities
+- ✅ **Operational Tooling**: CLI interface ready for cron jobs and operational deployment
+- ✅ **Foundation for Expansion**: Easy extension to additional configuration parameters
+- ✅ **Audit Trail**: Complete logging and change tracking for compliance
+- ❌ **Configuration Complexity**: Additional tuning logic and parameters to maintain
+- ❌ **Evaluation Dependency**: Requires sufficient evaluation data for effective tuning
+
+**Future Capabilities**:
+- **Multi-Parameter Tuning**: Extend to temperature, top_k, and other model parameters
+- **A/B Testing**: Automated configuration experiments with performance comparison
+- **Rollback Automation**: Automatic rollback on performance degradation detection
+- **Advanced Algorithms**: Machine learning-based optimization beyond rule-based suggestions
+
+---
+
 **Last Updated**: 2025-11-19  
 **Next Review**: 2025-12-19
