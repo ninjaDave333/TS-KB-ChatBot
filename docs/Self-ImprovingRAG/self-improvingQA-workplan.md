@@ -54,6 +54,49 @@ The TSKB-RAG system has completed all 6 foundational Self-Improving RAG phases, 
 
 **Goal**: Leverage complete evaluation infrastructure to systematically improve query understanding and response accuracy
 
+### 7.0 Golden Dataset & Regression Suite ⭐ CRITICAL FOUNDATION
+**Priority**: HIGHEST | **Timeline**: Week 1 (Days 1-3)
+
+**Objective**: Create human-verified golden QA set for regression detection and version comparison
+- Small, high-quality, human-verified dataset for core use cases
+- Detect regressions from auto-tuning and configuration changes
+- Validate that improvements don't break existing functionality
+- Baseline for comparing versions and configurations
+
+**Implementation**:
+```python
+# Files to create:
+- tests/golden_qa/qa_set.yaml (curated QA pairs)
+- Tests/test_golden_regression.py (regression harness)
+- app/core/golden_validator.py (validation logic)
+```
+
+**Golden QA Structure**:
+```yaml
+# tests/golden_qa/qa_set.yaml
+golden_queries:
+  - id: "client_count_basic"
+    query: "How many clients do we have?"
+    intent: "count_query"
+    expected_entities: ["Client"]
+    min_judge_score: 8.5
+    critical_facts: ["total client count", "current data"]
+    
+  - id: "failed_opportunities_2025"
+    query: "How many failed opportunities were there in 2025?"
+    intent: "count_query"
+    expected_entities: ["failed_opportunities", "2025"]
+    min_judge_score: 9.0
+    critical_facts: ["865 failed opportunities", "2025 timeframe"]
+```
+
+**Success Metrics**:
+- Golden set covers all major intents (100% coverage)
+- All golden queries pass regression tests
+- Judge scores above defined thresholds
+- Intent classification 100% accurate on golden set
+- Run on every config change and nightly CI
+
 ### 7.1 Query Intent Classification Refinement
 **Priority**: HIGH | **Timeline**: Week 1-2
 
@@ -190,58 +233,167 @@ The TSKB-RAG system has completed all 6 foundational Self-Improving RAG phases, 
 - Improved helpfulness score >8.7
 - Reduced irrelevant information in responses
 
-## 📈 Phase 9: Real-Time Quality Monitoring
+## 📈 Phase 9: Real-Time Quality Monitoring & Governance
 
-**Goal**: Build comprehensive monitoring and alerting for quality metrics
+**Goal**: Build comprehensive monitoring, alerting, and quality governance for production RAG system
 
-### 9.1 Live Quality Dashboard
+### 9.1 Live Quality Dashboard + Meta-Observability
 **Priority**: MEDIUM | **Timeline**: Week 7-8
 
-**Objective**: Real-time quality metrics visualization
+**Objective**: Real-time quality metrics visualization with self-improvement monitoring
 - Build on Phase 5 evaluation daemon
 - Real-time quality metrics dashboard
 - Alert system for quality degradation
 - Performance trend analysis and reporting
+- **Meta-Observability**: Monitor the health of self-improvement machinery
+
+**Dashboard Sections**:
+1. **Query Quality Metrics**: Overall scores, error rates, intent performance
+2. **Self-Improvement Health**: 
+   - Config changes per week
+   - Pattern promotions/demotions
+   - Revert events and backup usage
+   - Intents with persistent low scores
+   - Oscillating configs (unstable tuning)
+3. **Judge Model Performance**: Throughput, error rates, calibration metrics
+4. **Cost & Latency Tracking**: Token usage, response times, cost per intent
 
 **Implementation**:
 ```python
 # Files to create/modify:
-- app/monitoring/quality_dashboard.py (metrics visualization)
-- app/monitoring/alert_system.py (quality alerts)
-- static/dashboard.html (web interface)
+- app/monitoring/quality_dashboard.py (comprehensive metrics)
+- app/monitoring/alert_system.py (quality + meta alerts)
+- app/monitoring/meta_observer.py (self-improvement health)
+- static/dashboard.html (multi-section interface)
 ```
 
-### 9.2 A/B Testing Framework
-**Priority**: LOW | **Timeline**: Week 8-9
+### 9.2 Evaluation Sampling Strategy + Judge Calibration
+**Priority**: MEDIUM | **Timeline**: Week 8
 
-**Objective**: Systematic testing of improvements
-- Parallel model comparison
-- Configuration variant testing
-- Statistical significance validation
-- Automated rollback on performance degradation
+**Objective**: Intelligent evaluation sampling and judge model reliability
 
-### 9.3 User Feedback Integration
+**Stratified Sampling Strategy**:
+- **Per-Intent Minimum Coverage**: Guarantee X evaluations per intent per week
+- **Rare Intent Prioritization**: Extra weight for low-frequency intents
+- **Change-Aware Sampling**: Prioritize recently tuned intents/configs
+- **Quality-Based Sampling**: Focus on historically low-scoring query types
+
+**Judge Model Calibration**:
+- Compare judge scores vs human labels on golden dataset
+- Track judge-human agreement rates over time
+- Optional dual-judge consistency checks for critical flows
+- Detect judge model drift and recalibration needs
+
+**Implementation**:
+```python
+# Files to create:
+- app/monitoring/sampling_strategy.py (intelligent sampling)
+- app/core/judge_calibration.py (reliability checks)
+- Tests/test_judge_calibration.py (validation)
+```
+
+### 9.3 A/B Testing Framework + Data/Schema Drift Monitoring
+**Priority**: MEDIUM | **Timeline**: Week 8-9
+
+**Objective**: Systematic testing with production safety monitoring
+
+**A/B Testing Framework**:
+- **Variant Definition**: Different prompts, retrieval limits, routing strategies
+- **Assignment Strategy**: By user ID, intent, or time window
+- **Success Metrics**: Judge scores, latency, cost, user feedback
+- **Statistical Significance**: Automated winner detection with confidence intervals
+
+**Data & Schema Drift Monitoring**:
+- **Neo4j Schema Monitoring**: Track label/property changes over time
+- **Cardinality Drift**: Monitor data distribution changes (new products, regions)
+- **Schema Sanity Tests**: Core Cypher queries that must remain valid
+- **Automated Alerts**: Trigger golden QA re-runs on schema changes
+
+**Implementation**:
+```python
+# Files to create:
+- app/monitoring/experiment_manager.py (A/B testing)
+- app/monitoring/schema_monitor.py (drift detection)
+- Tests/test_experiment_manager.py (validation)
+- Tests/test_schema_monitor.py (validation)
+```
+
+### 9.4 Human-in-the-Loop Integration + Runtime Safety
 **Priority**: LOW | **Timeline**: Week 9-10
 
-**Objective**: Close the feedback loop with user behavior
-- Implicit feedback from query patterns
-- Explicit quality ratings integration
-- Continuous learning from user behavior
+**Objective**: Close feedback loop with safety guardrails
+
+**Human Feedback Hooks**:
+- **Answer Quality Feedback**: "Mark as wrong/great" with trace_id mapping
+- **Canonical Answer Pinning**: Human-verified answers for specific queries
+- **Golden Dataset Contribution**: Feed high-quality human feedback into golden set
+
+**Runtime Safety Guardrails**:
+- **Low Confidence Handling**: When factual_correctness < threshold:
+  - Add confidence hedging: "I'm not fully confident..."
+  - Show raw data more literally
+  - Avoid speculation and extrapolation
+- **Intent-Specific Safety**: Conservative behavior for high-error intents
+
+**Implementation**:
+```python
+# Files to create:
+- app/api/feedback_routes.py (feedback endpoints)
+- app/core/feedback_store.py (feedback persistence)
+- app/core/answer_safety.py (runtime guardrails)
+- Tests/test_feedback_flow.py (validation)
+```
 
 ## 🧠 Phase 10: Advanced Self-Learning
 
 **Goal**: Fully automated quality enhancement and continuous improvement
 
-### 10.1 Pattern Recognition & Learning
+### 10.1 Pattern Recognition & Learning + Pattern Library Management
 **Priority**: FUTURE | **Timeline**: Week 10+
 
-**Objective**: Identify and learn from successful patterns
+**Objective**: Identify and learn from successful patterns with intelligent lifecycle management
 - Success pattern extraction from high-scoring traces
 - Failure pattern analysis from low-scoring traces
 - Automatic prompt optimization
 - Self-improving query understanding
 
-### 10.2 Dynamic Model Selection
+**Pattern Library Quality Management**:
+- **Pattern Metrics Tracking**: Track per-pattern performance metrics
+  ```json
+  {
+    "pattern_id": "vendor_count_basic",
+    "eval_count": 45,
+    "avg_overall_score": 8.7,
+    "retrieval_error_ratio": 0.05,
+    "usage_count": 156,
+    "production_optimized": true
+  }
+  ```
+
+- **Pattern Promotion Policy**: Promote to production only when:
+  - eval_count >= 20
+  - avg_overall_score >= 8.5
+  - retrieval_error_ratio < 0.1
+
+- **Pattern Demotion/Retirement**: When patterns show:
+  - Persistent low scores over 50+ evaluations
+  - High semantic mismatch between examples and actual usage
+  - Overly broad matching (absorbing unrelated queries)
+
+- **Pattern Cleanup & Optimization**:
+  - Merge near-duplicate patterns automatically
+  - Split overly broad patterns by adding temporal/entity features
+  - Deduplication based on semantic similarity
+
+**Implementation**:
+```python
+# Files to create:
+- app/core/pattern_manager.py (lifecycle management)
+- app/core/pattern_quality.py (metrics and scoring)
+- Tests/test_pattern_quality.py (validation)
+```
+
+### 10.2 Dynamic Model Selection + Cost/Latency Optimization
 **Priority**: FUTURE | **Timeline**: Week 11+
 
 **Objective**: Intelligent model routing
@@ -261,11 +413,17 @@ The TSKB-RAG system has completed all 6 foundational Self-Improving RAG phases, 
 
 ## 🎯 Immediate Action Plan (Next 2 Weeks)
 
-### Week 1: Quality Analysis & Intent Refinement
-1. **Day 1-2**: Run comprehensive evaluation on existing traces
+### Week 1: Golden Dataset & Quality Analysis
+1. **Day 1-3**: Create Golden Dataset & Regression Suite (Phase 7.0)
+   - Curate 20-30 high-quality QA pairs covering all intents
+   - Implement regression test harness
+   - Establish baseline scores for golden set
+   
+2. **Day 4-5**: Run comprehensive evaluation on existing traces
    ```bash
    python -m app.monitoring.eval_runner --max-traces 500
    python Tests/evaluate_traces.py --summary
+   python Tests/test_golden_regression.py  # New golden set validation
    ```
 
 2. **Day 3-4**: Analyze evaluation results for quality patterns
@@ -308,11 +466,20 @@ The TSKB-RAG system has completed all 6 foundational Self-Improving RAG phases, 
 - **Missing Knowledge**: <15%
 - **No Errors**: >70%
 
-### Performance Metrics
-- **Query Response Time**: <3 seconds average
+### Performance & Cost Metrics (Multi-Objective Optimization)
+- **Query Response Time**: <3 seconds average, <5 seconds p95
+- **LLM Token Usage**: Track and optimize per intent
+- **Cost per Query**: Minimize while maintaining quality thresholds
 - **Intent Classification Accuracy**: >95%
 - **Multi-part Query Completion**: >90%
 - **User Satisfaction**: >8.0/10 (when feedback system implemented)
+
+### Quality Governance Metrics
+- **Golden Dataset Regression**: 0% failures on core use cases
+- **Judge-Human Agreement**: >85% on calibration set
+- **Pattern Quality**: >80% of patterns meet promotion criteria
+- **Schema Drift Detection**: <24 hour alert response time
+- **A/B Test Confidence**: >95% statistical significance for changes
 
 ## 🛠 Tools & Infrastructure
 
@@ -327,6 +494,27 @@ python Tests/evaluate_traces.py --summary
 python Tests/test_llm_integration.py
 python Tests/test_tracing.py
 python Tests/test_evaluation.py
+```
+
+### New Tools (To Be Implemented)
+```bash
+# Golden dataset and regression testing
+python Tests/test_golden_regression.py
+python Tests/create_golden_dataset.py --from-traces --top-scoring
+
+# Advanced monitoring and governance
+python -m app.monitoring.sampling_strategy --stratified --intent-coverage
+python -m app.monitoring.judge_calibration --compare-human-labels
+python -m app.monitoring.schema_monitor --detect-drift
+python -m app.monitoring.experiment_manager --create-variant
+
+# Pattern library management
+python -m app.core.pattern_manager --promote --demote --cleanup
+python Tests/test_pattern_quality.py
+
+# Human feedback and safety
+python -m app.api.feedback_routes --export-canonical-answers
+python Tests/test_answer_safety.py
 ```
 
 ### Data Sources
@@ -357,12 +545,16 @@ As improvements are implemented, update:
 
 ## 🔄 Continuous Improvement Process
 
-1. **Weekly Evaluation**: Run comprehensive evaluation on production traces
-2. **Quality Review**: Analyze metrics trends and identify degradation
-3. **Targeted Improvements**: Focus on lowest-performing areas
-4. **A/B Testing**: Validate improvements before full deployment
-5. **Auto-Tuning**: Let the system optimize configuration parameters
-6. **Documentation**: Keep all docs updated with changes and learnings
+1. **Daily Golden Set Validation**: Ensure core functionality remains intact
+2. **Weekly Comprehensive Evaluation**: Run stratified sampling on production traces
+3. **Quality & Meta-Health Review**: Analyze metrics trends and self-improvement health
+4. **Judge Calibration Checks**: Validate judge model reliability monthly
+5. **Targeted Improvements**: Focus on lowest-performing areas with A/B testing
+6. **Pattern Library Maintenance**: Promote/demote patterns based on performance
+7. **Schema Drift Monitoring**: Detect and respond to data/schema changes
+8. **Auto-Tuning with Safety**: Let system optimize with golden set validation
+9. **Human Feedback Integration**: Incorporate user feedback into golden dataset
+10. **Documentation & Audit Trail**: Maintain complete change history and learnings
 
 ---
 
@@ -376,6 +568,8 @@ As improvements are implemented, update:
 4. **Implement incrementally**: Small, measurable improvements with validation
 5. **Leverage infrastructure**: Use existing tracing, evaluation, and auto-tuning systems
 
-**Current Priority**: Phase 7.1 (Intent Classification Refinement) - Start here for immediate impact on query quality.
+**Current Priority**: Phase 7.0 (Golden Dataset & Regression Suite) - Critical foundation that must be implemented first to ensure safe, measurable improvements.
+
+**Next Priority**: Phase 7.1 (Intent Classification Refinement) - Build on golden dataset foundation for immediate query quality impact.
 
 The system is production-ready with comprehensive evaluation infrastructure. Focus on data-driven improvements using the judge model feedback and auto-tuning capabilities already in place.
