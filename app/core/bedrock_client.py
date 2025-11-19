@@ -9,7 +9,7 @@ class BedrockClient:
         self.llm_client = llm_client or LLMClient()
         print(f"BedrockClient initialized with LLMClient")
     
-    async def generate_cypher(self, user_query: str, schema: Dict[str, Any]) -> str:
+    async def generate_cypher(self, user_query: str, schema: Dict[str, Any], trace=None) -> str:
         """Build prompt and use LLMClient to generate Cypher queries"""
         
         if not self.llm_client:
@@ -104,8 +104,18 @@ Cypher:"""
         try:
             system_prompt = "You are a precise Cypher query generator. Generate ONLY valid Cypher syntax. Do NOT add explanations. MUST include ALL filters from user query. For 'non-X vendor' use: WHERE NOT toLower(p.vendor) CONTAINS 'x'. Return ALL requested fields. For Teams Recording queries: Use exact patterns provided. External meetings: size(c.externalParticipants) > 0. Employee activity: combine OWNER_OF + INVITED_TO relationships. Date filtering: use c.startTime for meetings, r.createdDateTime for recordings."
             
-            # Use LLMClient for actual model call
-            cypher_query = await self.llm_client.complete(system_prompt, prompt, max_tokens=4096)
+            # Record prompts in trace if available
+            if trace:
+                trace.prompt_system = system_prompt
+                trace.prompt_user = prompt
+                trace.llm_model_role = "primary"
+                # Get model ID from config
+                from .config import get_model_config
+                model_config = get_model_config("primary")
+                trace.llm_model_id = model_config.get("model_id", "unknown")
+            
+            # Use LLMClient for actual model call with primary role
+            cypher_query = await self.llm_client.complete(system_prompt, prompt, role="primary", max_tokens=4096)
             
             # Extract only the Cypher query - keep all lines, just clean up
             lines = cypher_query.split('\n')

@@ -12,6 +12,7 @@ from app.core.query_validator import CypherValidator
 from app.core.answer_generator import AnswerGenerator
 from app.core.performance_monitor import performance_monitor
 from app.core.config import get_rag_config
+from app.core.tracing import new_trace, safe_write_trace
 import time
 
 router = APIRouter()
@@ -152,6 +153,10 @@ async def record_feedback(request: FeedbackRequest):
 @router.post("/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user)):
     start_time = time.time()
+    
+    # Initialize tracing
+    trace = new_trace(intent=None, use_ai=request.use_ai, routing_path=None)
+    
     try:
         # Get schema for AI context
         schema = neo4j_client.get_schema()
@@ -174,7 +179,7 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
                     print(f"Using learned pattern: {cypher_query}")
                 else:
                     # Fall back to AI generation
-                    cypher_query = await bedrock_client.generate_cypher(request.query, schema)
+                    cypher_query = await bedrock_client.generate_cypher(request.query, schema, trace)
                     print(f"AI generated successfully: {cypher_query}")
                     method = "ai_generated"
             except Exception as e:
@@ -215,9 +220,19 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
             # Continue with original query if validation fails
             pass
         
+        # Record Cypher in trace
+        trace.cypher_query = cypher_query
+        trace.cypher_params = {}  # No params in current implementation
+        
         # Execute query
         try:
             result = neo4j_client.execute_query(cypher_query)
+            
+            # Record Neo4j result summary in trace
+            trace.neo4j_result_summary = {
+                "record_count": len(result),
+                "has_data": len(result) > 0
+            }
         except Exception as e:
             # If execution still fails, try one more fallback
             if method != "validation_fallback":
@@ -234,6 +249,10 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
         
         # Generate natural language answer
         answer = answer_generator.generate_answer(request.query, cypher_query, result)
+        
+        # Record routing path in trace
+        trace.routing_path = method
+        trace.intent = answer_generator._detect_query_type(request.query)
         
         # Record performance metrics
         execution_time = time.time() - start_time
@@ -257,6 +276,10 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
                 execution_time=execution_time,
                 data_count=len(result)
             )
+        
+        # Complete trace before returning
+        trace.final_answer = answer
+        safe_write_trace(trace)
         
         return QueryResponse(
             query=request.query,

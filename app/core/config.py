@@ -16,6 +16,20 @@ def get_rag_config() -> Dict[str, Any]:
         'routing': {
             'learned_pattern_threshold': 0.8,
             'fallback_order': ['ai', 'enhanced', 'traditional']
+        },
+        'models': {
+            'primary': {
+                'provider': 'bedrock',
+                'model_id': 'us.anthropic.claude-sonnet-4-20250514-v1:0',
+                'max_tokens': 4000,
+                'temperature': 0.3
+            },
+            'judge': {
+                'provider': 'bedrock',
+                'model_id': 'us.anthropic.claude-sonnet-4-20250514-v1:0',
+                'max_tokens': 2000,
+                'temperature': 0.0
+            }
         }
     }
     
@@ -27,3 +41,29 @@ def get_rag_config() -> Dict[str, Any]:
         print(f"Warning: Could not load RAG config from {config_path}: {e}")
         print("Using default configuration")
         return default_config
+
+def get_model_config(role: str = "primary") -> Dict[str, Any]:
+    """
+    Get model configuration for a specific role.
+    Falls back to primary model if role not found.
+    """
+    config = get_rag_config()
+    
+    # Default model configurations
+    default_models = {
+        'primary': {
+            'provider': 'bedrock',
+            'model_id': 'us.anthropic.claude-sonnet-4-20250514-v1:0',
+            'max_tokens': 4000,
+            'temperature': 0.3
+        },
+        'judge': {
+            'provider': 'bedrock',
+            'model_id': 'us.anthropic.claude-sonnet-4-20250514-v1:0',
+            'max_tokens': 2000,
+            'temperature': 0.0
+        }
+    }
+    
+    models = config.get('models', default_models)
+    return models.get(role, models.get('primary', default_models['primary']))

@@ -41,7 +41,14 @@ async def test_integration():
         assert len(cypher_query.strip()) > 0
         assert "MATCH" in cypher_query.upper() or "RETURN" in cypher_query.upper()
         
-        print("✅ Integration test passed - BedrockClient generates valid Cypher via LLMClient")
+        print("Integration test passed - BedrockClient generates valid Cypher via LLMClient with primary role")
+        
+        # Test that judge model path exists (even if not used in production)
+        from app.core.judge_client import judge_answer
+        judge_result = await judge_answer(llm_client, test_query, "Sample answer", "Sample context")
+        assert judge_result is not None
+        assert 'status' in judge_result
+        print(f"Judge model path verified - status: {judge_result['status']}")
         
         # Test that we can execute the query (optional)
         try:
@@ -53,15 +60,13 @@ async def test_integration():
         return True
         
     except Exception as e:
-        print(f"❌ Integration test failed: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"Integration test failed: {e}")
         return False
 
 if __name__ == "__main__":
     success = asyncio.run(test_integration())
     if success:
-        print("✅ All integration tests passed!")
+        print("All integration tests passed!")
     else:
-        print("❌ Integration tests failed!")
+        print("Integration tests failed!")
         sys.exit(1)
