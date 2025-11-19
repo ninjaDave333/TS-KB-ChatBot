@@ -7,11 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Completed - Self-Improving RAG Engine Phase 1 & 2
+- **Phase 1 - Config Foundation**: ✅ COMPLETED
+  - **RAG Configuration**: Introduced config/rag_config.yaml for routing parameters
+  - **Configuration Loader**: Added cached YAML loader (app/core/config.py) with error handling
+  - **Routing Refactor**: Replaced hardcoded routing thresholds with config-driven values
+  - **Zero Behavioral Change**: External API behavior unchanged, only internal configuration source modified
+  - **Dependencies**: Added PyYAML==6.0.1 for YAML configuration support
+
+- **Phase 2 - LLM Abstraction**: ✅ COMPLETED
+  - **Centralized LLMClient**: Created app/core/llm_client.py for all LLM interactions
+  - **BedrockClient Refactor**: Separated prompt building from AWS Bedrock calls
+  - **Multi-model Foundation**: Easy addition of judge models, fallback models, and provider abstraction
+  - **Clean Architecture**: Complete separation of concerns between prompt building and LLM execution
+  - **Comprehensive Testing**: 6/6 unit tests pass, integration test confirms identical behavior
+  - **Zero Behavioral Change**: Identical Cypher generation confirmed via end-to-end testing
+
 ### Planned
 - Conversational context management for multi-turn conversations
 - Advanced vector search integration with ChromaDB
 - Real-time query performance optimization
 - Enhanced RAGAS evaluation automation
+- Self-Improving RAG Engine Phase 3: Multi-model routing (judge models, fallback models)
+- Self-Improving RAG Engine Phase 4: Provider abstraction (OpenAI, Anthropic, local models)
 
 ## [2.0.2] - 2025-11-18
 

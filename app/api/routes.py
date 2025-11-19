@@ -7,9 +7,11 @@ from app.core.query_generator import QueryGenerator
 from app.core.enhanced_query_generator import EnhancedQueryGenerator
 from app.core.production_learning_loader import ProductionLearningLoader
 from app.core.bedrock_client import BedrockClient
+from app.core.llm_client import LLMClient
 from app.core.query_validator import CypherValidator
 from app.core.answer_generator import AnswerGenerator
 from app.core.performance_monitor import performance_monitor
+from app.core.config import get_rag_config
 import time
 
 router = APIRouter()
@@ -20,7 +22,9 @@ enhanced_generator = EnhancedQueryGenerator()
 # Load production learning patterns
 ProductionLearningLoader.load_production_patterns(enhanced_generator)
 
-bedrock_client = BedrockClient()
+# Initialize LLMClient and BedrockClient
+llm_client = LLMClient()
+bedrock_client = BedrockClient(llm_client)
 query_validator = CypherValidator()
 answer_generator = AnswerGenerator()
 
@@ -160,13 +164,17 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
                 # First try enhanced generator with learning
                 enhanced_result = enhanced_generator.generate_cypher_with_learning(request.query)
                 
-                if enhanced_result['method'] == 'learned_pattern' and enhanced_result['confidence'] > 0.8:
+                # Get routing configuration
+                config = get_rag_config()
+                learned_threshold = config['routing']['learned_pattern_threshold']
+                
+                if enhanced_result['method'] == 'learned_pattern' and enhanced_result['confidence'] > learned_threshold:
                     cypher_query = enhanced_result['cypher']
                     method = f"learned_pattern (confidence: {enhanced_result['confidence']:.2f})"
                     print(f"Using learned pattern: {cypher_query}")
                 else:
                     # Fall back to AI generation
-                    cypher_query = bedrock_client.generate_cypher(request.query, schema)
+                    cypher_query = await bedrock_client.generate_cypher(request.query, schema)
                     print(f"AI generated successfully: {cypher_query}")
                     method = "ai_generated"
             except Exception as e:

@@ -1,26 +1,19 @@
-import boto3
-import json
 import re
-import os
 from typing import Dict, Any
 from .schema_descriptions import SCHEMA_DESCRIPTIONS
+from .llm_client import LLMClient
 
 class BedrockClient:
-    def __init__(self):
-        try:
-            self.client = boto3.client('bedrock-runtime', region_name='us-east-1')
-            self.model_id = os.getenv('AWS_BEDROCK_MODEL_ID', 'us.anthropic.claude-3-5-haiku-20241022-v1:0')
-            print(f"Bedrock client initialized with model: {self.model_id}")
-        except Exception as e:
-            print(f"Bedrock client initialization failed: {e}")
-            self.client = None
-            self.model_id = None
+    def __init__(self, llm_client: LLMClient = None):
+        """Initialize with LLMClient for actual model calls."""
+        self.llm_client = llm_client or LLMClient()
+        print(f"BedrockClient initialized with LLMClient")
     
-    def generate_cypher(self, user_query: str, schema: Dict[str, Any]) -> str:
-        """Use Claude to generate Cypher queries"""
+    async def generate_cypher(self, user_query: str, schema: Dict[str, Any]) -> str:
+        """Build prompt and use LLMClient to generate Cypher queries"""
         
-        if not self.client:
-            raise Exception("Bedrock client not initialized")
+        if not self.llm_client:
+            raise Exception("LLMClient not initialized")
         
         # Build enhanced prompt with schema descriptions
         nodes_desc = "\n".join([f"- {name}: {info['purpose']} (key: {info['name_field']})" 
@@ -109,25 +102,10 @@ MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Close
 Cypher:"""
 
         try:
-            body = {
-                "anthropic_version": "bedrock-2023-05-31",
-                "max_tokens": 4096,  # Maximum allowed by Claude
-                "system": "You are a precise Cypher query generator. Generate ONLY valid Cypher syntax. Do NOT add explanations. MUST include ALL filters from user query. For 'non-X vendor' use: WHERE NOT toLower(p.vendor) CONTAINS 'x'. Return ALL requested fields. For Teams Recording queries: Use exact patterns provided. External meetings: size(c.externalParticipants) > 0. Employee activity: combine OWNER_OF + INVITED_TO relationships. Date filtering: use c.startTime for meetings, r.createdDateTime for recordings.",
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
-            }
+            system_prompt = "You are a precise Cypher query generator. Generate ONLY valid Cypher syntax. Do NOT add explanations. MUST include ALL filters from user query. For 'non-X vendor' use: WHERE NOT toLower(p.vendor) CONTAINS 'x'. Return ALL requested fields. For Teams Recording queries: Use exact patterns provided. External meetings: size(c.externalParticipants) > 0. Employee activity: combine OWNER_OF + INVITED_TO relationships. Date filtering: use c.startTime for meetings, r.createdDateTime for recordings."
             
-            response = self.client.invoke_model(
-                modelId=self.model_id,
-                body=json.dumps(body)
-            )
-            
-            result = json.loads(response['body'].read())
-            cypher_query = result['content'][0]['text'].strip()
+            # Use LLMClient for actual model call
+            cypher_query = await self.llm_client.complete(system_prompt, prompt, max_tokens=4096)
             
             # Extract only the Cypher query - keep all lines, just clean up
             lines = cypher_query.split('\n')

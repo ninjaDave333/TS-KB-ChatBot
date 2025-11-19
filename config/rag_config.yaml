@@ -1,0 +1,6 @@
+routing:
+  learned_pattern_threshold: 0.8
+  fallback_order:
+    - "ai"
+    - "enhanced"
+    - "traditional"

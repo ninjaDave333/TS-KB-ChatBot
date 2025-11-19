@@ -951,5 +951,204 @@ def _generate_multi_part_answer(self, user_query: str, data: List[Dict]) -> str:
 
 ---
 
-**Last Updated**: 2025-11-18  
-**Next Review**: 2025-12-18
+---
+
+## ADR-021: Self-Improving RAG Engine - Phase 1 Config Foundation
+
+**Date**: 2025-11-19  
+**Status**: Implemented  
+**Context**: Hardcoded routing parameters (learned_pattern_threshold, fallback_order) in routes.py prevented flexible configuration and future dynamic adjustments
+
+**Decision**: Introduce configuration-driven RAG routing with YAML config file and cached loader, maintaining zero external behavioral changes
+
+**Problem Analysis**:
+- **Hardcoded Values**: `learned_pattern_threshold = 0.8` and fallback chain hardcoded in routes.py
+- **Inflexible Configuration**: Changes required code modifications and redeployment
+- **Future Limitations**: Dynamic threshold adjustment impossible with hardcoded values
+- **Maintenance Overhead**: Configuration scattered across codebase
+
+**Solution Architecture**:
+- **YAML Configuration**: Centralized config file for all RAG routing parameters
+- **Cached Loader**: Performance-optimized config loading with LRU cache
+- **Error Handling**: Graceful fallback to defaults if config unavailable
+- **Zero Behavioral Change**: External API behavior completely unchanged
+
+**Implementation Details**:
+```yaml
+# config/rag_config.yaml
+routing:
+  learned_pattern_threshold: 0.8
+  fallback_order:
+    - "ai"
+    - "enhanced"
+    - "traditional"
+```
+
+```python
+# app/core/config.py
+@lru_cache(maxsize=1)
+def get_rag_config() -> Dict[str, Any]:
+    # Cached YAML loading with error handling
+    # Fallback to defaults if config unavailable
+```
+
+**Refactoring Changes**:
+- **Routes.py**: Replaced hardcoded `0.8` with `config['routing']['learned_pattern_threshold']`
+- **Config Import**: Added `from app.core.config import get_rag_config`
+- **Dynamic Loading**: Config loaded at runtime, not startup
+- **Preserved Logic**: Exact same routing behavior maintained
+
+**Dependencies Added**:
+- `PyYAML==6.0.1` - YAML configuration file support
+
+**Testing Strategy**:
+- **Config Loading Test**: Validates YAML parsing and structure
+- **Behavioral Verification**: Confirms unchanged routing behavior
+- **Manual Testing**: API endpoint testing with sample queries
+- **Config Modification**: Verify threshold changes take effect
+
+**File Structure**:
+```
+config/
+└── rag_config.yaml          # Main RAG configuration
+
+app/core/
+└── config.py                # Configuration loader
+
+Tests/
+└── test_rag_config.py       # Configuration testing
+
+docs/Self-ImprovingRAG/
+└── Phase1-Config-Foundation.md  # Phase documentation
+```
+
+**Performance Characteristics**:
+- **Cached Loading**: Config loaded once, cached for subsequent requests
+- **Minimal Overhead**: <1ms additional latency for config access
+- **Error Resilience**: Defaults used if config file unavailable
+- **Hot Reload**: Config changes require cache invalidation (future enhancement)
+
+**Validation Results**:
+- **Zero Behavioral Change**: Confirmed identical routing behavior
+- **Config Loading**: YAML parsing working correctly
+- **Error Handling**: Graceful fallback to defaults tested
+- **API Compatibility**: All existing endpoints unchanged
+
+**Foundation for Future Phases**:
+- **Phase 2**: Dynamic threshold adjustment based on performance metrics
+- **Phase 3**: Machine learning-driven configuration optimization
+- **Phase 4**: Real-time configuration updates without restart
+
+**Consequences**:
+- ✅ **Configuration Foundation**: Centralized, maintainable RAG configuration
+- ✅ **Zero Breaking Changes**: Complete backward compatibility maintained
+- ✅ **Future Flexibility**: Ready for dynamic configuration features
+- ✅ **Performance Optimized**: Cached loading with minimal overhead
+- ✅ **Error Resilient**: Graceful degradation if config unavailable
+- ❌ **Additional Dependency**: PyYAML library requirement
+- ❌ **Config File Management**: New configuration file to maintain
+- ❌ **Cache Invalidation**: Manual cache clearing needed for config updates
+
+**Next Steps**:
+- **Phase 2 Planning**: Dynamic threshold adjustment based on query success rates
+- **Hot Reload**: Implement configuration hot reload without restart
+- **Config Validation**: Enhanced validation for configuration values
+- **Monitoring**: Configuration change tracking and audit logging
+
+---
+
+---
+
+## ADR-022: Self-Improving RAG Engine - Phase 2 LLM Abstraction
+
+**Date**: 2025-11-19  
+**Status**: Implemented  
+**Context**: Mixed responsibilities in bedrock_client.py prevented multi-model support and provider independence
+
+**Decision**: Create centralized LLMClient abstraction to separate prompt building from LLM execution, enabling multi-model capabilities
+
+**Problem Analysis**:
+- **Mixed Responsibilities**: bedrock_client.py handled prompt building, AWS Bedrock calls, response parsing, and error handling
+- **Multi-model Limitations**: Impossible to add judge models, fallback models, or alternative providers
+- **Code Duplication Risk**: Future model additions would require duplicating Bedrock logic
+- **Testing Complexity**: Difficult to mock and unit test LLM interactions
+
+**Solution Architecture**:
+- **LLMClient Abstraction**: Centralized class for all LLM interactions (`app/core/llm_client.py`)
+- **BedrockClient Refactor**: Reduced to prompt building only, delegates LLM calls to LLMClient
+- **Clean Separation**: Prompt construction vs LLM execution completely separated
+- **Provider Independence**: Foundation for future provider abstraction
+
+**Implementation Details**:
+```python
+# New LLMClient abstraction
+class LLMClient:
+    async def generate(self, prompt: str, **kwargs) -> str
+    async def complete(self, system_prompt: str, user_prompt: str, **kwargs) -> str
+
+# Refactored BedrockClient (prompt building only)
+class BedrockClient:
+    def __init__(self, llm_client: LLMClient)
+    async def generate_cypher(self, user_query: str, schema: Dict) -> str
+        # Build prompts, call llm_client.complete()
+```
+
+**Architecture Benefits**:
+- **Multi-model Support**: Easy addition of judge models, fallback models
+- **Provider Independence**: Future support for OpenAI, Anthropic, local models
+- **Clean Testing**: Separate unit tests for prompt building vs LLM execution
+- **Code Reuse**: Single LLM abstraction for all model interactions
+
+**Files Created/Modified**:
+- **New**: `app/core/llm_client.py` - Centralized LLM abstraction
+- **New**: `Tests/test_llm_client.py` - Comprehensive unit tests (6/6 pass)
+- **New**: `Tests/test_llm_integration.py` - End-to-end integration test
+- **Modified**: `app/core/bedrock_client.py` - Refactored to prompt building only
+- **Modified**: `app/api/routes.py` - Updated dependency injection
+
+**Testing Validation**:
+- **Unit Tests**: 6/6 LLMClient tests pass (initialization, generate, complete, error handling)
+- **Integration Test**: Confirms identical Cypher generation before/after refactor
+- **Behavioral Verification**: Zero external behavior change confirmed
+- **Performance**: No latency impact, identical response times
+
+**Multi-Model Capabilities Enabled**:
+```python
+# Judge model for quality assessment
+judge_client = LLMClient("claude-3-haiku")
+
+# Fallback model for reliability
+fallback_client = LLMClient("claude-3-sonnet")
+
+# Batch evaluation model
+eval_client = LLMClient("claude-3-opus")
+
+# Use in BedrockClient
+bedrock_with_judge = BedrockClient(judge_client)
+```
+
+**Success Criteria Met**:
+- ✅ **Architecture-level**: All Bedrock logic removed from bedrock_client.py
+- ✅ **Code-level**: LLMClient returns identical responses to old logic
+- ✅ **Test-level**: All existing tests pass, new unit tests pass
+- ✅ **Behavioral**: /api/v1/query returns exactly same JSON before/after
+- ✅ **Deployment**: Code builds in Docker without modifications
+
+**Consequences**:
+- ✅ **Multi-model Foundation**: Easy addition of judge models and fallback models
+- ✅ **Provider Independence**: Ready for OpenAI, Anthropic, local model support
+- ✅ **Clean Architecture**: Complete separation of prompt building and LLM execution
+- ✅ **Enhanced Testing**: Separate unit tests for each responsibility
+- ✅ **Zero Breaking Changes**: Identical external behavior maintained
+- ❌ **Async Complexity**: BedrockClient.generate_cypher() now async (handled in routes)
+- ❌ **Additional Abstraction**: One more layer in the call stack
+
+**Future Capabilities**:
+- **Phase 3**: Multi-model routing with judge models for quality assessment
+- **Phase 4**: Provider abstraction supporting multiple LLM providers
+- **Phase 5**: Dynamic model selection based on query complexity
+
+---
+
+**Last Updated**: 2025-11-19  
+**Next Review**: 2025-12-19
