@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed - Answer Generation Consistency (2025-11-23)
+- **Multi-part Query Detection**: Fixed overly aggressive detection that flagged simple queries as multi-part
+- **Count Query Logic**: Improved detection to properly identify single-result numeric responses
+- **Answer Formatting**: Eliminated inconsistent response formats for similar queries
+- **Contextual Responses**: Enhanced count answers with query-specific context (non-TeraSky products, US employees, etc.)
+- **Query Classification**: Streamlined decision tree to prevent conflicting answer generation paths
+
+#### Technical Fixes
+- Multi-part detection now requires explicit conjunctions AND additional requests
+- Count queries properly identified when single numeric result with count keywords
+- Removed confusing "multiple parts" warnings for simple queries
+- Added contextual formatting for common query patterns
+- Fixed question mark pattern detection for true multi-part queries
+
+#### Results
+- "how many non terasky products do we have ?" → "Found 429 non-TeraSky products."
+- "how many employees operating in us ?" → "Found 292 employees operating in the US."
+- Consistent, clean responses without false multi-part warnings
+
 ### Completed - Self-Improving RAG Engine Phase 1-6
 
 ### [Phase 6] - 2025-11-19

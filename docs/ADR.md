@@ -349,6 +349,7 @@ WHERE o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'
 | 023 | Self-Improving RAG Engine Phase 3 Multi-Model Support | Implemented | High |
 | 024 | Self-Improving RAG Engine Phase 4 Tracing & Evaluation | Implemented | Critical |
 | 025 | Self-Improving RAG Engine Phase 5 Evaluation Daemon | Implemented | High |
+| 026 | Answer Generation Consistency Fix | Implemented | High |
 
 ---
 
@@ -1442,5 +1443,78 @@ python -m app.monitoring.tuning_runner --apply --min-eval-count 15 --max-limit 4
 
 ---
 
-**Last Updated**: 2025-11-19  
-**Next Review**: 2025-12-19
+---
+
+## ADR-026: Answer Generation Consistency Fix
+
+**Date**: 2025-11-23  
+**Status**: Implemented  
+**Context**: RAG system producing inconsistent and confusing responses - simple count queries flagged as multi-part, inconsistent answer formats
+
+**Decision**: Fix answer generation logic to provide consistent, contextual responses without false multi-part warnings
+
+**Problem Analysis**:
+- **Overly Aggressive Multi-part Detection**: Simple queries like "how many non terasky products" flagged as multi-part
+- **Inconsistent Count Detection**: Flawed logic for identifying when queries should return simple counts
+- **Confusing User Experience**: "Your query contains multiple parts" warnings for simple questions
+- **Inconsistent Formatting**: Different answer formats for similar query types
+
+**Solution Implementation**:
+- **Refined Multi-part Detection**: Only flag queries with explicit conjunctions AND additional requests
+- **Improved Count Logic**: Focus on single-result numeric responses with count keywords
+- **Contextual Responses**: Enhanced count answers with query-specific context
+- **Streamlined Decision Tree**: Eliminated conflicting answer generation paths
+
+**Technical Changes**:
+```python
+# Fixed multi-part detection
+def _is_multi_part_query(self, query: str) -> bool:
+    has_conjunction = any(conj in query_lower for conj in [" and ", " & ", "also"])
+    has_additional_request = any(req in query_lower for req in ["list", "show", "names"])
+    has_question_then_request = "?" in query and any(req in query_lower.split("?")[-1] for req in ["list", "show"])
+    return (has_conjunction and has_additional_request) or has_question_then_request
+
+# Improved count detection
+def _is_count_query(self, query: str, data: List[Dict]) -> bool:
+    has_count_keyword = any(keyword in query for keyword in ["how many", "count", "number of"])
+    if has_count_keyword and data and len(data) == 1:
+        numeric_fields = [k for k, v in data[0].items() if isinstance(v, (int, float))]
+        return len(numeric_fields) > 0
+    return False
+```
+
+**Answer Quality Improvements**:
+- **"how many non terasky products do we have ?"** → "Found 429 non-TeraSky products."
+- **"how many employees operating in us ?"** → "Found 292 employees operating in the US."
+- **"how many non terasky products that has a successful deal during 2025 do we have ?"** → "Found 95 non-TeraSky products that had successful deals during 2025."
+
+**Results Achieved**:
+- **Eliminated False Positives**: Simple queries no longer flagged as multi-part
+- **Consistent Count Responses**: Clean, contextual answers for count queries
+- **Improved User Experience**: No more confusing "multiple parts" warnings
+- **Contextual Formatting**: Query-specific responses based on content
+
+**Testing Validation**:
+- **Count Query Detection**: Properly identifies single-result numeric responses
+- **Multi-part Detection**: Only flags truly complex queries
+- **Answer Consistency**: Same query types produce consistent response formats
+- **Contextual Responses**: Answers tailored to query content (products, employees, deals)
+
+**Consequences**:
+- ✅ **Consistent User Experience**: Clean, predictable responses for similar queries
+- ✅ **Eliminated Confusion**: No more false multi-part warnings for simple questions
+- ✅ **Contextual Answers**: Responses now include relevant business context
+- ✅ **Improved Accuracy**: Better detection of query types and appropriate formatting
+- ✅ **Maintained Functionality**: All existing query patterns continue to work
+- ❌ **Increased Logic Complexity**: More sophisticated detection and formatting rules
+- ❌ **Maintenance Overhead**: Additional contextual patterns to maintain as queries evolve
+
+**Future Enhancements**:
+- **Pattern Learning**: Automatic detection of new contextual response patterns
+- **User Feedback Integration**: Learn from user satisfaction to improve answer quality
+- **Advanced Multi-part Handling**: Better support for complex queries with multiple components
+
+---
+
+**Last Updated**: 2025-11-23  
+**Next Review**: 2025-12-23

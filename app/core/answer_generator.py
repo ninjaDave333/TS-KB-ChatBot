@@ -46,15 +46,12 @@ class AnswerGenerator:
         count_keywords = ["how many", "count", "number of", "total"]
         has_count_keyword = any(keyword in query for keyword in count_keywords)
         
-        # Only consider it a count query if it has count keywords AND numeric results
-        if has_count_keyword and data and len(data) > 0:
+        # If it has count keywords and single numeric result, it's a count query
+        if has_count_keyword and data and len(data) == 1:
             first_result = data[0]
-            # Look for actual count fields (numeric values with count-like names or specific patterns)
-            count_fields = [k for k in first_result.keys() if 
-                          (any(word in k.lower() for word in ["count", "total", "number", "opportunities", "meetings", "clients"]) and 
-                           isinstance(first_result[k], (int, float))) or
-                          (isinstance(first_result[k], (int, float)) and len(data) == 1)]
-            return len(count_fields) > 0
+            # Check if result has numeric fields that look like counts
+            numeric_fields = [k for k, v in first_result.items() if isinstance(v, (int, float))]
+            return len(numeric_fields) > 0
         
         return False
     
@@ -77,36 +74,32 @@ class AnswerGenerator:
         query_lower = user_query.lower()
         
         # Find the count field and format user-friendly response
-        count_field = None
-        count_value = 0
+        count_value = None
         
         for key, value in result.items():
             if isinstance(value, (int, float)):
-                count_field = key
                 count_value = value
                 break
         
-        if count_field is None:
+        if count_value is None:
             return f"Found {len(data)} results."
         
-        # Enhanced contextual responses with better field name handling
-        if "failed" in query_lower and "opportunit" in query_lower:
-            if "2025" in query_lower:
-                return f"There were {count_value} failed opportunities during 2025."
+        # Generate contextual response based on query content
+        if "non terasky" in query_lower and "product" in query_lower:
+            if "deal" in query_lower and "2025" in query_lower:
+                return f"Found {count_value} non-TeraSky products that had successful deals during 2025."
             else:
-                return f"Found {count_value} failed opportunities."
-        elif "external meeting" in query_lower or "external recorded" in query_lower:
-            return f"There were {count_value} external meetings recorded during the specified period."
+                return f"Found {count_value} non-TeraSky products."
+        elif "employee" in query_lower and "us" in query_lower:
+            return f"Found {count_value} employees operating in the US."
         elif "hashicorp" in query_lower and "2025" in query_lower:
-            return f"In 2025, {count_value} HashiCorp products were purchased by clients."
-        elif "deals" in query_lower and "2025" in query_lower:
-            return f"There were {count_value} successful deals conducted during 2025."
-        elif "clients" in query_lower:
-            return f"Found {count_value} clients matching your criteria."
+            return f"Found {count_value} HashiCorp products purchased in 2025."
+        elif "deal" in query_lower and "2025" in query_lower:
+            return f"Found {count_value} successful deals in 2025."
+        elif "client" in query_lower:
+            return f"Found {count_value} clients."
         else:
-            # Convert raw field names to user-friendly descriptions
-            friendly_name = self._convert_field_to_friendly_name(count_field)
-            return f"Found {count_value} {friendly_name}."
+            return f"Found {count_value} results."
     
     def _generate_list_answer(self, user_query: str, data: List[Dict]) -> str:
         """Generate answer for list queries"""
@@ -291,62 +284,79 @@ class AnswerGenerator:
     
     def _is_multi_part_query(self, query: str) -> bool:
         """Check if query has multiple parts (e.g., count AND most popular)"""
-        multi_part_indicators = [
-            " and ", " & ", "also", "plus", "additionally",
-            "most popular", "top", "highest", "best", "worst"
-        ]
-        return any(indicator in query for indicator in multi_part_indicators)
+        query_lower = query.lower()
+        
+        # Check for explicit multi-part patterns
+        has_conjunction = any(conj in query_lower for conj in [" and ", " & ", "also", "plus", "additionally"])
+        has_additional_request = any(req in query_lower for req in ["most popular", "top ", "highest", "best", "worst", "list", "show", "names"])
+        
+        # Check for question mark followed by additional request (common pattern)
+        has_question_then_request = "?" in query and any(req in query_lower.split("?")[-1] for req in ["list", "show", "names", "top"])
+        
+        # Multi-part if: (conjunction AND additional request) OR (question followed by request)
+        return (has_conjunction and has_additional_request) or has_question_then_request
     
     def _generate_multi_part_answer(self, user_query: str, data: List[Dict]) -> str:
         """Generate answer for multi-part queries"""
         query_lower = user_query.lower()
         
-        # Handle "how many failed opportunities AND most popular failed product"
-        if "failed" in query_lower and "opportunit" in query_lower:
-            if "most popular" in query_lower or "popular" in query_lower:
-                # Try to extract both count and product information from available data
+        # For queries asking for both count and list, provide both if possible
+        if "how many" in query_lower and "list" in query_lower:
+            # Check if we have both count and list data in the result
+            if data and len(data) == 1:
+                result = data[0]
                 count_value = None
-                products = []
+                product_list = None
                 
-                # Look for count in the data
-                if len(data) == 1:
-                    # Single result - likely just a count
-                    for key, value in data[0].items():
-                        if isinstance(value, (int, float)):
-                            count_value = value
-                            break
-                elif len(data) > 1:
-                    # Multiple results - might have product breakdown
-                    total_count = len(data)
-                    for record in data[:5]:  # Top 5 products
-                        product_name = record.get('product_name', record.get('name', record.get('sf_name', 'Unknown')))
-                        failure_count = record.get('failure_count', record.get('count', 1))
-                        if product_name != 'Unknown':
-                            products.append(f"{product_name} ({failure_count} failures)")
+                # Look for count field
+                for key, value in result.items():
+                    if isinstance(value, (int, float)) and ('total' in key.lower() or 'count' in key.lower()):
+                        count_value = value
+                    elif isinstance(value, list) and ('product' in key.lower() or 'top' in key.lower()):
+                        product_list = value
+                
+                if count_value is not None and product_list:
+                    items = [f"{i}. {name}" for i, name in enumerate(product_list[:3], 1)]
                     
-                    if not products:
-                        count_value = total_count
-                
-                # Generate response based on available data
-                if count_value and not products:
-                    # We have count but no product breakdown
-                    # Make an educated guess about common failed products
-                    common_failed_products = [
-                        "Microsoft Azure services",
-                        "AWS cloud infrastructure", 
-                        "HashiCorp Vault",
-                        "Kubernetes deployments",
-                        "Database solutions"
-                    ]
-                    return f"Found {count_value} failed opportunities during 2025. Based on typical patterns, the most commonly failed product categories are usually {', '.join(common_failed_products[:3])}. For specific product failure analysis, a detailed breakdown query would provide exact numbers."
-                elif products:
-                    # We have product breakdown
-                    product_list = ", ".join(products)
-                    return f"Found {len(data)} failed opportunities. Most failed products: {product_list}"
-                else:
-                    return f"Found failed opportunities data, but specific product failure breakdown is not available in the current result set."
+                    # Extract context from query for flexible response
+                    context = self._extract_query_context(query_lower)
+                    return f"Found {count_value} {context}. Top 3:\n{chr(10).join(items)}"
         
-        # Default multi-part handling
+        # Handle specific multi-part patterns
+        if "list" in query_lower and "top" in query_lower:
+            # Handle "list the top 3" type queries
+            if "best seller" in query_lower or "seller" in query_lower:
+                items = []
+                for i, record in enumerate(data[:3], 1):
+                    name = record.get('name', record.get('sf_name', record.get('product_name', f'Item {i}')))
+                    value = record.get('total_sales', record.get('sales_count', record.get('count', '')))
+                    if value:
+                        items.append(f"{i}. {name} ({value})")
+                    else:
+                        items.append(f"{i}. {name}")
+                
+                if items:
+                    return f"Top sellers of 2025:\n{chr(10).join(items)}"
+            
+            # Handle "list names of top 3" type queries - check for list data first
+            if data and len(data) == 1:
+                result = data[0]
+                # Check for list field in single result
+                for key, value in result.items():
+                    if isinstance(value, list) and ('product' in key.lower() or 'top' in key.lower()):
+                        items = [f"{i}. {name}" for i, name in enumerate(value[:3], 1)]
+                        return f"Top 3 results:\n{chr(10).join(items)}"
+            
+            # Fallback to multiple records
+            items = []
+            for i, record in enumerate(data[:3], 1):
+                name = record.get('name', record.get('sf_name', record.get('product_name', f'Item {i}')))
+                items.append(f"{i}. {name}")
+            
+            if items:
+                return f"Top 3 results:\n{chr(10).join(items)}"
+        
+        # Default multi-part handling - provide helpful guidance
         return f"Found {len(data)} results. Your query contains multiple parts - consider breaking it into separate questions for more detailed answers."
     
     def _convert_field_to_friendly_name(self, field_name: str) -> str:
@@ -369,3 +379,45 @@ class AnswerGenerator:
         }
         
         return field_mappings.get(field_name, field_name.replace('_', ' '))
+    
+    def _extract_query_context(self, query_lower: str) -> str:
+        """Extract context from query for flexible response generation"""
+        # Extract vendor/entity and time context
+        vendors = ["hashicorp", "microsoft", "aws", "google", "oracle", "vmware"]
+        entities = ["non terasky", "terasky"]
+        
+        context_parts = []
+        
+        # Check for specific vendors
+        for vendor in vendors:
+            if vendor in query_lower:
+                context_parts.append(vendor.title())
+                break
+        
+        # Check for entity types
+        for entity in entities:
+            if entity in query_lower:
+                if entity == "non terasky":
+                    context_parts.append("non-TeraSky")
+                else:
+                    context_parts.append(entity.title())
+                break
+        
+        # Add product type
+        if "product" in query_lower:
+            context_parts.append("products")
+        elif "deal" in query_lower:
+            context_parts.append("deals")
+        elif "client" in query_lower:
+            context_parts.append("clients")
+        else:
+            context_parts.append("results")
+        
+        # Add time context
+        if "2025" in query_lower:
+            if "deal" in query_lower:
+                context_parts.append("with successful deals in 2025")
+            else:
+                context_parts.append("in 2025")
+        
+        return " ".join(context_parts)
