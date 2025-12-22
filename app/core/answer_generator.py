@@ -22,7 +22,7 @@ class AnswerGenerator:
         if query_type in ['external_meeting_analytics', 'employee_activity_ranking', 'meeting_breakdown', 'client_meeting_ranking', 'recording_list']:
             return self._generate_meeting_analytics_answer(user_query, data, query_type)
         
-        # Handle multi-part queries BEFORE simple count queries
+        # Handle multi-part queries BEFORE simple list queries
         if self._is_multi_part_query(query_lower):
             return self._generate_multi_part_answer(user_query, data)
         
@@ -109,13 +109,19 @@ class AnswerGenerator:
         # Handle Israeli clients with managers specifically
         if "israel" in user_query.lower() and "manager" in user_query.lower():
             client_manager_pairs = []
-            for record in data[:5]:
-                client = record.get("client", record.get("sf_name", "Unknown"))
-                manager = record.get("account_manager", record.get("name", "Unknown"))
-                client_manager_pairs.append(f"{client} (managed by {manager})")
+            for record in data[:10]:
+                # Try multiple possible field names
+                client = record.get("client_name", record.get("client", record.get("sf_name", "Unknown")))
+                manager = record.get("manager_name", record.get("account_manager", record.get("name", "Unknown")))
+                
+                # Skip if both are Unknown or None
+                if client != "Unknown" and manager != "Unknown" and client and manager:
+                    client_manager_pairs.append(f"{client} (managed by {manager})")
             
             if client_manager_pairs:
-                return f"Here are 5 Israeli clients with their account managers: {', '.join(client_manager_pairs)}"
+                return f"Top {len(client_manager_pairs)} Israeli clients with their account managers: {', '.join(client_manager_pairs)}"
+            else:
+                return "No Israeli clients with known managers found."
         
         # Extract names or relevant fields for other queries
         items = []
@@ -230,11 +236,26 @@ class AnswerGenerator:
                 return f"Found {len(data)} external meeting records."
         
         elif query_type == "employee_activity_ranking":
-            # Handle most active employee queries
+            # Handle most active employee queries - use table for top N lists
+            if "top" in query_lower and len(data) > 1:
+                # Generate markdown table
+                headers = list(data[0].keys())
+                friendly_headers = [self._convert_field_to_friendly_name(h).title() for h in headers]
+                
+                table = "| " + " | ".join(friendly_headers) + " |\n"
+                table += "| " + " | ".join(["---"] * len(headers)) + " |\n"
+                
+                for record in data[:10]:
+                    row_values = [str(v) if v is not None else "" for v in record.values()]
+                    table += "| " + " | ".join(row_values) + " |\n"
+                
+                return f"Top {len(data)} most active employees:\n\n{table}"
+            
+            # Single employee result
             if data:
                 employee_data = data[0]
-                employee_name = employee_data.get('employee', employee_data.get('e.name', employee_data.get('name', 'Unknown')))
-                meeting_count = employee_data.get('meeting_count', employee_data.get('total_meetings', 0))
+                employee_name = employee_data.get('employee', employee_data.get('employee_name', employee_data.get('e.name', employee_data.get('name', 'Unknown'))))
+                meeting_count = employee_data.get('activity_count', employee_data.get('meeting_count', employee_data.get('total_meetings', 0)))
                 
                 if 'david gidony' in query_lower:
                     # Special handling for David Gidony breakdown
@@ -288,7 +309,7 @@ class AnswerGenerator:
         
         # Check for explicit multi-part patterns
         has_conjunction = any(conj in query_lower for conj in [" and ", " & ", "also", "plus", "additionally"])
-        has_additional_request = any(req in query_lower for req in ["most popular", "top ", "highest", "best", "worst", "list", "show", "names"])
+        has_additional_request = any(req in query_lower for req in ["most popular", "top ", "highest", "best", "worst", "list", "show", "name", "names"])
         
         # Check for question mark followed by additional request (common pattern)
         has_question_then_request = "?" in query and any(req in query_lower.split("?")[-1] for req in ["list", "show", "names", "top"])
@@ -299,6 +320,29 @@ class AnswerGenerator:
     def _generate_multi_part_answer(self, user_query: str, data: List[Dict]) -> str:
         """Generate answer for multi-part queries"""
         query_lower = user_query.lower()
+        
+        # Handle "show multiple fields" queries (e.g., "show client, product, amount")
+        if ("show" in query_lower or "name" in query_lower or "list" in query_lower) and len(data) > 1:
+            # Generate markdown table for better readability
+            headers = list(data[0].keys())
+            friendly_headers = [self._convert_field_to_friendly_name(h).title() for h in headers]
+            
+            # Build markdown table
+            table = "| " + " | ".join(friendly_headers) + " |\n"
+            table += "| " + " | ".join(["---"] * len(headers)) + " |\n"
+            
+            for record in data[:10]:
+                row_values = []
+                for key, value in record.items():
+                    if isinstance(value, float) and ("price" in key.lower() or "amount" in key.lower()):
+                        row_values.append(f"${value:,.2f}")
+                    elif isinstance(value, float):
+                        row_values.append(f"{value:.2f}")
+                    else:
+                        row_values.append(str(value) if value is not None else "")
+                table += "| " + " | ".join(row_values) + " |\n"
+            
+            return f"Found {len(data)} results:\n\n{table}"
         
         # For queries asking for both count and list, provide both if possible
         if "how many" in query_lower and "list" in query_lower:
@@ -372,6 +416,11 @@ class AnswerGenerator:
             'deal_count': 'deals',
             'employee_count': 'employees',
             'sf_name': 'name',
+            'client_name': 'client',
+            'manager_name': 'manager',
+            'employee_name': 'employee',
+            'product_name': 'product',
+            'activity_count': 'activity',
             'total_price': 'total value',
             'unit_price': 'unit price',
             'close_date': 'close date',

@@ -1,0 +1,57 @@
+[
+  {
+    "id": "q1",
+    "question": "5 clients that purchased the most hashicorp products during 2024",
+    "gold_cypher": "MATCH (cl:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND (toLower(p.vendor) CONTAINS 'hashicorp' OR toLower(p.name) CONTAINS 'hashicorp') AND o.close_date >= '2024-01-01' AND o.close_date < '2025-01-01' WITH cl.sf_name as client, count(DISTINCT p) as product_count, count(o) as deal_count, sum(toFloat(o.total_price)) as total_spent ORDER BY product_count DESC, total_spent DESC LIMIT 5 RETURN client, product_count, deal_count, total_spent"
+  },
+  {
+    "id": "q2",
+    "question": " top 3 products with succesfull deals during 2023",
+    "gold_cypher": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2023-01-01' AND o.close_date < '2024-01-01' WITH p.name as product, count(o) as deal_count, sum(toFloat(o.total_price)) as total_revenue ORDER BY deal_count DESC, total_revenue DESC LIMIT 3 RETURN product, deal_count, total_revenue"
+  },
+  {
+    "id": "q3",
+    "question": "top 3 products with succesfull deals during 2023 and list client names with their accociated deal names",
+    "gold_cypher": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2023-01-01' AND o.close_date < '2024-01-01' WITH p.name as product, count(o) as deal_count ORDER BY deal_count DESC LIMIT 3 WITH collect(product) as top_products MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2023-01-01' AND o.close_date < '2024-01-01' AND p.name IN top_products RETURN p.name as product, collect({client: c.sf_name, deal: o.opportunity_name}) as deals ORDER BY size(deals) DESC"
+  },
+  {
+    "id": "q4",
+    "question": "top 5 products with succesfull deals during 2025 and list client names with their accociated deal names and deal price and gross profit",
+    "gold_cypher": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' WITH p.name as product, count(o) as deal_count ORDER BY deal_count DESC LIMIT 5 WITH collect(product) as top_products MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' AND p.name IN top_products RETURN p.name as product, collect({ client: c.sf_name, deal: o.opportunity_name, price: o.total_price, gross_profit: o.total_price }) as deals ORDER BY size(deals) DESC"
+  },
+  {
+    "id": "q5",
+    "question": "top 3 selling products of all time, list product name, product vendor and avg deal profit",
+    "gold_cypher": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' WITH p.name as product, p.vendor as vendor, count(o) as deal_count, avg(toFloat(o.total_price)) as avg_deal_profit ORDER BY deal_count DESC LIMIT 3 RETURN product, vendor, avg_deal_profit"
+  },
+  {
+    "id": "q6",
+    "question": "top 5 selling products of all time that are not terasky products, list product name, product vendor deals total count and avg deal profit",
+    "gold_cypher": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND NOT toLower(p.vendor) CONTAINS 'terasky' WITH p.name as product, p.vendor as vendor, count(o) as deal_count, avg(toFloat(o.total_price)) as avg_deal_profit ORDER BY deal_count DESC LIMIT 5 RETURN product, vendor, deal_count, avg_deal_profit"
+  },
+  {
+    "id": "q7",
+    "question": "top 5 employees with the most deals during 2025, show names deal amount and total profit",
+    "gold_cypher": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) MATCH (c)-[:MANAGED_BY]->(e:Employee) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' WITH e.name as employee, count(o) as deal_count, sum(toFloat(o.total_price)) as total_profit ORDER BY deal_count DESC LIMIT 5 RETURN employee, deal_count, total_profit"
+  },
+  {
+    "id": "q8",
+    "question": " top 5 employees with the most deals during 2025, show employee names deal amount , deal names, deal client and total profit for each deal",
+    "gold_cypher": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) MATCH (c)-[:MANAGED_BY]->(e:Employee) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' WITH e.name as employee, count(o) as deal_count ORDER BY deal_count DESC LIMIT 5 WITH collect(employee) as top_employees MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) MATCH (c)-[:MANAGED_BY]->(e:Employee) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' AND e.name IN top_employees RETURN e.name as employee, collect({ deal_name: o.opportunity_name, client: c.sf_name, profit: o.total_price }) as deals, count(o) as deal_count ORDER BY deal_count DESC"
+  },
+  {
+    "id": "q9",
+    "question": "4 top selling vendors during 2024-2025 , vendor names and list of products sold by name and ammount",
+    "gold_cypher": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2024-01-01' AND o.close_date < '2026-01-01' WITH p.vendor as vendor, count(o) as deal_count ORDER BY deal_count DESC LIMIT 4 WITH collect(vendor) as top_vendors MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2024-01-01' AND o.close_date < '2026-01-01' AND p.vendor IN top_vendors WITH p.vendor as vendor, p.name as product, count(o) as deals, sum(toFloat(o.total_price)) as total_amount RETURN vendor, collect({ product: product, deals: deals, total_amount: total_amount }) as products ORDER BY size(products) DESC"
+  },
+  {
+    "id": "q10",
+    "question": "5 top selling non terasky vendors during 2023-2025 , vendor names and list of products sold by name and ammount",
+    "gold_cypher": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2023-01-01' AND o.close_date < '2026-01-01' AND NOT toLower(p.vendor) CONTAINS 'terasky' WITH p.vendor as vendor, count(o) as deal_count ORDER BY deal_count DESC LIMIT 5 WITH collect(vendor) as top_vendors MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2023-01-01' AND o.close_date < '2026-01-01' AND p.vendor IN top_vendors WITH p.vendor as vendor, p.name as product, count(o) as deals, sum(toFloat(o.total_price)) as total_amount RETURN vendor, collect({ product: product, deals: deals, total_amount: total_amount }) as products ORDER BY size(products) DESC"
+  },
+  {
+    "id": "q11",
+    "question": "5 top selling security related products during 2023-2025 , vendor names, product names and list deals",
+    "gold_cypher": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2023-01-01' AND o.close_date < '2026-01-01' AND (toLower(p.name) CONTAINS 'security' OR toLower(p.sf_family) CONTAINS 'security' OR toLower(p.name) CONTAINS 'vault' OR toLower(p.name) CONTAINS 'firewall' OR toLower(p.name) CONTAINS 'prisma') WITH p.vendor as vendor, p.name as product, count(o) as deal_count ORDER BY deal_count DESC LIMIT 5 WITH collect({vendor: vendor, product: product}) as top_products MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2023-01-01' AND o.close_date < '2026-01-01' AND {vendor: p.vendor, product: p.name} IN top_products RETURN p.vendor as vendor, p.name as product, collect({ client: c.sf_name, deal: o.opportunity_name, amount: o.total_price }) as deals"
+  }
+]

@@ -8,8 +8,8 @@ from app.core.enhanced_query_generator import EnhancedQueryGenerator
 from app.core.production_learning_loader import ProductionLearningLoader
 from app.core.bedrock_client import BedrockClient
 from app.core.llm_client import LLMClient
-from app.core.query_validator import CypherValidator
 from app.core.answer_generator import AnswerGenerator
+from app.core.answer_renderer import render_answer
 from app.core.performance_monitor import performance_monitor
 from app.core.config import get_rag_config
 from app.core.tracing import new_trace, safe_write_trace
@@ -26,7 +26,6 @@ ProductionLearningLoader.load_production_patterns(enhanced_generator)
 # Initialize LLMClient and BedrockClient
 llm_client = LLMClient()
 bedrock_client = BedrockClient(llm_client)
-query_validator = CypherValidator()
 answer_generator = AnswerGenerator()
 
 class QueryRequest(BaseModel):
@@ -166,22 +165,10 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
         if request.use_ai:
             try:
                 print(f"Attempting AI generation for: {request.query}")
-                # First try enhanced generator with learning
-                enhanced_result = enhanced_generator.generate_cypher_with_learning(request.query)
-                
-                # Get routing configuration
-                config = get_rag_config()
-                learned_threshold = config['routing']['learned_pattern_threshold']
-                
-                if enhanced_result['method'] == 'learned_pattern' and enhanced_result['confidence'] > learned_threshold:
-                    cypher_query = enhanced_result['cypher']
-                    method = f"learned_pattern (confidence: {enhanced_result['confidence']:.2f})"
-                    print(f"Using learned pattern: {cypher_query}")
-                else:
-                    # Fall back to AI generation
-                    cypher_query = await bedrock_client.generate_cypher(request.query, schema, trace)
-                    print(f"AI generated successfully: {cypher_query}")
-                    method = "ai_generated"
+                # ALWAYS use AI generation (like CLI demo) - validation handled in BedrockClient
+                cypher_query = await bedrock_client.generate_cypher(request.query, schema, trace)
+                print(f"AI generated successfully: {cypher_query}")
+                method = "ai_generated"
             except Exception as e:
                 # Fallback to enhanced generator traditional method
                 error_msg = f"AI failed: {str(e)}"
@@ -198,33 +185,11 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
             cypher_query = enhanced_result['cypher']
             method = f"enhanced_basic ({enhanced_result['method']})"
         
-        # Validate and fix query
-        try:
-            is_valid, fixed_query, validation_issues = query_validator.validate_and_fix(cypher_query)
-            if not is_valid:
-                print(f"Validation failed: {validation_issues}")
-                error_msg = f"Query validation failed: {', '.join(validation_issues)}"
-                # Don't use fallback for now, just use the fixed query anyway
-                cypher_query = fixed_query
-                method += "_validated"
-            else:
-                cypher_query = fixed_query
-                if validation_issues:
-                    print(f"Auto-fixed issues: {validation_issues}")
-                    if error_msg:
-                        error_msg += f"; Fixed: {', '.join(validation_issues)}"
-                    else:
-                        error_msg = f"Auto-fixed: {', '.join(validation_issues)}"
-        except Exception as val_error:
-            print(f"Validation error: {val_error}")
-            # Continue with original query if validation fails
-            pass
-        
+        # Execute query (validation already done in BedrockClient)
         # Record Cypher in trace
         trace.cypher_query = cypher_query
         trace.cypher_params = {}  # No params in current implementation
         
-        # Execute query
         try:
             result = neo4j_client.execute_query(cypher_query)
             
@@ -234,21 +199,18 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
                 "has_data": len(result) > 0
             }
         except Exception as e:
-            # If execution still fails, try one more fallback
-            if method != "validation_fallback":
-                print(f"Query execution failed, trying fallback: {e}")
-                cypher_query = query_generator.generate_cypher(request.query)
-                method = "execution_fallback"
-                result = neo4j_client.execute_query(cypher_query)
-                if error_msg:
-                    error_msg += f"; Execution fallback used"
-                else:
-                    error_msg = "Execution fallback used"
-            else:
-                raise e
+            # Log the error and re-raise - don't hide execution failures
+            print(f"Query execution failed: {e}")
+            print(f"Failed Cypher: {cypher_query}")
+            raise
         
-        # Generate natural language answer
-        answer = answer_generator.generate_answer(request.query, cypher_query, result)
+        # Generate natural language answer using LLM
+        try:
+            answer = await render_answer(request.query, result, bedrock_client)
+        except Exception as e:
+            print(f"Answer rendering failed, using fallback: {e}")
+            # Fallback to rule-based generator
+            answer = answer_generator.generate_answer(request.query, cypher_query, result)
         
         # Record routing path in trace
         trace.routing_path = method
