@@ -89,7 +89,8 @@ PROMPT_PROFILES: Dict[str, Dict[str, str]] = {
             SCHEMA_SUMMARY + "\n" + RULES_SUMMARY +
             "\nFOCUS: This is a sales/deal analytics query. Emphasize:" +
             "\n- OPPORTUNITY relationship between Client and Product: (c:Client)-[o:OPPORTUNITY]->(p:Product)" +
-            "\n- opportunity_stage = 'Closed Won' for successful deals" +
+            "\n- opportunity_stage = 'Closed Won' for successful/won deals" +
+            "\n- opportunity_stage = 'Closed Lost' for lost deals (deals that were not won)" +
             "\n- close_date for filtering by year/period" +
             "\n- Aggregations: count(o) for deal count, sum(toFloat(o.total_price)) for revenue" +
             "\n- Product vendor property is 'vendor' (NOT vendor_name): use p.vendor" +

@@ -175,10 +175,14 @@ class FeedbackRequest(BaseModel):
 
 @router.post("/feedback")
 async def record_user_feedback(request: FeedbackRequest, user: dict = Depends(get_jwt_user)):
-    """Record user feedback (thumbs up/down) for answers."""
+    """Record user feedback (helpful/almost/not_helpful) for answers."""
     try:
         import json
         from pathlib import Path
+        
+        # Map old ratings for backward compatibility
+        rating_map = {'positive': 'helpful', 'up': 'helpful', 'negative': 'not_helpful', 'down': 'not_helpful'}
+        rating = rating_map.get(request.feedback, request.feedback)
         
         # Store feedback in persistentData
         feedback_file = Path("/home/ubuntu/meetingsBotLogs/persistentData/user_feedback.jsonl")
@@ -186,9 +190,9 @@ async def record_user_feedback(request: FeedbackRequest, user: dict = Depends(ge
         
         feedback_entry = {
             "query": request.query,
-            "answer": request.answer,
-            "feedback": request.feedback,
-            "metadata": request.metadata,
+            "answer": request.answer[:500],
+            "rating": rating,
+            "intent": request.metadata.get('method', 'unknown') if request.metadata else 'unknown',
             "user": request.user or user.get("email"),
             "timestamp": request.timestamp
         }

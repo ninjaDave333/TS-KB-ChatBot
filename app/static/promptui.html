@@ -195,7 +195,15 @@
             btn.parentElement.querySelectorAll('.feedback-btn').forEach(b => b.disabled = true);
             
             // Highlight selected
-            btn.classList.add(feedback === 'positive' ? 'active-positive' : 'active-negative');
+            if (feedback === 'helpful') {
+                btn.classList.add('active-positive');
+            } else if (feedback === 'not_helpful') {
+                btn.classList.add('active-negative');
+            } else {
+                btn.style.background = '#fbbf24';
+                btn.style.color = 'white';
+                btn.style.borderColor = '#fbbf24';
+            }
             
             try {
                 await fetch('/api/v1/feedback', {
@@ -256,8 +264,9 @@
                 const feedbackDiv = document.createElement('div');
                 feedbackDiv.className = 'feedback-buttons';
                 feedbackDiv.innerHTML = `
-                    <button class="feedback-btn" data-feedback="positive" data-query="${encodeURIComponent(chatHistory[chatHistory.length - 1]?.content || '')}">👍 Helpful</button>
-                    <button class="feedback-btn" data-feedback="negative" data-query="${encodeURIComponent(chatHistory[chatHistory.length - 1]?.content || '')}">👎 Not Helpful</button>
+                    <button class="feedback-btn" data-feedback="helpful" data-query="${encodeURIComponent(chatHistory[chatHistory.length - 1]?.content || '')}">👍 Helpful</button>
+                    <button class="feedback-btn" data-feedback="almost" data-query="${encodeURIComponent(chatHistory[chatHistory.length - 1]?.content || '')}">👌 Almost</button>
+                    <button class="feedback-btn" data-feedback="not_helpful" data-query="${encodeURIComponent(chatHistory[chatHistory.length - 1]?.content || '')}">👎 Not Helpful</button>
                 `;
                 messageDiv.appendChild(feedbackDiv);
                 

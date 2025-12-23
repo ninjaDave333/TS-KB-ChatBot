@@ -1733,3 +1733,222 @@ class MetricsCollector:
 - **Advanced Filtering**: Filter metrics by date range, intent, or user
 
 ---
+
+
+## ADR-029: Three-Tier User Feedback System
+
+**Date**: 2025-12-23  
+**Status**: Implemented  
+**Context**: Binary thumbs up/down feedback insufficient for understanding partial success cases and improvement opportunities
+
+**Decision**: Implement three-tier feedback system with helpful/almost/not_helpful ratings for granular user satisfaction tracking
+
+**Problem Analysis**:
+- **Binary Limitation**: Thumbs up/down couldn't distinguish between perfect answers and close-but-missing-something
+- **Improvement Blind Spots**: No visibility into queries that were "almost right" but needed refinement
+- **Self-Learning Gap**: Binary feedback insufficient for targeted prompt improvements
+- **User Frustration**: No way to indicate "good attempt but incomplete"
+
+**Solution Architecture**:
+- **Three Rating Levels**: Helpful (perfect), Almost (close but missing), Not Helpful (failed)
+- **Granular Analytics**: Separate tracking for satisfaction rate and partial success rate
+- **Self-Learning Integration**: Differentiated improvement suggestions based on feedback type
+- **Backward Compatibility**: Automatic mapping of old positive/negative ratings
+
+**Implementation Details**:
+```javascript
+// Frontend - Three feedback buttons
+<button onclick="sendFeedback('helpful')">👍 Helpful</button>
+<button onclick="sendFeedback('almost')">👌 Almost</button>
+<button onclick="sendFeedback('not_helpful')">👎 Not Helpful</button>
+
+// Backend - Rating mapping
+rating_map = {
+    'positive': 'helpful', 'up': 'helpful',
+    'negative': 'not_helpful', 'down': 'not_helpful'
+}
+```
+
+**Analytics Enhancements**:
+- **Satisfaction Rate**: Percentage of "helpful" ratings
+- **Partial Success Rate**: Percentage of "almost" ratings
+- **Failure Rate**: Percentage of "not_helpful" ratings
+- **Intent Breakdown**: Separate tracking by intent type for each rating level
+
+**Self-Learning Integration**:
+```python
+# Differentiated suggestions
+if feedback['almost_count'] > 3:
+    suggestions.append("Queries partially correct - review for missing details")
+
+if feedback['not_helpful_count'] > 3:
+    suggestions.append("Review failed queries and add examples")
+```
+
+**Files Modified**:
+- **Frontend**: `app/static/promptui.html` - Three feedback buttons with color coding
+- **Backend**: `app/api/routes.py` - Rating mapping and storage
+- **Self-Learning**: `app/core/self_learner.py` - Three-tier feedback analysis
+- **Report**: `Tests/run_self_learning.py` - Separate display sections
+
+**User Experience**:
+- **Visual Feedback**: Green (helpful), Yellow (almost), Red (not helpful)
+- **Clear Labels**: Descriptive tooltips for each rating level
+- **Disabled State**: Buttons disabled after selection to prevent duplicate feedback
+
+**Analytics Output**:
+```
+Perfect (Helpful): 45 (75%)
+Partial (Almost): 10 (17%)
+Failed (Not Helpful): 5 (8%)
+```
+
+**Consequences**:
+- ✅ **Granular Insights**: Understand partial success vs complete failure
+- ✅ **Targeted Improvements**: Different suggestions for almost vs not_helpful
+- ✅ **Better UX**: Users can express "close but not quite" sentiment
+- ✅ **Backward Compatible**: Old feedback data automatically mapped
+- ✅ **Self-Learning Ready**: Differentiated improvement strategies
+- ❌ **Increased Complexity**: Three categories vs two to analyze
+- ❌ **User Decision**: Users must choose between three options
+
+**Future Enhancements**:
+- **Feedback Comments**: Optional text field for specific improvement suggestions
+- **Pattern Analysis**: Identify common "almost" patterns for targeted fixes
+- **A/B Testing**: Test prompt improvements on "almost" queries
+
+---
+
+## ADR-030: Manual Self-Learning Analysis Tool
+
+**Date**: 2025-12-23  
+**Status**: Implemented  
+**Context**: Need systematic analysis of production failures, user feedback, and intent accuracy to drive continuous improvement
+
+**Decision**: Implement manual self-learning analysis tool for on-demand comprehensive system evaluation
+
+**Problem Analysis**:
+- **No Systematic Analysis**: Manual log review required to understand failure patterns
+- **Feedback Blind Spots**: User feedback collected but not systematically analyzed
+- **Intent Accuracy Unknown**: No visibility into misclassification rates
+- **Improvement Guesswork**: No data-driven suggestions for prompt optimization
+
+**Solution Architecture**:
+- **Comprehensive Analysis**: Failure patterns, user feedback, intent accuracy in single report
+- **CLI Tool**: On-demand execution via `python -m Tests.run_self_learning`
+- **Actionable Suggestions**: Targeted improvements for prompts, keywords, schema, examples
+- **JSON Report**: Machine-readable output for programmatic access
+
+**Analysis Capabilities**:
+1. **Failure Analysis**:
+   - Total failures and failure rate
+   - Error breakdown by type (CypherSyntaxError, CypherTypeError)
+   - Validation retry counts
+   - Detailed error queries with intent labels
+
+2. **User Feedback Analysis**:
+   - Satisfaction rate (helpful %)
+   - Partial success rate (almost %)
+   - Failure rate (not_helpful %)
+   - Feedback breakdown by intent
+   - Query lists for each feedback category
+
+3. **Intent Classification Analysis**:
+   - Unknown intent rate
+   - Intent distribution across all queries
+   - Most common intent type
+   - Misclassification patterns
+
+4. **Suggestion Engine**:
+   - **Prompt Rules**: High syntax/type errors → review rules
+   - **Intent Keywords**: High unknown rate → add keywords
+   - **Schema Hints**: Missing context → enhance schema
+   - **Few-Shot Examples**: Negative feedback → add examples
+
+**Implementation Details**:
+```python
+# Core analysis functions
+def analyze_failures() -> Dict[str, Any]:
+    # Groups errors by type, tracks retry counts
+    
+def analyze_user_feedback() -> Dict[str, Any]:
+    # Calculates satisfaction/partial/failure rates
+    
+def analyze_intent_accuracy() -> Dict[str, Any]:
+    # Tracks unknown rate and distribution
+    
+def suggest_improvements() -> Dict[str, List[str]]:
+    # Generates targeted suggestions based on patterns
+```
+
+**CLI Output Format**:
+```
+🧠 Running Self-Learning Analysis...
+
+============================================================
+FAILURE ANALYSIS
+============================================================
+Total Queries: 37
+Total Failures: 3 (8.1%)
+Validation Retries: 0
+
+Error Breakdown:
+  - CypherTypeError: 1
+  - CypherSyntaxError: 2
+
+============================================================
+USER FEEDBACK ANALYSIS
+============================================================
+Perfect (Helpful): 25 (68%)
+Partial (Almost): 8 (22%)
+Failed (Not Helpful): 4 (11%)
+
+============================================================
+SUGGESTIONS
+============================================================
+📝 Prompt Rules:
+  • High syntax errors detected. Review RULES_SUMMARY.
+
+🎯 Intent Keywords:
+  • Unknown intent rate: 8.1%. Add keywords to classifier.
+```
+
+**Files Created**:
+- **Core Engine**: `app/core/self_learner.py` - Analysis and suggestion logic
+- **CLI Tool**: `Tests/run_self_learning.py` - User-friendly interface
+- **Report Storage**: `/app/data/self_learning_report.json` - Full JSON output
+
+**Integration Points**:
+- **Metrics Collector**: Reads all query history (up to 100 queries)
+- **Feedback Storage**: Analyzes user feedback from persistent JSONL
+- **Intent Tracking**: Uses production metrics for intent distribution
+
+**Use Cases**:
+- **Weekly Reviews**: Run analysis to identify improvement opportunities
+- **Post-Deployment**: Validate new prompt changes with production data
+- **Quality Monitoring**: Track satisfaction trends and error patterns
+- **Continuous Improvement**: Data-driven prompt optimization
+
+**Success Criteria Met**:
+- ✅ **Comprehensive Analysis**: Failures, feedback, intent in single report
+- ✅ **Actionable Suggestions**: Targeted improvements based on data
+- ✅ **Easy Execution**: Simple CLI command for on-demand analysis
+- ✅ **Machine-Readable**: JSON output for automation
+- ✅ **Human-Readable**: Clear summaries with inline query display
+
+**Consequences**:
+- ✅ **Data-Driven Improvements**: Systematic analysis replaces guesswork
+- ✅ **Visibility**: Clear insight into production performance
+- ✅ **Targeted Actions**: Specific suggestions for each issue type
+- ✅ **Manual Control**: Human review before applying changes
+- ✅ **Audit Trail**: JSON reports for historical analysis
+- ❌ **Manual Execution**: Requires periodic manual runs
+- ❌ **No Auto-Apply**: Suggestions must be manually implemented
+
+**Future Enhancements**:
+- **Automated Scheduling**: Cron job for weekly analysis
+- **Trend Analysis**: Compare metrics across multiple runs
+- **Auto-Apply Mode**: Automatic prompt updates for low-risk changes
+- **Slack Integration**: Post analysis summaries to team channel
+
+---

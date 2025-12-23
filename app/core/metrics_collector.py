@@ -111,7 +111,7 @@ class MetricsCollector:
                     'min_response_time': round(min(self.response_times), 2) if self.response_times else 0,
                     'max_response_time': round(max(self.response_times), 2) if self.response_times else 0,
                 },
-                'recent_queries': self.query_history[-20:],  # Last 20
+                'recent_queries': self.query_history,  # Return all (up to 100)
                 'last_updated': datetime.now().isoformat()
             }
     

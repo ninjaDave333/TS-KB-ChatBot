@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Three-Tier User Feedback System (2025-12-23)
+- **Enhanced Feedback Options**: Replaced binary thumbs up/down with three-tier system:
+  - 👍 **Helpful**: Perfect answer, fully satisfied
+  - 👌 **Almost**: Close but missing something, partial success
+  - 👎 **Not Helpful**: Wrong answer or failed query
+- **Granular Analytics**: Separate tracking for perfect, partial, and failed responses
+- **Self-Learning Integration**: Differentiated improvement suggestions based on feedback type
+- **Backward Compatibility**: Automatic mapping of old positive/negative ratings to new system
+
+#### Technical Implementation
+- **Frontend**: Three feedback buttons with color coding (green/yellow/red)
+- **Backend**: Rating values `helpful`, `almost`, `not_helpful` with legacy mapping
+- **Storage**: JSONL format with rating field for easy analysis
+- **Analytics**: Separate satisfaction rate and partial success rate calculations
+
+#### Self-Learning Enhancements
+- **Almost Feedback**: Suggests adding missing details to prompt profiles
+- **Not Helpful Feedback**: Suggests reviewing failed queries and adding examples
+- **Report Display**: Separate sections for partial success vs complete failure queries
+- **Actionable Insights**: Targeted suggestions based on feedback category
+
+### Added - Manual Self-Learning Analysis Tool (2025-12-23)
+- **Comprehensive Analysis**: Failure patterns, user feedback, intent accuracy, actionable suggestions
+- **CLI Tool**: `python -m Tests.run_self_learning` for on-demand analysis
+- **Failure Pattern Detection**: Groups errors by type with detailed query lists
+- **User Feedback Correlation**: Links negative/partial feedback to specific query patterns
+- **Intent Classification Audit**: Tracks unknown intent rate and misclassification patterns
+- **Suggestion Engine**: Generates targeted improvements for prompts, keywords, schema, examples
+- **JSON Report**: Full analysis saved to `/app/data/self_learning_report.json`
+
+#### Analysis Capabilities
+1. **Failure Analysis**: Total failures, error breakdown, validation retry counts, detailed error queries
+2. **User Feedback Analysis**: Satisfaction rate, partial success rate, feedback by intent, query lists
+3. **Intent Classification**: Unknown rate, distribution, most common intent
+4. **Suggestions**: Prompt rules, intent keywords, schema hints, few-shot examples
+
+#### Technical Implementation
+- `app/core/self_learner.py`: Analysis engine with failure/feedback/intent correlation
+- `Tests/run_self_learning.py`: CLI interface with formatted output and inline query display
+- **Metrics Integration**: Reads from production metrics (all queries, not just last 20)
+- **Feedback Integration**: Analyzes user feedback from persistent storage
+- **Report Format**: Human-readable summary + detailed JSON for programmatic access
+
+#### Use Cases
+- **Weekly Reviews**: Run analysis to identify improvement opportunities
+- **Post-Deployment**: Validate new prompt changes with production data
+- **Quality Monitoring**: Track satisfaction trends and error patterns
+- **Continuous Improvement**: Data-driven prompt optimization
+
+### Fixed - Metrics Collection Completeness (2025-12-23)
+- **Full Query History**: Self-learning now sees all queries (up to 100) instead of just last 20
+- **Immediate Persistence**: Metrics saved after every query instead of every 10
+- **Container Restart Safety**: All metrics persist across container restarts
+- **Accurate Analysis**: Self-learning analysis now reflects complete production data
+
 ### Added - User Feedback System (2025-12-22)
 - **Thumbs Up/Down Feedback**: Users can rate every bot answer as helpful or not helpful
 - **Feedback Analytics**: Real-time satisfaction tracking with breakdown by intent and user
