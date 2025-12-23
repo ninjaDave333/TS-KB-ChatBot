@@ -64,6 +64,42 @@ async def get_metrics():
     """Get production monitoring metrics."""
     return metrics_collector.get_metrics()
 
+@router.get("/feedback/analytics")
+async def get_feedback_analytics():
+    """Get user feedback analytics."""
+    try:
+        import json
+        from pathlib import Path
+        from collections import defaultdict
+        
+        feedback_file = Path("/home/ubuntu/meetingsBotLogs/persistentData/user_feedback.jsonl")
+        
+        if not feedback_file.exists():
+            return {"total_feedback": 0, "satisfaction_rate": 0}
+        
+        total = 0
+        positive = 0
+        by_intent = defaultdict(lambda: {"positive": 0, "negative": 0})
+        
+        with open(feedback_file) as f:
+            for line in f:
+                entry = json.loads(line)
+                total += 1
+                if entry["feedback"] == "positive":
+                    positive += 1
+                intent = entry.get("metadata", {}).get("method", "unknown")
+                by_intent[intent][entry["feedback"]] += 1
+        
+        return {
+            "total_feedback": total,
+            "positive": positive,
+            "negative": total - positive,
+            "satisfaction_rate": round((positive / total * 100) if total > 0 else 0, 1),
+            "by_intent": dict(by_intent)
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
 @router.get("/health/detailed")
 async def detailed_health():
     """Get detailed health status including performance metrics."""
@@ -130,13 +166,48 @@ async def suggest_query_improvements(request: QueryRequest):
 
 class FeedbackRequest(BaseModel):
     query: str
+    answer: str
+    feedback: str  # 'positive' or 'negative'
+    metadata: Optional[dict] = None
+    user: Optional[str] = None
+    timestamp: str
+
+@router.post("/feedback")
+async def record_user_feedback(request: FeedbackRequest, user: dict = Depends(get_jwt_user)):
+    """Record user feedback (thumbs up/down) for answers."""
+    try:
+        import json
+        from pathlib import Path
+        
+        # Store feedback in persistentData
+        feedback_file = Path("/home/ubuntu/meetingsBotLogs/persistentData/user_feedback.jsonl")
+        feedback_file.parent.mkdir(parents=True, exist_ok=True)
+        
+        feedback_entry = {
+            "query": request.query,
+            "answer": request.answer,
+            "feedback": request.feedback,
+            "metadata": request.metadata,
+            "user": request.user or user.get("email"),
+            "timestamp": request.timestamp
+        }
+        
+        with open(feedback_file, "a") as f:
+            f.write(json.dumps(feedback_entry) + "\n")
+        
+        return {"status": "feedback_recorded"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class LearningFeedbackRequest(BaseModel):
+    query: str
     cypher: str
     execution_time: float
     data_count: int
     user_rating: Optional[float] = None
 
 @router.post("/learning/feedback")
-async def record_feedback(request: FeedbackRequest):
+async def record_learning_feedback(request: LearningFeedbackRequest):
     """Record feedback for query learning."""
     try:
         enhanced_generator.record_query_success(

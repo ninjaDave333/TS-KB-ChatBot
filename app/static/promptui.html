@@ -15,6 +15,11 @@
         .user-bubble { display: inline-block; background: #2563eb; color: white; padding: 10px 15px; border-radius: 18px 18px 4px 18px; max-width: 70%; }
         .bot-message { text-align: left; }
         .bot-bubble { display: inline-block; background: #e5e7eb; color: #374151; padding: 10px 15px; border-radius: 18px 18px 18px 4px; max-width: 70%; white-space: pre-line; }
+        .feedback-buttons { margin-top: 8px; display: flex; gap: 8px; }
+        .feedback-btn { padding: 4px 12px; border: 1px solid #d1d5db; background: white; border-radius: 12px; cursor: pointer; font-size: 12px; }
+        .feedback-btn:hover { background: #f3f4f6; }
+        .feedback-btn.active-positive { background: #10b981; color: white; border-color: #10b981; }
+        .feedback-btn.active-negative { background: #ef4444; color: white; border-color: #ef4444; }
         .input-container { padding: 20px; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; }
         .input-field { flex: 1; padding: 12px; border: 1px solid #d1d5db; border-radius: 25px; outline: none; }
         .send-btn { padding: 12px 24px; background: #2563eb; color: white; border: none; border-radius: 25px; cursor: pointer; }
@@ -181,6 +186,37 @@
         
         const authManager = new AuthManager();
         
+        async function handleFeedback(btn, answer, metadata) {
+            const feedback = btn.dataset.feedback;
+            const query = decodeURIComponent(btn.dataset.query);
+            
+            // Disable both buttons
+            btn.parentElement.querySelectorAll('.feedback-btn').forEach(b => b.disabled = true);
+            
+            // Highlight selected
+            btn.classList.add(feedback === 'positive' ? 'active-positive' : 'active-negative');
+            
+            try {
+                await fetch('/api/v1/feedback', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        query,
+                        answer,
+                        feedback,
+                        metadata,
+                        user: currentUser?.email,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+            } catch (error) {
+                console.error('Feedback submission failed:', error);
+            }
+        }
+        
         function updateUI() {
             if (currentUser && accessToken) {
                 authSection.classList.add('hidden');
@@ -214,6 +250,20 @@
                 metaDiv.className = 'metadata';
                 metaDiv.textContent = `Method: ${metadata.method} | Data: ${metadata.dataCount} items | Time: ${metadata.executionTime}s`;
                 messageDiv.appendChild(metaDiv);
+                
+                // Add feedback buttons
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = 'feedback-buttons';
+                feedbackDiv.innerHTML = `
+                    <button class="feedback-btn" data-feedback="positive" data-query="${encodeURIComponent(chatHistory[chatHistory.length - 1]?.content || '')}">👍 Helpful</button>
+                    <button class="feedback-btn" data-feedback="negative" data-query="${encodeURIComponent(chatHistory[chatHistory.length - 1]?.content || '')}">👎 Not Helpful</button>
+                `;
+                messageDiv.appendChild(feedbackDiv);
+                
+                // Attach feedback handlers
+                feedbackDiv.querySelectorAll('.feedback-btn').forEach(btn => {
+                    btn.addEventListener('click', () => handleFeedback(btn, content, metadata));
+                });
             }
             
             chatContainer.appendChild(messageDiv);

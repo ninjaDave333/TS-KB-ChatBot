@@ -182,12 +182,12 @@
             <div class="value" id="total-queries">0</div>
         </div>
         <div class="stat-card">
-            <h3>Avg Response Time</h3>
-            <div class="value" id="avg-response"><span class="unit">ms</span></div>
+            <h3>User Satisfaction</h3>
+            <div class="value" id="satisfaction-rate"><span class="unit">%</span></div>
         </div>
         <div class="stat-card">
-            <h3>Validation Pass Rate</h3>
-            <div class="value" id="validation-rate"><span class="unit">%</span></div>
+            <h3>Avg Response Time</h3>
+            <div class="value" id="avg-response"><span class="unit">ms</span></div>
         </div>
         <div class="stat-card">
             <h3>Error Rate</h3>
@@ -228,25 +228,25 @@
         
         async function fetchMetrics() {
             try {
-                const response = await fetch('/api/v1/metrics');
-                const data = await response.json();
-                updateDashboard(data);
+                const [metricsRes, feedbackRes] = await Promise.all([
+                    fetch('/api/v1/metrics'),
+                    fetch('/api/v1/feedback/analytics')
+                ]);
+                const metrics = await metricsRes.json();
+                const feedback = await feedbackRes.json();
+                updateDashboard(metrics, feedback);
             } catch (error) {
                 console.error('Failed to fetch metrics:', error);
             }
         }
         
-        function updateDashboard(data) {
+        function updateDashboard(data, feedback) {
             // Update stats
             document.getElementById('total-queries').textContent = data.total_queries || 0;
+            document.getElementById('satisfaction-rate').innerHTML = 
+                `${feedback.satisfaction_rate || 0}<span class="unit">%</span>`;
             document.getElementById('avg-response').innerHTML = 
                 `${(data.performance?.avg_response_time * 1000 || 0).toFixed(0)}<span class="unit">ms</span>`;
-            
-            // Calculate validation pass rate (queries that passed on first attempt)
-            const firstAttempt = data.validation_attempts?.['1'] || 0;
-            const total = data.total_queries || 1;
-            const passRate = ((firstAttempt / total) * 100).toFixed(1);
-            document.getElementById('validation-rate').innerHTML = `${passRate}<span class="unit">%</span>`;
             
             // Calculate error rate
             const errorCount = Object.values(data.errors || {}).reduce((a, b) => a + b, 0);
