@@ -13,7 +13,7 @@ import threading
 class MetricsCollector:
     """Thread-safe metrics collector for production monitoring."""
     
-    def __init__(self, metrics_file: str = "data/production_metrics.json"):
+    def __init__(self, metrics_file: str = "/app/data/production_metrics.json"):
         self.metrics_file = Path(metrics_file)
         self.metrics_file.parent.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
@@ -81,7 +81,7 @@ class MetricsCollector:
             # Add to history
             self.query_history.append({
                 'timestamp': datetime.now().isoformat(),
-                'query': query[:100],  # Truncate long queries
+                'query': query[:200],  # Increased from 100 to 200 chars
                 'intent': intent,
                 'validation_attempts': validation_attempts,
                 'response_time': round(response_time, 2),

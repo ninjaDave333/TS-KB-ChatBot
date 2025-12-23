@@ -1,3 +1,0 @@
-case,question,context_utilization,answer_similarity,context_relevancy,average_score
-1,How many Israeli clients do we have?,1.0,0.95,1.0,0.983
-2,What HashiCorp products were purchased in 2025?,1.0,0.9,0.9,0.933

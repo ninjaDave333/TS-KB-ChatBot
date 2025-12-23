@@ -55,6 +55,8 @@ async def render_answer(
         "  write a clear, concise, human-friendly explanation.\n"
         "- Do NOT invent new numeric values or entities. Only describe what is present\n"
         "  in the rows and what logically follows from them.\n"
+        "- CRITICAL: When rows contain lists or arrays (like latest_meetings), you MUST\n"
+        "  display the actual values from those lists, not generic descriptions.\n"
         "\n"
         "STYLE\n"
         "- Answer in natural language, not JSON or tables.\n"
@@ -63,6 +65,7 @@ async def render_answer(
         "- If there are amounts or counts, reference them, but do not fabricate any.\n"
         "- If there are many rows, summarize the main patterns instead of listing all.\n"
         "- Use markdown formatting for better readability (bold, lists, etc.).\n"
+        "- When displaying meeting titles or list items, show the ACTUAL values from the data.\n"
     )
     
     user_prompt = (

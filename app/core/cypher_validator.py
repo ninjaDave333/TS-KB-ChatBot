@@ -111,6 +111,10 @@ def validate_cypher_syntax(cypher: str) -> Tuple[bool, str]:
     
     upper_cyp = cypher.upper()
     
+    # Check for APOC functions
+    if "APOC." in upper_cyp:
+        return False, "APOC functions not available - use native Cypher only"
+    
     # Check for SQL-ONLY keywords
     sql_only_keywords = ["SELECT", "FROM", "GROUP BY", "HAVING", "INNER JOIN", "LEFT JOIN", "RIGHT JOIN"]
     for kw in sql_only_keywords:
@@ -162,6 +166,17 @@ def reject_if_forbidden_schema(cypher: str) -> None:
     for bad in forbidden:
         if bad in upper_cyp:
             raise ValueError(f"Generated Cypher contains forbidden write clause: {bad.strip()}")
+    
+    # Check for CalendarEvent queries using .name instead of .title
+    if "CalendarEvent" in cypher or "ce." in cypher:
+        if re.search(r"\bce\.name\b", cypher) or re.search(r"\bm\.name\b", cypher):
+            raise ValueError("Use ce.title for meeting names, NOT ce.name (which contains UUID)")
+        # Check for unaliased ce.owner in WITH clause
+        if re.search(r"WITH ce\.owner,", cypher):
+            raise ValueError("Expression ce.owner in WITH must be aliased: use 'WITH ce.owner AS owner'")
+        # Check for invalid collect with ORDER BY inside
+        if re.search(r"collect\([^)]+ORDER BY", cypher, re.IGNORECASE):
+            raise ValueError("Cannot use ORDER BY inside collect(). Use ORDER BY before WITH, then collect()")
 
 
 def suggest_correction(cypher: str, error_reason: str) -> str:

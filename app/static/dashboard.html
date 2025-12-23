@@ -242,7 +242,8 @@
         
         function updateDashboard(data, feedback) {
             // Update stats
-            document.getElementById('total-queries').textContent = data.total_queries || 0;
+            const total = data.total_queries || 1;
+            document.getElementById('total-queries').textContent = total;
             document.getElementById('satisfaction-rate').innerHTML = 
                 `${feedback.satisfaction_rate || 0}<span class="unit">%</span>`;
             document.getElementById('avg-response').innerHTML = 

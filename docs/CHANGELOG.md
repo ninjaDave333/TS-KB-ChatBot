@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - User Feedback System (2025-12-22)
+- **Thumbs Up/Down Feedback**: Users can rate every bot answer as helpful or not helpful
+- **Feedback Analytics**: Real-time satisfaction tracking with breakdown by intent and user
+- **Dashboard Integration**: User satisfaction % displayed as KPI alongside query metrics
+- **Feedback Storage**: Persistent JSONL storage at `/home/ubuntu/meetingsBotLogs/persistentData/user_feedback.jsonl`
+- **Analytics Endpoint**: `/api/v1/feedback/analytics` returns satisfaction rate and detailed breakdowns
+- **Feedback Script**: `Tests/analyze_feedback.py` for offline analysis and reporting
+
+#### Technical Implementation
+- **Frontend**: Feedback buttons on every bot response with visual state (green/red highlighting)
+- **Backend**: POST `/api/v1/feedback` endpoint recording query, answer, feedback type, metadata, user, timestamp
+- **Dashboard**: Auto-refresh satisfaction rate every 10 seconds alongside other KPIs
+- **Storage Format**: One JSON line per feedback entry for easy parsing and GDPR compliance
+
+#### Metrics Tracked
+- Total feedback count (positive + negative)
+- Satisfaction rate percentage
+- Feedback breakdown by intent (sales_v1, calendar_v1, product_v1, strict_v1)
+- Feedback breakdown by user email
+- Recent feedback history (last 10 entries)
+
+#### Use Cases
+- Track overall system quality and user satisfaction trends
+- Identify which query types receive negative feedback
+- Measure user engagement through feedback participation
+- Continuous improvement based on user ratings
+
+### Added - Intent Classification Improvements (2025-12-22)
+- **Priority-Based Keyword Matching**: Prevents sales_v1 from over-matching other intents
+- **Production Query Testing**: 100% accuracy on 20 real production queries
+- **Enhanced Keywords**: Added "installed", "invitedto", "syncmetadata", "scanmetadata", "activities", "assignments"
+- **Metadata Detection**: Explicit strict_v1 classification for metadata/activities queries
+- **Keyword Hierarchy**: Product → Calendar → Product (broad) → Sales → Metadata → Strict (default)
+
+#### Technical Implementation
+- **Keyword Priority**: Strong product keywords checked first (hashicorp, terraform, vault, vendor, license)
+- **Calendar Keywords**: Meeting, recording, calendar, event, invite, scheduled
+- **Product Keywords**: Product, purchased, bought, acquired, solution
+- **Sales Keywords**: Deal, revenue, closed won, win rate
+- **Metadata Keywords**: syncmetadata, scanmetadata, activities, assignments
+
+#### Test Results
+- **Production Accuracy**: 100% (20/20 real queries classified correctly)
+- **Synthetic Test Issues**: Ollama-generated queries inconsistent, not reliable for testing
+- **Production Failures Fixed**: All 3 "unknown" intent failures now properly classified
+- **Expected Improvement**: 85% → 95%+ success rate in production
+
+#### Files Modified
+- `app/core/prompt_profiles.py`: Updated classify_question_intent() with priority-based logic
+- `app/static/promptui.html`: Added white-space: pre-line for line break preservation
+- `Tests/production_intent_test.py`: Created production query validation test
+- `Tests/intent_test_detailed.py`: Synthetic query test (less reliable)
+
 ### Added - Production Monitoring Dashboard (2025-12-22)
 - **Real-time Metrics Dashboard**: Live monitoring at `/dashboard` with auto-refresh every 10 seconds
 - **Metrics Collector**: Thread-safe tracking of query performance, intent distribution, validation stats, and errors

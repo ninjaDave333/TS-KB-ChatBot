@@ -40,6 +40,8 @@ RULES_SUMMARY = """
 Rules:
 - ALWAYS generate Cypher that is READ-ONLY.
 - Do NOT use CREATE, MERGE, DELETE, DETACH, or SET.
+- Do NOT use APOC functions (apoc.*) - they are not available.
+- For sorting collected items, use ORDER BY before collect() instead of sorting after.
 - For "top active clients in YEAR":
   - Use Closed Won opportunities:
     MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)
@@ -101,12 +103,14 @@ PROMPT_PROFILES: Dict[str, Dict[str, str]] = {
         "system": (
             SCHEMA_SUMMARY + "\n" + RULES_SUMMARY +
             "\nFOCUS: This is a calendar/meeting query. Emphasize:" +
-            "\n- CalendarEvent node properties: owner, startTime, endTime, title, externalParticipants, internalParticipants" +
+            "\n- CalendarEvent node properties: owner, startTime, endTime, title, name, externalParticipants, internalParticipants" +
+            "\n- CRITICAL: Use ce.title for meeting names/titles (NOT ce.name which is the ID)" +
+            "\n- CRITICAL: In WITH clauses, ALWAYS alias expressions: WITH ce.owner AS owner, count(ce) AS meeting_count" +
+            "\n- CRITICAL: When collecting meeting titles, filter out generic ones: WHERE NOT ce.title STARTS WITH 'Teams Meeting'" +
             "\n- For employee meeting activity: MATCH (ce:CalendarEvent) then count by ce.owner" +
+            "\n- For latest meetings: Filter BEFORE collecting, then ORDER BY startTime DESC and collect(ce.title)[0..3]" +
             "\n- Use toLower() and CONTAINS for case-insensitive matching" +
             "\n- For date ranges: WHERE ce.startTime >= datetime('2025-01-01')" +
-            "\n- AVOID complex list comprehensions with WHERE clauses - use simple MATCH patterns" +
-            "\n- Example: MATCH (ce:CalendarEvent) WHERE toLower(ce.owner) CONTAINS '@' WITH ce.owner AS employee, count(ce) AS meeting_count" +
             "\n" + FEW_SHOT_EXAMPLES +
             "\nYou MUST answer ONLY with a Cypher query, no explanation, no markdown, no backticks."
         ),
