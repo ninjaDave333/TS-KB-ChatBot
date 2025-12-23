@@ -93,9 +93,8 @@ class MetricsCollector:
             if len(self.query_history) > 100:
                 self.query_history = self.query_history[-100:]
             
-            # Persist every 10 queries
-            if self.total_queries % 10 == 0:
-                self._save_metrics()
+            # Persist immediately
+            self._save_metrics()
     
     def get_metrics(self) -> Dict[str, Any]:
         """Get current metrics snapshot."""

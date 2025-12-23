@@ -21,18 +21,25 @@ class BedrockClient:
                 return json.load(f)
         return {"temperature": 0.1, "prompt_profile": "strict_v1"}
     
-    async def generate_cypher(self, user_query: str, schema: Dict[str, Any], trace=None) -> tuple[str, str, int]:
+    async def generate_cypher(self, user_query: str, schema: Dict[str, Any], trace=None, conversation_history=None) -> tuple[str, str, int]:
         """
         Generate Cypher queries using intent-based routing and validation retry.
+        
+        Args:
+            user_query: Current user question
+            schema: Neo4j schema
+            trace: Tracing object
+            conversation_history: List of {"role": "user"|"assistant", "content": "..."}
         
         Returns: (cypher_query, intent, validation_attempts)
         
         Flow:
         1. Classify intent (sales_v1, calendar_v1, product_v1, strict_v1)
         2. Get intent-specific prompts
-        3. Generate Cypher with LLM
-        4. Validate and clean
-        5. Retry with correction if validation fails (max 2 attempts)
+        3. Add conversation context if provided
+        4. Generate Cypher with LLM
+        5. Validate and clean
+        6. Retry with correction if validation fails (max 2 attempts)
         """
         
         if not self.llm_client:
@@ -44,6 +51,15 @@ class BedrockClient:
         
         # Step 2: Get intent-specific prompts
         system_prompt, user_prompt = get_prompt_for_intent(intent, user_query)
+        
+        # Step 3: Add conversation context if provided
+        if conversation_history and len(conversation_history) > 0:
+            context_str = "\n\nPrevious conversation context:\n"
+            for msg in conversation_history[-4:]:  # Last 2 exchanges (4 messages)
+                role = "User" if msg["role"] == "user" else "Assistant"
+                context_str += f"{role}: {msg['content'][:200]}\n"
+            user_prompt = context_str + "\nCurrent question: " + user_query
+            print(f"[Context] Added {len(conversation_history)} previous messages")
         
         # Step 3: Get temperature from best config
         temperature = self.best_config.get("temperature", 0.1)

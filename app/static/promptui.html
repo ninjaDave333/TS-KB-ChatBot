@@ -83,6 +83,7 @@
         const signInBtn = document.getElementById('signInBtn');
         
         let chatHistory = [];
+        let conversationHistory = [];  // For API context
         let accessToken = null;
         let currentUser = null;
         
@@ -297,6 +298,7 @@
             if (!message) return;
 
             addMessage(message, true);
+            conversationHistory.push({role: "user", content: message});
             messageInput.value = '';
             sendBtn.disabled = true;
             showLoading();
@@ -308,7 +310,10 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${accessToken}`
                     },
-                    body: JSON.stringify({ query: message })
+                    body: JSON.stringify({ 
+                        query: message,
+                        conversation_history: conversationHistory.slice(-6)  // Last 3 exchanges
+                    })
                 });
 
                 removeLoading();
@@ -321,6 +326,7 @@
                         executionTime: data.execution_time ? data.execution_time.toFixed(2) : '0.00'
                     };
                     addMessage(data.answer, false, metadata);
+                    conversationHistory.push({role: "assistant", content: data.answer});
                 } else if (response.status === 401) {
                     addMessage('Authentication expired. Please sign in again.', false);
                     authManager.signOut();
@@ -345,6 +351,7 @@
                 </div>
             `;
             chatHistory = [];
+            conversationHistory = [];  // Clear conversation context
         }
 
         sendBtn.addEventListener('click', sendMessage);

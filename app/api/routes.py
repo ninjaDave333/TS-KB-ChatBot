@@ -32,6 +32,7 @@ answer_generator = AnswerGenerator()
 class QueryRequest(BaseModel):
     query: str
     use_ai: bool = True
+    conversation_history: Optional[list] = None  # [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]
 
 class QueryResponse(BaseModel):
     query: str
@@ -240,7 +241,9 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
             try:
                 print(f"Attempting AI generation for: {request.query}")
                 # ALWAYS use AI generation (like CLI demo) - validation handled in BedrockClient
-                cypher_query, intent, validation_attempts = await bedrock_client.generate_cypher(request.query, schema, trace)
+                cypher_query, intent, validation_attempts = await bedrock_client.generate_cypher(
+                    request.query, schema, trace, conversation_history=request.conversation_history
+                )
                 print(f"AI generated successfully: {cypher_query}")
                 method = "ai_generated"
             except Exception as e:
