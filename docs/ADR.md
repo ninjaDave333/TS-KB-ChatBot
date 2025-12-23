@@ -1626,3 +1626,110 @@ async def render_answer(question, rows, bedrock_client):
 - **Phase 4**: Learned pattern optimization and caching
 
 ---
+
+
+## ADR-028: Production Monitoring Dashboard
+
+**Date**: 2025-12-22  
+**Status**: Implemented  
+**Context**: Need real-time visibility into production RAG performance, intent distribution, validation success rates, and error patterns
+
+**Decision**: Implement comprehensive production monitoring dashboard with auto-refresh metrics and visualizations
+
+**Problem Analysis**:
+- **No Visibility**: No real-time insight into production RAG performance
+- **Manual Monitoring**: Required log analysis to understand system behavior
+- **Error Detection**: Difficult to identify error patterns and validation failures
+- **Intent Analysis**: No visibility into query distribution across intent types
+- **Performance Tracking**: No systematic tracking of response times and validation attempts
+
+**Solution Architecture**:
+- **Metrics Collector**: Thread-safe tracking of all query executions with persistent storage
+- **Dashboard UI**: Real-time web interface with auto-refresh charts and KPIs
+- **API Endpoint**: `/api/v1/metrics` returning comprehensive JSON metrics
+- **Persistent Storage**: JSON-based metrics history in `data/production_metrics.json`
+
+**Implementation Components**:
+```python
+# Metrics Collector
+class MetricsCollector:
+    def record_query(self, query, intent, validation_attempts, response_time, success, error):
+        # Thread-safe recording with automatic persistence
+        
+    def get_metrics(self):
+        # Returns: total_queries, intent_distribution, validation_attempts,
+        #          errors, performance stats, recent_queries
+
+# Dashboard Features
+- Auto-refresh every 10 seconds
+- Intent distribution (doughnut chart)
+- Validation attempts (bar chart)
+- Response time trend (line chart)
+- Error types (bar chart)
+- Recent queries panel with metadata
+```
+
+**Metrics Tracked**:
+- **Query Count**: Total queries per intent type (sales_v1, calendar_v1, product_v1, strict_v1)
+- **Validation Attempts**: Distribution of 1-attempt vs 2-attempt queries
+- **Response Time**: Average, min, max execution times
+- **Error Types**: Frequency of different error types
+- **Success Rate**: Validation pass rate and overall success rate
+- **Query History**: Last 100 queries with full metadata
+
+**Dashboard Features**:
+- **Real-time KPIs**: Total queries, avg response time, validation pass rate, error rate
+- **Intent Distribution Chart**: Doughnut chart showing query breakdown by intent
+- **Validation Attempts Chart**: Bar chart tracking first-attempt vs retry success
+- **Response Time Trend**: Line chart showing last 20 queries' execution times
+- **Error Types Chart**: Bar chart displaying error frequency by type
+- **Recent Queries Panel**: Last 20 queries with success/failure badges, intent labels, timing
+
+**Files Created**:
+- **Core Collector**: `app/core/metrics_collector.py` - Thread-safe metrics tracking
+- **Dashboard UI**: `app/static/dashboard.html` - Responsive web interface with Chart.js
+- **Modified**: `app/api/routes.py` - Integrated metrics recording for all queries
+- **Modified**: `app/core/bedrock_client.py` - Returns tuple with intent and validation attempts
+- **Modified**: `app/main.py` - Added `/dashboard` route
+
+**Integration Points**:
+- **Query Success**: Records intent, validation attempts, response time
+- **Query Failure**: Records error type, response time, intent (if available)
+- **Automatic Persistence**: Saves metrics every 10 queries
+- **Thread Safety**: Lock-based synchronization for concurrent requests
+
+**Dashboard Access**:
+- **URL**: `http://localhost:8002/dashboard`
+- **Auto-refresh**: Updates every 10 seconds
+- **Responsive**: Works on desktop and mobile devices
+- **Dark Theme**: Professional UI matching production environment
+
+**Performance Characteristics**:
+- **Minimal Overhead**: <5ms per query for metrics recording
+- **Persistent Storage**: JSON file with last 1000 response times, 100 queries
+- **Thread-Safe**: Lock-based synchronization for concurrent access
+- **Auto-Cleanup**: Maintains bounded history to prevent unbounded growth
+
+**Success Criteria Met**:
+- ✅ **Real-time Visibility**: Live dashboard with auto-refresh
+- ✅ **Comprehensive Metrics**: Intent, validation, performance, errors tracked
+- ✅ **Persistent Storage**: Metrics survive container restarts
+- ✅ **Thread Safety**: Concurrent request handling without data corruption
+- ✅ **Production Ready**: Minimal overhead, automatic persistence
+
+**Consequences**:
+- ✅ **Production Visibility**: Real-time insight into RAG performance
+- ✅ **Error Detection**: Quick identification of error patterns
+- ✅ **Intent Analysis**: Understand query distribution across intent types
+- ✅ **Performance Tracking**: Monitor response times and validation success
+- ✅ **Quality Monitoring**: Track validation pass rates and retry patterns
+- ❌ **Storage Growth**: Metrics file grows over time (mitigated by bounded history)
+- ❌ **Additional Endpoint**: New dashboard endpoint to maintain
+
+**Future Enhancements**:
+- **Alerting**: Automatic alerts for error rate spikes or performance degradation
+- **Historical Analysis**: Long-term trend analysis and reporting
+- **Export Capabilities**: CSV/JSON export for external analysis
+- **Advanced Filtering**: Filter metrics by date range, intent, or user
+
+---

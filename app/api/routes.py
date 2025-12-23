@@ -11,6 +11,7 @@ from app.core.llm_client import LLMClient
 from app.core.answer_generator import AnswerGenerator
 from app.core.answer_renderer import render_answer
 from app.core.performance_monitor import performance_monitor
+from app.core.metrics_collector import metrics_collector
 from app.core.config import get_rag_config
 from app.core.tracing import new_trace, safe_write_trace
 import time
@@ -60,8 +61,8 @@ async def get_schema():
 
 @router.get("/metrics")
 async def get_metrics():
-    """Get system performance metrics."""
-    return performance_monitor.get_performance_summary()
+    """Get production monitoring metrics."""
+    return metrics_collector.get_metrics()
 
 @router.get("/health/detailed")
 async def detailed_health():
@@ -162,11 +163,13 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
         error_msg = None
         
         # Generate Cypher query with dynamic learning
+        intent = None
+        validation_attempts = 1
         if request.use_ai:
             try:
                 print(f"Attempting AI generation for: {request.query}")
                 # ALWAYS use AI generation (like CLI demo) - validation handled in BedrockClient
-                cypher_query = await bedrock_client.generate_cypher(request.query, schema, trace)
+                cypher_query, intent, validation_attempts = await bedrock_client.generate_cypher(request.query, schema, trace)
                 print(f"AI generated successfully: {cypher_query}")
                 method = "ai_generated"
             except Exception as e:
@@ -239,6 +242,15 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
                 data_count=len(result)
             )
         
+        # Record metrics
+        metrics_collector.record_query(
+            query=request.query,
+            intent=intent or "unknown",
+            validation_attempts=validation_attempts,
+            response_time=execution_time,
+            success=True
+        )
+        
         # Complete trace before returning
         trace.final_answer = answer
         safe_write_trace(trace)
@@ -254,6 +266,17 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
         )
     
     except Exception as e:
+        # Record metrics for failure
+        execution_time = time.time() - start_time
+        metrics_collector.record_query(
+            query=request.query,
+            intent="unknown",
+            validation_attempts=1,
+            response_time=execution_time,
+            success=False,
+            error=type(e).__name__
+        )
+        
         # Record query failure for learning
         try:
             enhanced_generator.record_query_failure(

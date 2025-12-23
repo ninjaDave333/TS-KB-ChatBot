@@ -62,6 +62,10 @@ async def health():
 async def prompt_ui():
     return FileResponse("app/static/promptui.html")
 
+@app.get("/dashboard")
+async def dashboard():
+    return FileResponse("app/static/dashboard.html")
+
 if __name__ == "__main__":
     import uvicorn
     import os

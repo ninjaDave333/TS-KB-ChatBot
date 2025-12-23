@@ -21,9 +21,11 @@ class BedrockClient:
                 return json.load(f)
         return {"temperature": 0.1, "prompt_profile": "strict_v1"}
     
-    async def generate_cypher(self, user_query: str, schema: Dict[str, Any], trace=None) -> str:
+    async def generate_cypher(self, user_query: str, schema: Dict[str, Any], trace=None) -> tuple[str, str, int]:
         """
         Generate Cypher queries using intent-based routing and validation retry.
+        
+        Returns: (cypher_query, intent, validation_attempts)
         
         Flow:
         1. Classify intent (sales_v1, calendar_v1, product_v1, strict_v1)
@@ -77,7 +79,7 @@ class BedrockClient:
                 if not errors:
                     print(f"[Validation] ✓ Passed on attempt {attempt + 1}")
                     print(f"[Final Cypher] {cypher}")
-                    return cypher
+                    return cypher, intent, attempt + 1
                 
                 # Validation failed
                 print(f"[Validation] ✗ Failed on attempt {attempt + 1}: {errors}")

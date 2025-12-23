@@ -132,44 +132,44 @@ PROMPT_PROFILES: Dict[str, Dict[str, str]] = {
 
 def classify_question_intent(question: str) -> str:
     """
-    Classify question intent using keyword matching.
+    Classify question intent using keyword matching with priority order.
     Returns: 'sales_v1', 'calendar_v1', 'product_v1', or 'strict_v1' (default)
     """
     q_lower = question.lower()
     
-    # Calendar / Meeting keywords
+    # High-priority product keywords (check first)
+    strong_product_keywords = ["hashicorp", "terraform", "vault", "consul", "vendor", "license", "installed"]
+    if any(kw in q_lower for kw in strong_product_keywords):
+        return "product_v1"
+    
+    # Calendar keywords (check second)
     calendar_keywords = [
         "meeting", "recording", "calendar", "event", "call", "invite", "invited",
-        "owner of", "participant", "attendee", "transcript", "subject", "agenda"
+        "invitedto", "owner of", "participant", "attendee", "transcript", "scheduled"
     ]
-    
-    # Sales / Deal keywords
-    sales_keywords = [
-        "deal", "opportunity", "revenue", "sold", "sales", "pipeline", "closed won",
-        "closed lost", "client", "customer", "purchase", "deal count", "top selling",
-        "best performing", "successful deals", "win rate"
-    ]
-    
-    # Product / Vendor keywords
-    product_keywords = [
-        "product", "vendor", "solution", "feature", "installed", "family",
-        "license", "asset", "version", "deployment", "tool"
-    ]
-    
-    # Count keyword matches
-    calendar_score = sum(1 for kw in calendar_keywords if kw in q_lower)
-    sales_score = sum(1 for kw in sales_keywords if kw in q_lower)
-    product_score = sum(1 for kw in product_keywords if kw in q_lower)
-    
-    # Return the highest scoring intent
-    if calendar_score > 0 and calendar_score >= sales_score and calendar_score >= product_score:
+    if any(kw in q_lower for kw in calendar_keywords):
         return "calendar_v1"
-    elif sales_score > 0 and sales_score >= product_score:
-        return "sales_v1"
-    elif product_score > 0:
+    
+    # Product keywords (broader, check third)
+    product_keywords = ["product", "purchased", "bought", "acquired", "solution"]
+    if any(kw in q_lower for kw in product_keywords):
         return "product_v1"
-    else:
+    
+    # Sales keywords (check fourth)
+    sales_keywords = [
+        "deal", "revenue", "closed won", "closed lost", "win rate",
+        "top selling", "best performing", "successful deals"
+    ]
+    if any(kw in q_lower for kw in sales_keywords):
+        return "sales_v1"
+    
+    # Metadata/activities keywords (check fifth for strict_v1)
+    metadata_keywords = ["syncmetadata", "scanmetadata", "activities", "assignments"]
+    if any(kw in q_lower for kw in metadata_keywords):
         return "strict_v1"
+    
+    # Default: strict_v1 for ambiguous queries (pipeline, opportunities)
+    return "strict_v1"
 
 
 def get_prompt_for_intent(intent: str, question: str) -> Tuple[str, str]:

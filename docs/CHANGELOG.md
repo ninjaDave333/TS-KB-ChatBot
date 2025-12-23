@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Production Monitoring Dashboard (2025-12-22)
+- **Real-time Metrics Dashboard**: Live monitoring at `/dashboard` with auto-refresh every 10 seconds
+- **Metrics Collector**: Thread-safe tracking of query performance, intent distribution, validation stats, and errors
+- **Intent Distribution Chart**: Doughnut chart showing breakdown of sales_v1, calendar_v1, product_v1, strict_v1 queries
+- **Validation Attempts Chart**: Bar chart tracking first-attempt vs retry success rates
+- **Response Time Trend**: Line chart showing last 20 queries' execution times
+- **Error Types Chart**: Bar chart displaying error frequency by type
+- **Recent Queries Panel**: Last 20 queries with success/failure badges, intent labels, timing, and validation attempts
+- **Key Performance Indicators**: Total queries, avg response time, validation pass rate, error rate
+- **Persistent Metrics Storage**: JSON-based metrics history in `data/production_metrics.json`
+- **API Endpoint**: `/api/v1/metrics` returning comprehensive JSON metrics
+
+#### Technical Implementation
+- `app/core/metrics_collector.py`: Thread-safe metrics collection with automatic persistence every 10 queries
+- `app/static/dashboard.html`: Responsive dashboard with Chart.js visualizations and dark theme
+- `app/api/routes.py`: Integrated metrics recording for all query executions (success and failure)
+- `app/core/bedrock_client.py`: Returns tuple (cypher, intent, validation_attempts) for metrics tracking
+- `app/main.py`: Added `/dashboard` route for monitoring interface
+
+#### Dashboard Features
+- **Auto-refresh**: Updates every 10 seconds without page reload
+- **Responsive Design**: Works on desktop and mobile devices
+- **Dark Theme**: Professional UI matching production environment
+- **Real-time Stats**: Live KPIs with color-coded badges
+- **Query History**: Detailed view of recent queries with metadata
+- **Chart Visualizations**: Interactive charts for trend analysis
+
+#### Metrics Tracked
+- Query count per intent type (sales_v1, calendar_v1, product_v1, strict_v1)
+- Validation attempts distribution (1 attempt vs 2 attempts)
+- Response time statistics (avg, min, max)
+- Error types and frequencies
+- Success/failure rates
+- Query history with timestamps
+
+#### Benefits
+- **Visibility**: Real-time insight into production RAG performance
+- **Quality Monitoring**: Track validation pass rates and error patterns
+- **Intent Analysis**: Understand query distribution across intent types
+- **Performance Tracking**: Monitor response times and identify bottlenecks
+- **Error Detection**: Quick identification of error patterns for debugging
+
 ### Added - Self-Learning RAG Integration Phase 1 (2025-12-22)
 - **Intent-Based Prompt Routing**: Automatic question classification into 4 specialized profiles (sales_v1, calendar_v1, product_v1, strict_v1)
 - **Prompt Profiles System**: Intent-specific prompts with schema emphasis, few-shot examples, and validation rules
