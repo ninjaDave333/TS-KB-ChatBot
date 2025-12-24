@@ -67,7 +67,11 @@ class MetricsCollector:
                      validation_attempts: int,
                      response_time: float,
                      success: bool,
-                     error: Optional[str] = None):
+                     error: Optional[str] = None,
+                     user: Optional[str] = None,
+                     trace_id: Optional[str] = None,
+                     cypher: Optional[str] = None,
+                     answer: Optional[str] = None):
         """Record a query execution."""
         with self._lock:
             self.total_queries += 1
@@ -86,7 +90,11 @@ class MetricsCollector:
                 'validation_attempts': validation_attempts,
                 'response_time': round(response_time, 2),
                 'success': success,
-                'error': error
+                'error': error,
+                'user': user,
+                'trace_id': trace_id,
+                'cypher': cypher[:500] if cypher else None,
+                'answer': answer[:500] if answer else None
             })
             
             # Keep only last 100
@@ -101,6 +109,14 @@ class MetricsCollector:
         with self._lock:
             avg_response_time = sum(self.response_times) / len(self.response_times) if self.response_times else 0
             
+            # Calculate per-user stats
+            user_stats = defaultdict(lambda: {'queries': 0, 'errors': 0})
+            for q in self.query_history:
+                user = q.get('user', 'anonymous')
+                user_stats[user]['queries'] += 1
+                if not q['success']:
+                    user_stats[user]['errors'] += 1
+            
             return {
                 'total_queries': self.total_queries,
                 'intent_distribution': dict(self.intent_counts),
@@ -111,6 +127,7 @@ class MetricsCollector:
                     'min_response_time': round(min(self.response_times), 2) if self.response_times else 0,
                     'max_response_time': round(max(self.response_times), 2) if self.response_times else 0,
                 },
+                'user_stats': dict(user_stats),
                 'recent_queries': self.query_history,  # Return all (up to 100)
                 'last_updated': datetime.now().isoformat()
             }

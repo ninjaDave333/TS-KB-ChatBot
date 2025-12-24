@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - SSH Deployment Automation (2025-12-24)
+- **Automated Deployment Script**: `build_and_run_auto.sh` for non-interactive deployments
+- **SSH Integration**: Direct deployment from local machine to remote server via SCP
+- **Amazon Q Rules**: SSH configuration stored in `.amazonq/rules/ssh_deployment.md` for persistent access
+- **Deployment Workflow**: Copy files → Run build_and_run_auto.sh → Container restarts automatically
+
+#### Technical Implementation
+- **SSH Commands**: Automated file copy and remote execution via `executeBash` tool
+- **Key Management**: Proper permissions handling for PEM keys on Windows
+- **Background Execution**: Auto script runs without blocking for log following
+- **Manual Override**: Original `build_and_run.sh` preserved for manual deployments with logs
+
+#### Deployment Commands
+```bash
+# Copy files
+scp -i D:\Projects\aipg.pem -r app/api app/core app/static Tests ubuntu@aipg.dudelabz.com:/path/
+
+# Auto rebuild (no log follow)
+ssh -i D:\Projects\aipg.pem ubuntu@aipg.dudelabz.com "cd /path && sudo ./build_and_run_auto.sh"
+
+# Manual rebuild (with logs)
+ssh -i D:\Projects\aipg.pem ubuntu@aipg.dudelabz.com "cd /path && sudo ./build_and_run.sh"
+```
+
 ### Added - Three-Tier User Feedback System (2025-12-23)
 - **Enhanced Feedback Options**: Replaced binary thumbs up/down with three-tier system:
   - 👍 **Helpful**: Perfect answer, fully satisfied

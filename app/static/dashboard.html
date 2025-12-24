@@ -113,6 +113,11 @@
             border-radius: 8px;
             margin-bottom: 10px;
             border-left: 3px solid #60a5fa;
+            cursor: pointer;
+        }
+        
+        .query-item:hover {
+            background: #1e293b;
         }
         
         .query-item.error {
@@ -123,6 +128,28 @@
             font-size: 14px;
             margin-bottom: 8px;
             color: #e2e8f0;
+        }
+        
+        .query-details {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background: #1e293b;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        
+        .query-details.expanded {
+            display: block;
+        }
+        
+        .query-details pre {
+            background: #0f172a;
+            padding: 8px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 5px 0;
         }
         
         .query-item .query-meta {
@@ -168,6 +195,31 @@
             font-size: 12px;
             margin-top: 20px;
         }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .pagination button {
+            padding: 8px 16px;
+            background: #334155;
+            color: #e2e8f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: #475569;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -212,11 +264,20 @@
             <h3>Error Types</h3>
             <canvas id="errorChart"></canvas>
         </div>
+        <div class="chart-card">
+            <h3>Top Users</h3>
+            <canvas id="userChart"></canvas>
+        </div>
     </div>
     
     <div class="recent-queries">
-        <h3>Recent Queries (Last 20)</h3>
+        <h3>Recent Queries (Click to expand)</h3>
         <div id="queries-list"></div>
+        <div class="pagination">
+            <button id="prevBtn" onclick="changePage(-1)">← Previous</button>
+            <span id="pageInfo" style="color: #94a3b8; align-self: center;"></span>
+            <button id="nextBtn" onclick="changePage(1)">Next →</button>
+        </div>
     </div>
     
     <div class="refresh-info">
@@ -225,6 +286,9 @@
     
     <script>
         let charts = {};
+        let allQueries = [];
+        let currentPage = 0;
+        const pageSize = 20;
         
         async function fetchMetrics() {
             try {
@@ -259,9 +323,11 @@
             updateValidationChart(data.validation_attempts || {});
             updateResponseTimeChart(data.recent_queries || []);
             updateErrorChart(data.errors || {});
+            updateUserChart(data.user_stats || {});
             
-            // Update recent queries
-            updateRecentQueries(data.recent_queries || []);
+            // Store all queries and update display
+            allQueries = (data.recent_queries || []).reverse();
+            updateQueriesDisplay();
             
             // Update timestamp
             document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
@@ -398,15 +464,60 @@
             });
         }
         
-        function updateRecentQueries(queries) {
+        function updateUserChart(userStats) {
+            const ctx = document.getElementById('userChart');
+            if (charts.user) charts.user.destroy();
+            
+            // Sort by query count and take top 10
+            const sortedUsers = Object.entries(userStats)
+                .sort((a, b) => b[1].queries - a[1].queries)
+                .slice(0, 10);
+            
+            const hasUsers = sortedUsers.length > 0;
+            
+            charts.user = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: hasUsers ? sortedUsers.map(([user]) => user.split('@')[0]) : ['No Data'],
+                    datasets: [{
+                        label: 'Queries',
+                        data: hasUsers ? sortedUsers.map(([, stats]) => stats.queries) : [0],
+                        backgroundColor: '#60a5fa'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { labels: { color: '#e2e8f0' } }
+                    },
+                    scales: {
+                        y: { 
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: '#334155' }
+                        },
+                        x: { 
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: '#334155' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateQueriesDisplay() {
+            const start = currentPage * pageSize;
+            const end = start + pageSize;
+            const pageQueries = allQueries.slice(start, end);
+            
             const container = document.getElementById('queries-list');
-            if (queries.length === 0) {
+            if (pageQueries.length === 0) {
                 container.innerHTML = '<p style="color: #94a3b8; text-align: center;">No queries yet</p>';
                 return;
             }
             
-            container.innerHTML = queries.slice(-20).reverse().map(q => `
-                <div class="query-item ${q.success ? '' : 'error'}">
+            container.innerHTML = pageQueries.map((q, idx) => `
+                <div class="query-item ${q.success ? '' : 'error'}" onclick="toggleDetails(${start + idx})">
                     <div class="query-text">${q.query}</div>
                     <div class="query-meta">
                         <span><span class="badge ${q.success ? 'success' : 'error'}">${q.success ? '✓' : '✗'}</span></span>
@@ -414,10 +525,33 @@
                         <span>⏱ ${q.response_time}s</span>
                         <span>🔄 ${q.validation_attempts} attempt${q.validation_attempts > 1 ? 's' : ''}</span>
                         <span>🕐 ${new Date(q.timestamp).toLocaleTimeString()}</span>
+                        ${q.user ? `<span>👤 ${q.user.split('@')[0]}</span>` : ''}
                         ${q.error ? `<span style="color: #ef4444;">Error: ${q.error}</span>` : ''}
+                    </div>
+                    <div class="query-details" id="details-${start + idx}">
+                        <div><strong>Full Query:</strong><pre>${q.query}</pre></div>
+                        <div><strong>Trace ID:</strong> ${q.trace_id || 'N/A'}</div>
+                        <div><strong>Cypher:</strong><pre>${q.cypher || 'N/A'}</pre></div>
+                        <div><strong>Answer:</strong><pre>${q.answer || 'N/A'}</pre></div>
                     </div>
                 </div>
             `).join('');
+            
+            // Update pagination
+            document.getElementById('pageInfo').textContent = 
+                `Page ${currentPage + 1} of ${Math.ceil(allQueries.length / pageSize)}`;
+            document.getElementById('prevBtn').disabled = currentPage === 0;
+            document.getElementById('nextBtn').disabled = end >= allQueries.length;
+        }
+        
+        function toggleDetails(idx) {
+            const details = document.getElementById(`details-${idx}`);
+            details.classList.toggle('expanded');
+        }
+        
+        function changePage(delta) {
+            currentPage += delta;
+            updateQueriesDisplay();
         }
         
         // Initial load

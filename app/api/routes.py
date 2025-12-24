@@ -79,23 +79,25 @@ async def get_feedback_analytics():
             return {"total_feedback": 0, "satisfaction_rate": 0}
         
         total = 0
-        positive = 0
-        by_intent = defaultdict(lambda: {"positive": 0, "negative": 0})
+        helpful = 0
+        by_intent = defaultdict(lambda: {"helpful": 0, "almost": 0, "not_helpful": 0})
         
         with open(feedback_file) as f:
             for line in f:
                 entry = json.loads(line)
                 total += 1
-                if entry["feedback"] == "positive":
-                    positive += 1
-                intent = entry.get("metadata", {}).get("method", "unknown")
-                by_intent[intent][entry["feedback"]] += 1
+                rating = entry.get("rating", "not_helpful")
+                if rating == "helpful":
+                    helpful += 1
+                intent = entry.get("intent", "unknown")
+                by_intent[intent][rating] += 1
         
         return {
             "total_feedback": total,
-            "positive": positive,
-            "negative": total - positive,
-            "satisfaction_rate": round((positive / total * 100) if total > 0 else 0, 1),
+            "helpful": helpful,
+            "almost": total - helpful - sum(1 for line in open(feedback_file) if '"rating": "not_helpful"' in line),
+            "not_helpful": sum(1 for line in open(feedback_file) if '"rating": "not_helpful"' in line),
+            "satisfaction_rate": round((helpful / total * 100) if total > 0 else 0, 1),
             "by_intent": dict(by_intent)
         }
     except Exception as e:
@@ -326,7 +328,11 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
             intent=intent or "unknown",
             validation_attempts=validation_attempts,
             response_time=execution_time,
-            success=True
+            success=True,
+            user=user.get("email"),
+            trace_id=trace.trace_id,
+            cypher=cypher_query,
+            answer=answer
         )
         
         # Complete trace before returning
@@ -352,7 +358,8 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
             validation_attempts=1,
             response_time=execution_time,
             success=False,
-            error=type(e).__name__
+            error=type(e).__name__,
+            user=user.get("email") if user else None
         )
         
         # Record query failure for learning

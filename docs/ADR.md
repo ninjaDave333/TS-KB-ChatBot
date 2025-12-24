@@ -1952,3 +1952,77 @@ SUGGESTIONS
 - **Slack Integration**: Post analysis summaries to team channel
 
 ---
+
+
+## ADR-031: SSH Deployment Automation
+
+**Date**: 2025-12-24  
+**Status**: Implemented  
+**Context**: Manual deployment process required multiple steps and was error-prone, needed automated deployment from local machine to remote server
+
+**Decision**: Implement SSH-based automated deployment using Amazon Q's executeBash tool with proper key management and background execution
+
+**Problem Analysis**:
+- **Manual Process**: Required SSH login, file copy, rebuild, restart - multiple error-prone steps
+- **No Automation**: No way to deploy directly from development environment
+- **Log Blocking**: Original build_and_run.sh blocked with `docker logs --follow`
+- **Key Management**: PEM key permissions issues on Windows
+
+**Solution Architecture**:
+- **SSH Integration**: Use executeBash tool with SSH/SCP commands for remote operations
+- **Automated Script**: Create build_and_run_auto.sh without log following for non-interactive use
+- **Key Management**: Proper icacls permissions for PEM keys on Windows
+- **Persistent Config**: Store SSH details in .amazonq/rules for automatic availability
+
+**Implementation Details**:
+```bash
+# Key permission fix
+icacls D:\Projects\aipg.pem /inheritance:r /grant:r "%USERNAME%:R"
+
+# File deployment
+scp -i D:\Projects\aipg.pem -r app/api app/core app/static Tests ubuntu@server:/path/
+
+# Automated rebuild (no log follow)
+ssh -i D:\Projects\aipg.pem ubuntu@server "cd /path && sudo ./build_and_run_auto.sh"
+
+# Manual rebuild (with logs)
+ssh -i D:\Projects\aipg.pem ubuntu@server "cd /path && sudo ./build_and_run.sh"
+```
+
+**Files Created**:
+- `.amazonq/rules/ssh_deployment.md` - SSH configuration and commands
+- `build_and_run_auto.sh` (remote) - Automated build script without log following
+
+**SSH Configuration**:
+- **Host**: aipg.dudelabz.com:22
+- **User**: ubuntu
+- **Key**: D:\Projects\aipg.pem
+- **Path**: /home/ubuntu/mb-env-ProdLike/test_env/tskb-rag-chatbot
+
+**Deployment Workflow**:
+1. **Copy Files**: SCP modified files to remote server
+2. **Run Auto Script**: Execute build_and_run_auto.sh via SSH
+3. **Container Restarts**: Docker container rebuilds and restarts automatically
+4. **Verify**: Check logs manually if needed with original script
+
+**Key Management**:
+- **Host Key Changes**: Automatic removal with `ssh-keygen -R`
+- **Permission Errors**: Fixed with icacls on Windows
+- **Secure Storage**: PEM key stored locally, never transmitted
+
+**Consequences**:
+- ✅ **One-Command Deployment**: Deploy from local machine with single command
+- ✅ **Automated Process**: No manual SSH login required
+- ✅ **Non-Blocking**: Auto script completes without hanging on logs
+- ✅ **Persistent Config**: SSH details always available in Amazon Q
+- ✅ **Manual Override**: Original script preserved for interactive use
+- ❌ **Windows-Specific**: Commands optimized for Windows environment
+- ❌ **Key Security**: PEM key must be properly secured locally
+
+**Future Enhancements**:
+- **Git-Based Deployment**: Use git pull instead of SCP for version control
+- **Rollback Capability**: Automated rollback on deployment failure
+- **Health Checks**: Verify container health after deployment
+- **Multi-Environment**: Support for dev/staging/prod deployments
+
+---
