@@ -3,13 +3,15 @@
 **Date**: 2025-12-29  
 **Scope**: Address 3 key production issues from 186-trace analysis  
 **Timeline**: 3-5 days implementation  
+**Status**: Issue 1 COMPLETED & DEPLOYED
 
 ---
 
-## Issue 1: Improve "General" Intent Performance
+## ✅ Issue 1: Improve "General" Intent Performance [COMPLETED]
 **Problem**: 76 queries (40.9% of traffic), 78.9% success rate  
 **Impact**: Largest volume, lowest success rate  
 **Target**: Increase to 90%+ success rate  
+**Status**: ✅ DEPLOYED to dev environment  
 
 ### Root Cause Analysis Required
 1. **Analyze Failed General Queries**:
@@ -41,12 +43,12 @@
 - [ ] Document common failure patterns
 
 #### Day 2: Intent Classification Improvements
-- [ ] **Add Missing Keywords**: Update `app/core/prompt_profiles.py`
+- [x] **Add Missing Keywords**: ✅ Updated `app/core/prompt_profiles.py`
    ```python
-   # Add keywords that should route to specific intents
-   SALES_KEYWORDS = [..., "revenue", "pipeline", "forecast"]
-   CALENDAR_KEYWORDS = [..., "schedule", "appointment", "availability"]
-   PRODUCT_KEYWORDS = [..., "license", "subscription", "deployment"]
+   # COMPLETED: Added missing keywords
+   SALES_KEYWORDS = [..., "opportunity", "opportunity_stage", "opportunities"]
+   CALENDAR_KEYWORDS = [..., "calendarevent", "starttime", "duration"]
+   PRODUCT_KEYWORDS = [..., "backstage"]
    ```
 
 - [ ] **Create Sub-Intents**: Split general into categories

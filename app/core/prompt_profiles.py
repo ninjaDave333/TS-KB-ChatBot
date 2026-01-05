@@ -143,14 +143,15 @@ def classify_question_intent(question: str) -> str:
     q_lower = question.lower()
     
     # High-priority product keywords (check first)
-    strong_product_keywords = ["hashicorp", "terraform", "vault", "consul", "vendor", "license", "installed"]
+    strong_product_keywords = ["hashicorp", "terraform", "vault", "consul", "vendor", "license", "installed", "backstage"]
     if any(kw in q_lower for kw in strong_product_keywords):
         return "product_v1"
     
     # Calendar keywords (check second)
     calendar_keywords = [
         "meeting", "recording", "calendar", "event", "call", "invite", "invited",
-        "invitedto", "owner of", "participant", "attendee", "transcript", "scheduled"
+        "invitedto", "owner of", "participant", "attendee", "transcript", "scheduled",
+        "calendarevent", "starttime", "meeting title", "duration", "subject_type"
     ]
     if any(kw in q_lower for kw in calendar_keywords):
         return "calendar_v1"
@@ -163,7 +164,8 @@ def classify_question_intent(question: str) -> str:
     # Sales keywords (check fourth)
     sales_keywords = [
         "deal", "revenue", "closed won", "closed lost", "win rate",
-        "top selling", "best performing", "successful deals"
+        "top selling", "best performing", "successful deals",
+        "opportunity", "opportunity_stage", "opportunities"
     ]
     if any(kw in q_lower for kw in sales_keywords):
         return "sales_v1"
