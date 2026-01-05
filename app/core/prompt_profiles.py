@@ -142,6 +142,10 @@ def classify_question_intent(question: str) -> str:
     """
     q_lower = question.lower()
     
+    # Input validation - reject invalid queries
+    if len(question.strip()) < 5 or any(invalid in q_lower for invalid in ['crap', 'test', 'hello', 'hi']):
+        return "invalid_input"
+    
     # High-priority product keywords (check first)
     strong_product_keywords = ["hashicorp", "terraform", "vault", "consul", "vendor", "license", "installed", "backstage"]
     if any(kw in q_lower for kw in strong_product_keywords):

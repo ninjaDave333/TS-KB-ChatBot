@@ -1,0 +1,187 @@
+trace_id,timestamp,intent,routing_path,has_data,record_count,cypher_length,has_final_answer
+bc6b37be-7c82-45fc-983a-7ceabd033232,2025-11-19T12:58:33.478242,employee_activity_ranking,ai_generated,True,1,154,True
+da6897ed-9f4b-43fc-8ef8-640f75a8a297,2025-11-19T12:58:46.898480,employee_activity_ranking,learned_pattern (confidence: 1.00),True,1,154,True
+0795a670-be03-4d3b-9b9d-2eb709642685,2025-11-19T12:59:02.286924,employee_activity_ranking,learned_pattern (confidence: 1.00),True,1,154,True
+1172f94e-1d1a-4593-8005-fb1fe94acee7,2025-11-19T12:59:18.508049,list,learned_pattern (confidence: 1.00),True,30,178,True
+5631bfec-dfd7-41df-99b3-7808910cf696,2025-11-19T13:01:10.587077,external_meeting_analytics,learned_pattern (confidence: 1.00),True,1,136,True
+af388fdb-4e84-480a-8d9d-8d2d7047bf5b,2025-11-19T13:01:19.899604,count,ai_generated,True,1,192,True
+00d6b14b-fea7-41b5-9623-da6f306b990c,2025-11-19T13:31:07.938668,count,ai_generated,True,1,135,True
+cef4e495-f9fc-402f-90f9-041c4ee9ebe4,2025-11-19T13:31:20.469991,recording_list,ai_generated,True,1,158,True
+11ec45ae-f0bb-48a6-ba6f-0ff3bf173b2c,2025-11-23T14:54:23.714878,count,ai_generated,True,1,104,True
+caecc4ff-9305-44b2-a296-5c504f8944e0,2025-11-23T14:54:44.638247,count,ai_generated,True,1,251,True
+e0a843bb-bf61-450b-be5a-83acfdddaf08,2025-11-23T14:55:06.603323,count,ai_generated,True,1,361,True
+4cc98f6d-2d2c-405d-80a6-8003d8ba22d3,2025-11-23T14:55:33.662302,list,ai_generated,True,3,264,True
+42430f30-d659-49c5-a0f3-a963442e5cc1,2025-11-23T14:55:47.230592,list,ai_generated,True,1,254,True
+b93ce63d-f3e0-4d50-91e3-c3daad0fb946,2025-11-23T14:56:17.362113,count,learned_pattern (confidence: 1.00),True,1,52,True
+a4b4cae1-d410-45bd-9831-1b9af77de492,2025-11-23T15:03:54.631328,count,learned_pattern (confidence: 1.00),True,1,361,True
+fe4e30fe-7032-47ea-925e-61503d043539,2025-11-23T15:07:14.707140,count,learned_pattern (confidence: 1.00),True,1,361,True
+7dbb527e-ead4-494e-a9d0-efece6f4e8ad,2025-11-23T15:07:37.409330,count,learned_pattern (confidence: 1.00),True,1,361,True
+238c2ecc-432a-4f02-a154-b82426fdf724,2025-11-23T15:12:41.443154,count,learned_pattern (confidence: 1.00),True,1,361,True
+ed8f7ee3-4dc4-4e28-8520-ae3595b8f315,2025-11-23T15:12:52.217849,count,learned_pattern (confidence: 1.00),True,1,361,True
+f15d6b7d-0bed-4463-9907-30415d829d44,2025-11-23T15:13:01.248755,count,learned_pattern (confidence: 1.00),True,1,361,True
+019e6df4-37f9-4d40-967f-b114db11c838,2025-11-23T15:13:18.148166,count,ai_generated,True,1,208,True
+d5a30308-4335-48e7-8208-edafb967b8c6,2025-11-23T15:13:36.260975,general,ai_generated,True,2019,262,True
+c76428e6-317e-442c-93a9-fd898771ea1e,2025-11-23T15:13:48.562961,general,execution_fallback,False,0,191,True
+58f7035c-29be-420f-9afc-dd9b629d1825,2025-12-21T15:21:53.891355,count,enhanced_fallback (traditional_generation),True,1,40,True
+05193a0b-926d-490a-ba2a-5e48a8b09f0f,2025-12-21T15:23:46.288010,count,learned_pattern (confidence: 1.00),True,1,40,True
+652d4392-a7f7-4de5-b4be-b2fbdc08f7e0,2025-12-21T15:23:59.866486,count,learned_pattern (confidence: 1.00),True,1,40,True
+bf68704d-e83e-44d8-841b-75608e10d2a1,2025-12-21T15:24:09.434383,count,ai_generated,True,3,396,True
+3d5c6bf5-35b2-4f4b-92c9-45ab1221728b,2025-12-21T15:24:35.858301,list,ai_generated,True,10,414,True
+692e3a11-5700-411b-94a8-5ae57cabb815,2025-12-22T07:20:34.531338,count,ai_generated,True,3,396,True
+3b1ca62f-e808-4de3-878d-157ce150a66a,2025-12-22T07:21:22.372435,external_meeting_analytics,learned_pattern (confidence: 1.00),True,1,136,True
+e66db04b-b262-4f62-a0af-a0c9d399cc67,2025-12-22T07:21:37.980828,list,ai_generated,True,9,351,True
+a13bb3a5-78c4-4e37-8f60-34e0aac08182,2025-12-22T07:23:36.338195,vendor,ai_generated,True,9,294,True
+9e1c922e-fc48-406f-84f7-ed854b42d8bb,2025-12-22T07:25:05.985850,vendor,learned_pattern (confidence: 1.00),True,9,294,True
+336bf2f9-fca9-4a0b-acf8-ece64908ec8e,2025-12-22T07:26:54.564880,vendor,learned_pattern (confidence: 1.00),True,9,294,True
+078b2242-4cf0-4d35-8f05-2cfba04cc107,2025-12-22T07:50:16.010966,vendor,learned_pattern (confidence: 1.00),True,9,294,True
+fc89dda9-427c-4728-a14b-59f81a1a04f6,2025-12-22T07:51:15.179662,vendor,learned_pattern (confidence: 1.00),True,9,294,True
+6ac7a178-5184-4973-b2a6-5aaeab5ba804,2025-12-22T08:01:23.811166,list,ai_generated,True,10,186,True
+b1b005ff-9079-4fec-8546-6921cef0ab33,2025-12-22T08:01:48.741396,list,learned_pattern (confidence: 1.00),True,30,178,True
+a3b8416d-a225-4ffb-a410-b59046bf7f40,2025-12-22T08:37:15.322759,employee_activity_ranking,execution_fallback,False,0,585,True
+5565d67a-a413-4fc5-9ac1-7a8d8c5202ec,2025-12-22T08:37:41.664332,employee_activity_ranking,learned_pattern (confidence: 1.00),True,10,49,True
+915cbfe5-c425-44ce-98c0-af4946fe95b1,2025-12-22T08:42:40.088895,employee_activity_ranking,learned_pattern (confidence: 1.00),True,10,49,True
+d4e1c68f-0b47-408a-bfbb-11479d4e15e6,2025-12-22T08:43:04.116713,employee_activity_ranking,learned_pattern (confidence: 1.00),True,1,154,True
+a2717473-4102-4d31-9dd1-e41942e8ca78,2025-12-22T08:43:23.192363,general,ai_generated,True,1,258,True
+4e830798-9dbe-4aaa-adb6-4b8961a3c031,2025-12-22T08:43:35.571211,general,learned_pattern (confidence: 1.00),True,1,258,True
+34ad5d98-79bc-458f-a0ed-99002e8ddd62,2025-12-22T08:43:51.695771,general,learned_pattern (confidence: 1.00),True,1,258,True
+c2c70f50-5315-48b3-8798-864b8c0aa739,2025-12-22T08:51:57.013593,employee_activity_ranking,learned_pattern (confidence: 1.00),True,10,49,True
+1dc2e1b3-f63b-48b9-a754-396c58f9badc,2025-12-22T08:52:54.572694,general,learned_pattern (confidence: 1.00),True,1,258,True
+489dde72-e2ce-4410-b3c7-e1fb7acf6731,2025-12-22T08:59:38.096809,employee_activity_ranking,execution_fallback,False,0,227,True
+599435d3-ad79-4bd6-b0a5-8ebce4bf8489,2025-12-22T09:00:39.583514,general,ai_generated,True,1,303,True
+f61fa86e-0f20-4e0d-91fe-62aef2c3a3b9,2025-12-22T09:04:06.678667,employee_activity_ranking,ai_generated,True,5,172,True
+65e408da-edf1-403d-a484-106f31271d2d,2025-12-22T09:04:38.593930,general,ai_generated,True,1,258,True
+b71d4bb5-78ed-4b41-9e80-1fffa9e8bb22,2025-12-22T09:04:50.198146,general,ai_generated,True,1,303,True
+4d06f1de-e46f-4d85-aecb-14cbcdf67c37,2025-12-22T09:05:06.021120,general,ai_generated,True,1,431,True
+76126d19-3a22-4c0b-813b-fc2965b4629c,2025-12-22T13:11:18.397302,list,ai_generated,True,71,158,True
+7a16d6a8-23d6-48b8-b9ef-27cac7894336,2025-12-22T13:11:28.854374,employee_activity_ranking,ai_generated,True,1,145,True
+605d2ebb-9e12-4135-8409-e33c0a6d0e74,2025-12-22T13:11:43.420688,vendor,ai_generated,True,5,255,True
+0cb42f4e-7517-47b6-a05e-4f135c0cb68b,2025-12-22T13:11:50.920083,count,ai_generated,True,1,192,True
+e06aad39-de4b-4541-877d-2039947856f0,2025-12-22T14:26:01.026870,count,ai_generated,True,1,192,True
+ecb69d3a-4bcf-470e-b713-326a5028f5e9,2025-12-22T14:27:13.111914,general,ai_generated,True,1,185,True
+cddc89a7-4253-4dad-84aa-37766333db44,2025-12-22T14:27:38.895715,general,ai_generated,False,0,52,True
+e422ce13-2907-473d-b0f3-b5a4455a908d,2025-12-22T14:27:43.319646,count,ai_generated,True,1,123,True
+fb2e0030-4de0-4355-b076-6f31a5ee5109,2025-12-22T14:27:47.232167,general,ai_generated,True,1,203,True
+110db2db-27f0-41eb-a29c-7af42b0614fb,2025-12-22T14:27:52.970610,count,ai_generated,True,1,98,True
+7166abd1-3e5a-4a8d-a594-4ecd0dedf0ad,2025-12-22T14:28:07.787017,general,ai_generated,True,1,182,True
+1c1b65e4-0bb6-4dba-b675-323635396d5d,2025-12-22T14:28:16.109107,count,ai_generated,True,1,274,True
+59b4c137-6a5a-4733-b84b-e9665f08dacd,2025-12-22T14:28:29.672709,count,ai_generated,True,1,79,True
+721a0381-fdf1-486d-9e4b-37db06a0b575,2025-12-22T14:28:35.403013,general,ai_generated,False,0,193,True
+cc4558b8-43e1-47b6-a230-673755467b64,2025-12-22T14:28:41.170535,count,ai_generated,True,1,123,True
+3a441473-c8ee-4790-b075-806e12d25ae4,2025-12-22T14:28:46.280994,count,ai_generated,True,1,101,True
+d8d826cd-e312-43d4-b999-6fec9c0b690b,2025-12-22T14:28:52.182356,general,ai_generated,True,1,174,True
+fee730bb-877a-411a-9b0d-65c66a7f9332,2025-12-22T14:28:58.174194,count,ai_generated,True,1,133,True
+c2fcef65-4554-4d96-89dc-c892fe8fca66,2025-12-22T14:29:07.926829,general,ai_generated,False,0,281,True
+3bbbeb24-937b-469e-afc4-61ca913adcee,2025-12-22T14:29:12.905728,general,ai_generated,True,1,185,True
+43f2e3f8-0936-4758-8d0c-f74d85d7bb20,2025-12-22T14:29:19.739586,general,ai_generated,True,1,192,True
+be8fb284-2520-414d-adb1-55bc55261112,2025-12-22T14:29:26.011674,count,ai_generated,True,52,210,True
+56b96ff0-a355-4dd3-ab9c-ef6995cd6b28,2025-12-22T14:29:32.390622,count,ai_generated,True,1,153,True
+4cacc321-80c7-4834-b691-2b4685973cfe,2025-12-22T14:29:37.837006,general,ai_generated,True,10,195,True
+2ac4358c-7398-4d42-ab02-ebd4a3b010a1,2025-12-22T14:29:43.027006,count,ai_generated,True,1,101,True
+153052e4-b0bf-4161-a5db-83a6a573ec5b,2025-12-22T14:29:51.388416,general,ai_generated,True,1,166,True
+9bc6049d-5921-42fa-b320-9ca301b546f6,2025-12-22T14:29:56.314090,count,ai_generated,True,1,176,True
+3f179a88-bc19-4f1a-a78c-03b6321486a5,2025-12-22T14:30:02.674636,vendor,ai_generated,True,1,191,True
+02485408-6f58-4b9b-9a74-f066977d86c7,2025-12-22T14:30:08.176591,general,ai_generated,True,1,160,True
+43dea161-f78c-43a0-ace5-a96c2ec95e4a,2025-12-23T10:43:54.784932,vendor,ai_generated,True,5,255,True
+53f0df9f-1d2b-4d1f-91ee-df5d6702ba1a,2025-12-23T10:45:50.041277,vendor,ai_generated,True,5,255,True
+06a3d8d8-c72b-43c7-aa29-b490e27aac1e,2025-12-23T10:46:29.228694,vendor,ai_generated,True,5,419,True
+02d97a9b-2c93-465f-bfe9-3b7f4f995f52,2025-12-23T10:51:26.460519,vendor,ai_generated,True,5,419,True
+503408e6-7c20-4773-b272-bf7c5980be0b,2025-12-23T10:58:59.478454,list,ai_generated,True,5,514,True
+35438303-3ec6-4246-8b15-abefb3d30994,2025-12-23T11:04:28.428206,list,ai_generated,True,5,486,True
+1ee28ff7-3600-4162-aaa8-a51e49a30c32,2025-12-23T11:09:03.704392,list,ai_generated,True,5,486,True
+cf47e1e5-5a3f-451b-828b-fef88b416aa0,2025-12-23T11:09:25.233143,list,ai_generated,True,5,486,True
+96bcce57-16d2-4c8b-a05a-229669da709e,2025-12-23T11:15:31.601642,list,ai_generated,True,5,486,True
+92b87418-b29f-4e83-9703-cf0152d85cfd,2025-12-23T11:31:56.736271,list,ai_generated,True,5,331,True
+d3fd4cc8-c914-4bb6-a49e-01570e195e37,2025-12-23T11:35:18.379478,vendor,ai_generated,True,18,298,True
+59638b91-d520-4566-a4b6-cf7dd6d34b23,2025-12-23T11:36:09.080388,list,ai_generated,True,2,252,True
+c78ed1e3-dbeb-4a71-bb1b-d8a8d02e3435,2025-12-23T11:36:49.915306,list,ai_generated,False,0,249,True
+fc34b8db-add3-4bc6-9ac8-e9adfa30145d,2025-12-23T11:43:59.673384,vendor,ai_generated,True,18,337,True
+e61a8028-5181-45e7-a7d0-00a329e5599a,2025-12-23T11:44:19.050729,general,ai_generated,False,0,326,True
+364bc6af-794c-49e7-b230-120199788f39,2025-12-23T11:46:25.159142,vendor,ai_generated,True,6,371,True
+b3be13b9-c37b-4f6c-9aa1-1021049f054f,2025-12-23T11:51:26.340973,external_meeting_analytics,ai_generated,True,1,183,True
+9d015d02-921a-4f94-a2db-7a74b4680915,2025-12-23T12:06:53.553326,list,ai_generated,True,6,243,True
+c79378cc-c3d6-4f9d-bbec-43284cd1e690,2025-12-23T12:07:29.696433,general,ai_generated,True,8,279,True
+fbb6e859-6cab-486f-8916-14c8a70dffdd,2025-12-23T12:08:34.086959,general,ai_generated,True,8,295,True
+0b50be5b-a64c-4bdc-8c82-41487ceed17e,2025-12-23T12:27:45.205637,list,ai_generated,True,6,234,True
+d510e4ce-c586-4c71-8a3a-68d6ec7497bc,2025-12-23T12:28:04.091530,list,ai_generated,False,0,290,True
+fad80530-a22a-44af-b3a5-593d53d373ae,2025-12-23T12:28:15.334183,list,ai_generated,True,1,304,True
+6d1ce2df-16c5-4fd3-9a46-536590f52464,2025-12-23T12:29:10.704219,recording_list,ai_generated,False,0,211,True
+24de8d81-ff69-4161-b939-9dba90608c1c,2025-12-23T12:29:22.381190,general,ai_generated,False,0,210,True
+be58c945-78b3-401a-be15-ec7aa225f2cb,2025-12-23T12:29:37.655278,general,ai_generated,True,5,129,True
+72c703e2-4f86-4b03-8e23-ad77d549833d,2025-12-23T12:30:09.253895,list,ai_generated,True,5,178,True
+0637d3e2-db6e-46b2-96f4-cea9e442779b,2025-12-23T12:33:37.136247,count,ai_generated,True,2,355,True
+c04e1c94-719d-4299-87aa-66a2cc80fc5e,2025-12-23T12:34:35.768820,general,ai_generated,True,2,219,True
+c0815085-bb22-4260-91f6-f08892c745a6,2025-12-23T12:38:24.654677,list,ai_generated,True,5,177,True
+b2b59cca-099c-46e9-9753-d4a3c8eaad50,2025-12-23T12:39:26.016201,count,ai_generated,True,30,144,True
+66a4bb00-8651-48c8-85b1-cfca2a29c2c2,2025-12-23T12:40:17.069662,count,ai_generated,True,3,124,True
+dd5a72f2-a636-4640-a691-91688b33be53,2025-12-23T12:40:50.883197,general,ai_generated,True,1,320,True
+67aef2e4-ebb0-45f3-afbf-bb20e9826613,2025-12-24T06:50:11.757313,vendor,ai_generated,False,0,322,True
+386a55b6-40e8-481c-b5d5-70b533c0291e,2025-12-24T06:50:34.442048,vendor,ai_generated,True,3,369,True
+f9590f3b-a736-46be-ac20-bf3738ed75cf,2025-12-24T06:51:06.741564,general,ai_generated,True,3,240,True
+fadd603d-7a0c-4891-ad2c-dfc2fd0864aa,2025-12-24T06:51:37.346699,general,ai_generated,True,3,301,True
+06529509-b1e0-4a99-8c97-18ef461178f5,2025-12-24T06:52:45.733335,list,ai_generated,False,0,426,True
+16c1187e-e42b-41b9-bd57-c0c38e7c2cb6,2025-12-24T06:53:33.904924,general,ai_generated,False,0,354,True
+3f162fd4-cd02-448e-a6a4-bb52d727e331,2025-12-24T06:54:12.573626,general,ai_generated,True,3,166,True
+bafbc642-38e4-4491-80cb-c135973944f1,2025-12-24T06:54:32.878613,count,ai_generated,True,1,64,True
+a678495b-7912-4625-8204-0dce2e3689a4,2025-12-24T07:26:31.097980,external_meeting_analytics,ai_generated,True,1,183,True
+26820cb2-65bc-47da-a4db-eb6786e3151d,2025-12-24T07:26:41.435636,general,ai_generated,True,1,196,True
+0aba1afa-49eb-47a8-9aa4-fccd094b4005,2025-12-24T09:11:34.307381,general,ai_generated,True,931,333,True
+a9fd574d-693b-4ce2-b35e-1c129cdfe4a6,2025-12-24T09:12:44.629779,vendor,ai_generated,True,77,379,True
+40c318bc-6638-4ba7-96e8-521c3bc41bad,2025-12-24T09:13:41.741564,general,ai_generated,True,77,347,True
+78a8aaa5-4aca-49b8-a763-25bfb2469780,2025-12-24T09:18:13.153680,general,ai_generated,True,432,568,True
+6d022c2e-673c-4b7d-812a-f65968fb6083,2025-12-24T09:20:18.531561,general,ai_generated,True,445,509,True
+4314e5e0-591a-4f2b-a83a-1ae5bafeef6c,2025-12-24T09:21:34.992367,list,ai_generated,True,432,400,True
+5a80f9f6-65d7-42b1-800b-5a933fec9679,2025-12-24T09:23:32.227790,list,ai_generated,True,1,502,True
+9eb9ee4a-90c7-4074-87eb-b3680f040b30,2025-12-24T09:24:37.860711,general,ai_generated,True,10,543,True
+59d1f9ce-9dab-456b-b9e7-9c8452f789e8,2025-12-24T09:27:48.880200,general,ai_generated,True,10,536,True
+3cd30d17-1a3a-4447-9c40-ef62bdbc5c43,2025-12-24T09:28:51.243403,general,ai_generated,False,0,490,True
+bf4cc211-25c8-466b-a4a1-3f7f8ab2bb25,2025-12-24T10:05:52.699982,general,ai_generated,True,1,91,True
+e3cf353f-1839-458d-ae31-df7347263698,2025-12-24T10:07:16.940126,general,ai_generated,True,5,117,True
+9e7bb8d7-3fbb-46ee-917d-da7570635811,2025-12-28T17:23:09.429188,count,ai_generated,True,1,157,True
+a20c07fd-dc68-4230-acce-ef1762f3e2e3,2025-12-28T17:23:32.834927,general,ai_generated,True,1,235,True
+0db19461-8ca8-4484-8790-046e19f2cd7c,2025-12-28T17:23:55.286209,count,ai_generated,True,1,205,True
+b9f9a891-9632-4b27-b15e-c1ba09fdd430,2025-12-28T17:24:18.001466,vendor,ai_generated,True,215,312,True
+d6776880-8290-414e-8987-f84866e19a1c,2025-12-28T17:25:53.171018,general,ai_generated,True,4,584,True
+badcc519-c9d2-49d2-a3d3-e9092a20a54e,2025-12-28T17:28:19.209064,count,ai_generated,True,1,131,True
+c5b4d91f-67f0-46ba-ac05-1a0b0eca1f86,2025-12-28T17:28:42.656747,vendor,ai_generated,False,0,95,True
+626d0be6-8bcf-4e92-a3c5-73c58127eb37,2025-12-29T13:11:59.427376,vendor,ai_generated,True,5,303,True
+af325a10-1e6d-49c0-af2b-111a081eeb5c,2025-12-29T13:13:52.845509,general,ai_generated,False,0,338,True
+c0cf513b-682f-4925-be04-7ad847680222,2025-12-29T13:15:54.297442,general,ai_generated,True,5,266,True
+8d7b8865-3efa-425d-b13b-a2edce7bceb0,2025-12-29T13:18:35.445949,general,ai_generated,True,5,1130,True
+11646291-45fa-4c68-bed5-0f4c4f536800,2025-12-29T13:19:23.512094,general,ai_generated,False,0,115,True
+bb172933-3635-4cf5-8aaa-289604040fe9,2025-12-29T13:19:42.875396,general,ai_generated,True,6,1463,True
+c3750bc5-bd80-476b-beee-3e1c1f69b863,2025-12-29T13:20:24.772293,general,ai_generated,False,0,194,True
+e7b553cb-9e2e-4aa2-a571-83f5d9f19def,2025-12-29T13:20:51.915199,general,ai_generated,False,0,276,True
+7c12ceaa-bb7b-4a54-8d8b-650db44732fe,2025-12-29T13:21:41.250387,employee_activity_ranking,ai_generated,True,1,139,True
+fd0ef75e-e6dc-42f2-991f-ee95ff0e6912,2025-12-29T13:22:34.713371,general,ai_generated,True,75,172,True
+ada7b68e-474a-4614-a913-b60636840902,2025-12-29T13:23:24.415295,count,ai_generated,True,8,1532,True
+0f0640b2-9b43-4eea-b938-8952a0fb9dc3,2025-12-29T13:23:58.128790,external_meeting_analytics,ai_generated,True,2,320,True
+ffdf7f0f-e28b-4740-96eb-ad4034a26ef4,2025-12-29T13:24:30.081538,general,ai_generated,True,2,316,True
+5fcb0f01-3164-477d-b2fb-428e2e9b77a7,2025-12-29T13:25:34.578408,general,ai_generated,False,0,536,True
+6855a053-1e46-4ceb-bfc2-3c07dc25e060,2025-12-29T13:25:57.416516,general,ai_generated,True,1,729,True
+5a1595e5-670c-4cf2-91fa-d5570dddadca,2025-12-29T13:27:08.219418,general,ai_generated,True,512,534,True
+00947ca1-dfd9-4a8e-a563-202fe55e983b,2025-12-29T13:28:03.969145,general,ai_generated,True,15,652,True
+d6e2a567-ee0c-4b25-a53e-da8392728137,2025-12-29T13:29:41.718606,general,ai_generated,False,0,762,True
+342f96fd-b7d8-4494-b0f5-29eeb1421517,2025-12-29T13:29:53.817306,general,ai_generated,False,0,554,True
+1ba9f55c-aced-45c8-ad8f-5520925cb9f1,2025-12-29T13:30:08.597646,general,ai_generated,True,1,719,True
+2c19d84e-2e07-4a2a-84dd-1a90e992da6b,2025-12-29T13:30:43.698928,general,ai_generated,True,1,777,True
+bc442292-717d-4179-bbd4-e81d85f85074,2025-12-29T13:32:22.558612,general,ai_generated,True,10,368,True
+8e9ba503-42d4-45a3-9056-dbdbb4e8bce7,2025-12-29T13:33:13.579885,general,ai_generated,True,6,479,True
+7c7ee11d-8f69-41f3-b9a9-e1ae7ed37fe2,2025-12-29T13:33:48.874277,general,ai_generated,True,704,496,True
+63604e4b-c323-4512-8a54-8f30b977eda4,2026-01-04T12:55:48.745318,vendor,ai_generated,True,3,237,True
+42b6ea77-a882-4e29-b51c-cc0c3c4dd68d,2026-01-04T12:56:15.880314,general,ai_generated,True,10,404,True
+f2b40374-7dbd-4c94-b187-ecc0afc52cf6,2026-01-04T15:02:30.907413,general,ai_generated,True,3,169,True
+50df1beb-bbe4-4a3c-bdd2-4bd356518770,2026-01-04T15:03:15.785444,general,ai_generated,True,16,198,True
+8f49b78f-879c-4b00-917a-75e91709ab57,2026-01-04T15:03:59.839479,general,ai_generated,True,163,242,True
+76424bdc-2550-42be-9e28-bf7dd6567e7a,2026-01-04T15:04:35.977981,list,ai_generated,True,2274,266,True
+39765df0-e84a-4453-9dd7-413ce79638f2,2026-01-05T10:30:21.501724,general,ai_generated,True,18,189,True
+fc62c64b-fa3c-4ae0-914d-3fa49f197c94,2026-01-05T10:30:58.450982,general,ai_generated,False,0,264,True
+ec49ea61-15d3-43e1-a199-86a1d86dbe86,2026-01-05T10:31:43.237562,general,ai_generated,True,10,332,True
+a2c3f7d8-ae53-4f45-802a-e35f172f58f4,2026-01-05T10:33:11.615460,count,ai_generated,True,3,207,True
+fcc34938-2aec-4d16-a8ee-41174249c11e,2026-01-05T10:33:54.353375,general,ai_generated,True,3,218,True
+a416c059-fa89-414d-9625-7b7e41e90f8a,2026-01-05T10:36:15.814754,general,ai_generated,True,5,286,True
+b2d91423-4afc-471f-b7ab-568afa69e233,2026-01-05T10:37:08.935412,general,ai_generated,True,5,414,True
+cdcc3dee-5e2a-410f-abf1-d2a0f40f2342,2026-01-05T10:37:41.932404,general,ai_generated,True,12,636,True
+d337b128-f787-491e-ac3c-a8c6ccd581ad,2026-01-05T10:39:20.235405,list,ai_generated,True,3,289,True
+883edf72-02de-4ad2-a546-244b83b63eb9,2026-01-05T10:40:29.455671,list,ai_generated,True,5,334,True
+39945fa6-6033-4b4d-a204-1b2fb3ca219e,2026-01-05T10:43:46.504869,list,ai_generated,True,5,334,True
+95fd52d6-d5b4-4e01-bdfc-fbcf697b9fb6,2026-01-05T10:44:04.084609,list,ai_generated,True,5,334,True

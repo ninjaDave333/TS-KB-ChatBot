@@ -34,10 +34,13 @@ async def render_answer(
     - Keeps all Cypher generation / DB logic separate (we only rewrite the *result*).
     - Does NOT invent numbers: the model is instructed to stay grounded in rows.
     - Handles non-JSON-serializable types by converting to strings.
+    - Provides helpful suggestions for empty results.
     """
     
     if not rows:
-        return "There are no matching results for that question."
+        # Generate helpful suggestions for empty results
+        helpful_message = generate_empty_result_help(question)
+        return f"There are no matching results for that question. {helpful_message}"
     
     # Limit rows to keep prompts reasonable
     max_rows_for_prompt = 50
@@ -87,3 +90,29 @@ async def render_answer(
         return "I ran the query but could not generate a natural-language explanation."
     
     return text
+
+
+def generate_empty_result_help(question: str) -> str:
+    """Generate helpful suggestions for empty results"""
+    q_lower = question.lower()
+    suggestions = []
+    
+    if "2025" in question:
+        suggestions.append("Try a different year (2023 or 2024)")
+    
+    if "backstage" in q_lower:
+        suggestions.append("Try 'HashiCorp', 'AWS', or 'Microsoft' instead")
+    
+    if "calendarevent" in q_lower:
+        suggestions.append("Try asking about 'meetings' or 'recordings' instead")
+    
+    if "client" in q_lower and "region" in q_lower:
+        suggestions.append("Try 'IL', 'US', or 'UK' for regions")
+    
+    if "opportunity_stage" in q_lower:
+        suggestions.append("Try 'Closed Won', 'Pipeline', or 'Proposal' for stages")
+    
+    if suggestions:
+        return "Suggestions: " + "; ".join(suggestions) + "."
+    
+    return "Try broadening your search criteria or using different keywords."

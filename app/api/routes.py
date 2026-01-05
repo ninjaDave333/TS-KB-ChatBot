@@ -240,8 +240,14 @@ async def process_query(request: QueryRequest, user: dict = Depends(get_jwt_user
         schema = neo4j_client.get_schema()
         error_msg = None
         
+        # Check for invalid input first
+        from app.core.prompt_profiles import classify_question_intent
+        intent = classify_question_intent(request.query)
+        
+        if intent == "invalid_input":
+            raise HTTPException(status_code=400, detail="Invalid query. Please provide a meaningful business question.")
+        
         # Generate Cypher query with dynamic learning
-        intent = None
         validation_attempts = 1
         if request.use_ai:
             try:

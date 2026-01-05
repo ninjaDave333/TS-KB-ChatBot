@@ -2,7 +2,7 @@
 
 ## Executive Summary for Slide Deck AI Agent
 
-Create a comprehensive board-level presentation about our **Self-Learning RAG (Retrieval-Augmented Generation) System** that transforms natural language questions into database queries and continuously improves its performance. The presentation should be **technical yet accessible**, with clear business value, detailed technical architecture, and future roadmap.
+Create a comprehensive board-level presentation (not ppts, sungle images or pdf) about our **Self-Learning RAG (Retrieval-Augmented Generation) System** that transforms natural language questions into database queries and continuously improves its performance. The presentation should be **technical yet accessible**, with clear business value, detailed technical architecture, and future roadmap.
 
 ---
 

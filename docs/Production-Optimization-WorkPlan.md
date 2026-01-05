@@ -88,10 +88,27 @@
 
 ---
 
-## Issue 2: Increase Learned Pattern Usage
+## Issue 2: Increase Learned Pattern Usage [NEXT PRIORITY]
 **Problem**: 14% learned patterns vs 50% target  
 **Impact**: Slower responses, higher LLM costs  
 **Target**: Achieve 35%+ learned pattern usage  
+**Status**: ⏳ WAITING for new trace data to validate Issue 1 fix
+
+### Immediate Monitoring Plan:
+1. **Track New Traces**: Monitor production for 24-48 hours
+   ```bash
+   # Check for new traces
+   python Tests/monitor_deployment.py
+   
+   # Copy new traces when available
+   scp -i D:\Projects\aipg.pem ubuntu@aipg.dudelabz.com:/home/ubuntu/meetingsBotLogs/persistentData/traces.jsonl ref_data/
+   
+   # Analyze new data
+   python -m Tests.analyze_traces --data-dir ref_data --export-csv
+   ```
+
+2. **Validate Fix**: Look for improved general intent success rate in new traces
+3. **Baseline Established**: Current 186 traces show 78.9% general success rate  
 
 ### Root Cause Analysis
 1. **Pattern Learning Threshold**: Current confidence threshold may be too high
