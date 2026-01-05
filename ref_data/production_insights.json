@@ -1,0 +1,43 @@
+{
+  "query_volume_by_type": {
+    "teams_recording": 3,
+    "israeli_clients": 3,
+    "temporal_business": 1,
+    "data_quality_filters": 0
+  },
+  "average_performance": {
+    "teams_recording": {
+      "avg_execution_time": 1.6,
+      "avg_data_count": 1.0
+    },
+    "israeli_clients": {
+      "avg_execution_time": 2.21,
+      "avg_data_count": 23.3
+    },
+    "temporal_business": {
+      "avg_execution_time": 1.64,
+      "avg_data_count": 10.0
+    }
+  },
+  "refinement_patterns": {
+    "data_quality_filter": 1,
+    "additional_filter": 1
+  },
+  "data_quality_issues": [
+    {
+      "issue": "Unknown manager filtering",
+      "frequency": 2,
+      "impact": "Users repeatedly trying to filter out Unknown values"
+    }
+  ],
+  "user_behavior_insights": [
+    {
+      "pattern": "Iterative query refinement",
+      "frequency": 2,
+      "description": "Users refine queries based on initial results"
+    }
+  ],
+  "recommendations": [
+    "Create specialized Teams Recording query templates"
+  ]
+}

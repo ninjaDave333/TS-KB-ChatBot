@@ -1,0 +1,15 @@
+{"trace_id": "test1", "intent": "CLIENT_HISTORY", "scores": {"overall_score": 6.0, "factual_correctness": 7.0, "grounded_in_context": 5.0, "helpfulness": 6.0}, "primary_issue": "retrieval"}
+{"trace_id": "test2", "intent": "CLIENT_HISTORY", "scores": {"overall_score": 6.5, "factual_correctness": 7.5, "grounded_in_context": 5.5, "helpfulness": 6.5}, "primary_issue": "retrieval"}
+{"trace_id": "test3", "intent": "CLIENT_HISTORY", "scores": {"overall_score": 7.0, "factual_correctness": 8.0, "grounded_in_context": 6.0, "helpfulness": 7.0}, "primary_issue": "retrieval"}
+{"trace_id": "test4", "intent": "CLIENT_HISTORY", "scores": {"overall_score": 6.8, "factual_correctness": 7.8, "grounded_in_context": 5.8, "helpfulness": 6.8}, "primary_issue": "retrieval"}
+{"trace_id": "test5", "intent": "CLIENT_HISTORY", "scores": {"overall_score": 7.2, "factual_correctness": 8.2, "grounded_in_context": 6.2, "helpfulness": 7.2}, "primary_issue": "retrieval"}
+{"trace_id": "test6", "intent": "CLIENT_HISTORY", "scores": {"overall_score": 6.3, "factual_correctness": 7.3, "grounded_in_context": 5.3, "helpfulness": 6.3}, "primary_issue": "retrieval"}
+{"trace_id": "test7", "intent": "CLIENT_HISTORY", "scores": {"overall_score": 6.9, "factual_correctness": 7.9, "grounded_in_context": 5.9, "helpfulness": 6.9}, "primary_issue": "retrieval"}
+{"trace_id": "test8", "intent": "CLIENT_HISTORY", "scores": {"overall_score": 7.1, "factual_correctness": 8.1, "grounded_in_context": 6.1, "helpfulness": 7.1}, "primary_issue": "retrieval"}
+{"trace_id": "test9", "intent": "CLIENT_HISTORY", "scores": {"overall_score": 6.7, "factual_correctness": 7.7, "grounded_in_context": 5.7, "helpfulness": 6.7}, "primary_issue": "retrieval"}
+{"trace_id": "test10", "intent": "CLIENT_HISTORY", "scores": {"overall_score": 7.3, "factual_correctness": 8.3, "grounded_in_context": 6.3, "helpfulness": 7.3}, "primary_issue": "retrieval"}
+{"trace_id": "test11", "intent": "CLIENT_HISTORY", "scores": {"overall_score": 6.4, "factual_correctness": 7.4, "grounded_in_context": 5.4, "helpfulness": 6.4}, "primary_issue": "retrieval"}
+{"trace_id": "test12", "intent": "CLIENT_HISTORY", "scores": {"overall_score": 6.6, "factual_correctness": 7.6, "grounded_in_context": 5.6, "helpfulness": 6.6}, "primary_issue": "none"}
+{"trace_id": "test13", "intent": "PRODUCT_INFO", "scores": {"overall_score": 9.0, "factual_correctness": 9.2, "grounded_in_context": 8.8, "helpfulness": 9.1}, "primary_issue": "none"}
+{"trace_id": "test14", "intent": "PRODUCT_INFO", "scores": {"overall_score": 8.9, "factual_correctness": 9.1, "grounded_in_context": 8.7, "helpfulness": 9.0}, "primary_issue": "none"}
+{"trace_id": "test15", "intent": "PRODUCT_INFO", "scores": {"overall_score": 9.1, "factual_correctness": 9.3, "grounded_in_context": 8.9, "helpfulness": 9.2}, "primary_issue": "none"}

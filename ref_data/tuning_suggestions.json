@@ -1,0 +1,8 @@
+[
+  {
+    "intent": "CLIENT_HISTORY",
+    "current_limit": 10,
+    "suggested_limit": 15,
+    "reason": "High retrieval error ratio (0.92) and low overall score (6.7); increasing limit from 10 to 15"
+  }
+]

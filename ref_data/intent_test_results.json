@@ -1,0 +1,268 @@
+{
+  "accuracy": 51,
+  "stats": {
+    "sales_v1": {
+      "correct": 22,
+      "total": 25
+    },
+    "calendar_v1": {
+      "correct": 19,
+      "total": 25
+    },
+    "product_v1": {
+      "correct": 8,
+      "total": 25
+    },
+    "strict_v1": {
+      "correct": 2,
+      "total": 25
+    }
+  },
+  "misclassifications": [
+    {
+      "query": "Which clients have had a meeting with TeraSky Sales this quarter?",
+      "expected": "calendar_v1",
+      "predicted": "strict_v1"
+    },
+    {
+      "query": "How many opportunities are currently in the sales pipeline for TeraSky clients?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "What clients purchased TeraSky products in 2024?",
+      "expected": "product_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Which TeraSky clients had a meeting with a sales representative this quarter?",
+      "expected": "calendar_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "What companies have purchased TeraSky's VPS service this year?",
+      "expected": "product_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Which clients have been scheduled to meet with potential buyers?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Which clients met with TeraSky last quarter?",
+      "expected": "calendar_v1",
+      "predicted": "strict_v1"
+    },
+    {
+      "query": "How many opportunities are in the pipeline for TeraSky clients?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Which TeraSky clients have had the most meetings scheduled for Q2 2024?",
+      "expected": "sales_v1",
+      "predicted": "calendar_v1"
+    },
+    {
+      "query": "Which clients purchased TeraSky's Enterprise Edition in Q2 2024?",
+      "expected": "product_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "How many opportunities are currently in the pipeline for TeraSky clients?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "What clients purchased TeraSky products in Q4 2024?",
+      "expected": "product_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "How many opportunities are currently in the sales pipeline for TeraSky clients?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "What is the total number of opportunities currently in the pipeline?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "What clients purchased our TeraSky product line in 2024?",
+      "expected": "product_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "How many TeraSky clients have closed deals recently?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "How many opportunities are in the pipeline?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Which clients made purchases of TeraSky products in 2025?",
+      "expected": "product_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "How many active opportunities are currently in the sales pipeline?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Which clients had a meeting with TeraSky sales team last quarter?",
+      "expected": "calendar_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Which TeraSky clients acquired a subscription to the premium package in 2024?",
+      "expected": "product_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Is there a total count of active opportunities in TeraSky's sales pipeline?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "What are the names of clients who met with sales reps this quarter?",
+      "expected": "calendar_v1",
+      "predicted": "strict_v1"
+    },
+    {
+      "query": "What clients have bought HashiCorp products this year?",
+      "expected": "product_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "How many opportunities are currently in the sales pipeline for TeraSky clients?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Which TeraSky clients participated in the most meetings in Q2 2024?",
+      "expected": "product_v1",
+      "predicted": "calendar_v1"
+    },
+    {
+      "query": "Which clients have the most active opportunities?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Which TeraSky clients have had the most frequent meetings with sales teams this quarter?",
+      "expected": "sales_v1",
+      "predicted": "strict_v1"
+    },
+    {
+      "query": "Which TeraSky clients have purchased at least one product in 2025?",
+      "expected": "product_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "How many client leads are currently being pursued?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "How many open opportunities do TeraSky clients have?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "List clients who had a meeting with TeraSky sales team this month.",
+      "expected": "calendar_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Which clients made purchases of TeraSky products in Q4 2024?",
+      "expected": "product_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "What number of opportunities are currently in the sales pipeline for TeraSky clients?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "What TeraSky clients have attended the most meetings with our sales team this year?",
+      "expected": "product_v1",
+      "predicted": "calendar_v1"
+    },
+    {
+      "query": "What are the total number of opportunities currently in the sales pipeline?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "How many qualified sales opportunities are currently in the pipeline?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Which clients bought TeraSky's VPS offerings in Q2 2024?",
+      "expected": "product_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "How many opportunities are currently in the sales pipeline for TeraSky clients?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "How many opportunities are currently in the sales pipeline?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Which TeraSky clients purchased more than one product in 2024?",
+      "expected": "product_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "How many sales opportunities are currently in the pipeline for TeraSky clients?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "What TeraSky clients purchased the 'Vulcan' product in 2025?",
+      "expected": "product_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "What are all opportunities in the sales pipeline?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Which clients have the most active opportunities?",
+      "expected": "strict_v1",
+      "predicted": "sales_v1"
+    },
+    {
+      "query": "Which TeraSky clients have had a meeting with at least one of their own sales team members?",
+      "expected": "sales_v1",
+      "predicted": "strict_v1"
+    },
+    {
+      "query": "What TeraSky clients have scheduled meetings with HashiCorp products this quarter?",
+      "expected": "product_v1",
+      "predicted": "calendar_v1"
+    },
+    {
+      "query": "How many unfulfilled meeting invitations do TeraSky clients have?",
+      "expected": "strict_v1",
+      "predicted": "calendar_v1"
+    },
+    {
+      "query": "Which clients have purchased TeraSky products in Q2 2024?",
+      "expected": "product_v1",
+      "predicted": "sales_v1"
+    }
+  ]
+}

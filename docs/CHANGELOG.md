@@ -7,6 +7,81 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Production Traces Analysis System (2025-12-29)
+- **Dedicated Traces Analyzer**: `Tests/analyze_traces.py` for systematic analysis of 144 production traces
+- **Production Data Focus**: Analyzes actual user queries from live deployment via traces.jsonl
+- **Comprehensive Metrics**: Intent performance, query patterns, failure analysis, performance tracking
+- **Trace Generator Identified**: FastAPI `/query` endpoint generates traces via `app/core/tracing.py`
+- **Real User Insights**: Direct analysis of production query behavior and system performance
+
+#### Analysis Capabilities
+1. **Intent Classification Performance**: Success rates by intent, routing method distribution
+2. **Query Pattern Analysis**: Common Cypher patterns (employee/calendar, client/opportunity, recording, product)
+3. **Performance Metrics**: Response times, data quality, success rates, empty result rates
+4. **Failure Pattern Identification**: Error categorization, sample failures, problematic queries
+5. **Actionable Recommendations**: Data-driven suggestions for system improvement
+
+#### Usage Examples
+```bash
+# Basic production traces analysis
+python -m Tests.analyze_traces --data-dir ref_data
+
+# Export to CSV for external analysis
+python -m Tests.analyze_traces --data-dir ref_data --export-csv
+```
+
+#### Key Features
+- **Production Focus**: Analyzes 144 real user queries from live deployment
+- **Complete Coverage**: All production traces systematically analyzed
+- **Automation Ready**: CLI tool suitable for scheduled analysis
+- **Failure Detection**: Systematic identification of error patterns
+- **Performance Tracking**: Real-world response time and success rate analysis
+- **Intent Validation**: Actual intent classification performance measurement
+
+#### Integration with Existing Tools
+- **Complements**: `Tests/analyze_question_history.py` (processed data) vs `Tests/analyze_traces.py` (raw production data)
+- **Data Pipeline**: Production traces → Analysis → Recommendations → System improvements
+- **Automation**: Both tools suitable for scheduled analysis and continuous monitoring
+
+### Added - Comprehensive Question History Analysis System (2025-12-29)
+- **Unified Analysis Tool**: `Tests/analyze_question_history.py` consolidates all question history data sources
+- **Multi-Source Integration**: Analyzes eval_results.jsonl, query_patterns.json, self_improvement_results.json, production_insights.json
+- **Actionable Insights**: Automated generation of improvement suggestions based on data patterns
+- **CSV Export**: Export consolidated analysis results for external analysis and reporting
+- **CLI Interface**: Easy-to-use command-line tool with detailed and summary modes
+
+#### Analysis Capabilities
+1. **Evaluation Scores Analysis**: Judge model performance by intent with overall metrics
+2. **Learned Patterns Analysis**: Pattern success rates, usage statistics, and failure analysis
+3. **Intent Classification Analysis**: Classification accuracy, error patterns, improvement opportunities
+4. **User Behavior Analysis**: Query types, refinement patterns, data quality issues
+5. **Improvement Suggestions**: Specific recommendations for prompt, keyword, and schema enhancements
+
+#### Usage Examples
+```bash
+# Basic analysis report
+python -m Tests.analyze_question_history
+
+# Detailed analysis with all metrics
+python -m Tests.analyze_question_history --detailed
+
+# Export to CSV for external analysis
+python -m Tests.analyze_question_history --export-csv
+```
+
+#### Key Features
+- **Unified View**: Single tool provides complete picture of system performance across all data sources
+- **Data-Driven Insights**: Identifies low-scoring intents, high-failure patterns, classification issues
+- **Export Flexibility**: CSV format enables integration with external analytics tools
+- **Systematic Improvement**: Replaces manual data inspection with automated analysis
+- **Comprehensive Coverage**: Analyzes evaluation scores, learned patterns, intent accuracy, user behavior
+
+#### Improvement Suggestion Logic
+- **Low Evaluation Scores**: Flags intents with average score < 7.0/10 for prompt review
+- **High Failure Patterns**: Highlights patterns with most failures for debugging
+- **Intent Classification Issues**: Suggests keywords for queries with unknown intent
+- **Data Quality Issues**: Identifies user experience problems affecting satisfaction
+
 ### Added - SSH Deployment Automation (2025-12-24)
 - **Automated Deployment Script**: `build_and_run_auto.sh` for non-interactive deployments
 - **SSH Integration**: Direct deployment from local machine to remote server via SCP

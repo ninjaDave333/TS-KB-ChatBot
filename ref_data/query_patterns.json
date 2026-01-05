@@ -1,0 +1,948 @@
+{
+  "patterns": {
+    "{\"complexity\": 3, \"entities\": [\"client\"], \"query_types\": [\"list_queries\", \"filter_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[:MANAGED_BY]->(e:Employee) WHERE c.region = \"IL\" AND e.name IS NOT NULL AND toLower(e.name) <> \"unknown\" RETURN c.sf_name as client_name, e.name as manager_name",
+      "success_rate": 0.9,
+      "avg_execution_time": 1.7,
+      "usage_count": 3,
+      "data_count": 25,
+      "example_queries": [
+        "List Israeli clients with managers",
+        "List 10 Israeli clients with managers"
+      ],
+      "created_at": "2025-11-17T16:45:00.000000",
+      "production_optimized": true
+    },
+    "{\"complexity\": 2, \"entities\": [\"meeting\", \"recording\"], \"query_types\": [\"count_queries\"], \"meeting_type\": \"external\"}": {
+      "cypher_template": "MATCH (r:Recording)-[:LINKED_TO]->(c:CalendarEvent) WHERE size(c.externalParticipants) > 0 RETURN count(r) as external_meetings_recorded",
+      "success_rate": 1.0,
+      "avg_execution_time": 1.5,
+      "usage_count": 5,
+      "data_count": 1,
+      "example_queries": [
+        "How many external meetings recorded?",
+        "Count external meetings"
+      ],
+      "created_at": "2025-11-17T16:45:00.000000",
+      "production_optimized": true
+    },
+    "{\"complexity\": 2, \"entities\": [\"meeting\", \"recording\"], \"query_types\": [\"count_queries\"], \"meeting_type\": \"internal\"}": {
+      "cypher_template": "MATCH (r:Recording)-[:LINKED_TO]->(c:CalendarEvent) WHERE size(c.externalParticipants) = 0 RETURN count(r) as internal_meetings_recorded",
+      "success_rate": 1.0,
+      "avg_execution_time": 1.3,
+      "usage_count": 3,
+      "data_count": 1,
+      "example_queries": [
+        "How many internal meetings recorded?",
+        "Count internal meetings"
+      ],
+      "created_at": "2025-11-17T16:45:00.000000",
+      "production_optimized": true
+    },
+    "{\"complexity\": 4, \"entities\": [\"client\"], \"query_types\": [\"comparison_queries\", \"temporal_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' WITH c, count(o) as deal_count ORDER BY deal_count DESC LIMIT 10 RETURN c.sf_name as client_name, deal_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 1.6,
+      "usage_count": 2,
+      "data_count": 10,
+      "example_queries": [
+        "who are the top 10 most active clients in 2025?",
+        "top active clients 2025"
+      ],
+      "created_at": "2025-11-17T16:45:00.000000",
+      "production_optimized": true
+    },
+    "{\"complexity\": 1, \"entities\": [], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (p:Product) RETURN count(DISTINCT p.vendor) as vendor_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 4.349393001757562,
+      "usage_count": 11,
+      "data_count": 1,
+      "example_queries": [
+        "how many prompt security opps were during 2025 ?",
+        "How many Vendor opportunities have a status of 'Won'?",
+        "How many Vendor opportunities have a status of 'Lost'?",
+        "how many calandar event you have during november 2025, split to internal vs external",
+        "how many backstage opportunities do we have or have had?"
+      ],
+      "created_at": "2025-11-17T14:33:35.471063",
+      "last_used": "2025-12-28T17:28:23.458940"
+    },
+    "{\"complexity\": 2, \"entities\": [\"employee\"], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (e:Employee) RETURN count(e) as employee_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 3.581490144133568,
+      "usage_count": 5,
+      "data_count": 1,
+      "example_queries": [
+        "How many employees work here?",
+        "Count employees",
+        "how many employees operating in us ?",
+        "What is the count of Employee assignments that are also Skills?",
+        "What is the total number of Employees who can be InvitedTo CalendarEvents in Region 'West'?"
+      ],
+      "created_at": "2025-11-17T14:33:49.693821",
+      "last_used": "2025-12-22T14:28:51.424098"
+    },
+    "{\"complexity\": 2, \"entities\": [\"meeting\"], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (r:Recording)-[:LINKED_TO]->(c:CalendarEvent) WHERE size(c.externalParticipants) > 0 RETURN count(r) as external_meetings_recorded",
+      "success_rate": 1.0,
+      "avg_execution_time": 5.896133985370398,
+      "usage_count": 8,
+      "data_count": 1,
+      "example_queries": [
+        "How many external meetings recorded?",
+        "How many external meetings were recorded?",
+        "what is the over all total meeting count ?",
+        "perfect. can you also provide the meetings count for each ?",
+        "and how many of the above are internal vs external meetings ?"
+      ],
+      "created_at": "2025-11-18T12:56:59.676016",
+      "last_used": "2025-12-29T13:24:04.132490"
+    },
+    "{\"complexity\": 3, \"entities\": [\"product\"], \"query_types\": [\"count_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage <> 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' WITH count(o) as failedCount, p.name as product, count(p) as productCount RETURN failedCount, product, productCount ORDER BY productCount DESC LIMIT 1",
+      "success_rate": 1.0,
+      "avg_execution_time": 0.3334648311138153,
+      "usage_count": 4,
+      "data_count": 1,
+      "example_queries": [
+        "how many failed oppertunities were during 2025 ? and what is the most \"popular\" failed product ?",
+        "how many failed opportunities were during 2025? and what is the most popular failed product?"
+      ],
+      "created_at": "2025-11-18T12:57:53.892119",
+      "last_used": "2025-11-18T14:46:12.461195"
+    },
+    "{\"complexity\": 3, \"entities\": [], \"query_types\": [\"list_queries\", \"temporal_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' WITH o.name as name, o.cost as cost ORDER BY cost DESC LIMIT 3 RETURN name, cost",
+      "success_rate": 1.0,
+      "avg_execution_time": 2.2499873638153076,
+      "usage_count": 1,
+      "data_count": 3,
+      "example_queries": [
+        "list the name and coat of the top 3 highest cost opts created in 2025"
+      ],
+      "created_at": "2025-11-19T06:38:59.935529"
+    },
+    "{\"complexity\": 3, \"entities\": [\"employee\", \"meeting\"], \"query_types\": [\"comparison_queries\"]}": {
+      "cypher_template": "MATCH (e:Employee)-[rel:OWNER_OF|INVITED_TO]->(c:CalendarEvent) RETURN e.name as employee, count(rel) as meeting_count ORDER BY meeting_count DESC LIMIT 1",
+      "success_rate": 1.0,
+      "avg_execution_time": 3.542525954544544,
+      "usage_count": 7,
+      "data_count": 1,
+      "example_queries": [
+        "Who is the most active employee in meetings?",
+        "Who is the 2nd most active employee in meetings?",
+        "Who is the top 3 most active employees in meetings?",
+        "which top 3 employees are associated to largest amount of calemdar meetings ?",
+        "who is the most active employee meeting wise ?"
+      ],
+      "created_at": "2025-11-19T12:58:35.750525",
+      "last_used": "2025-12-29T13:21:45.246958"
+    },
+    "{\"complexity\": 2, \"entities\": [], \"query_types\": [\"count_queries\", \"temporal_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage <> 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' RETURN count(o) as failed_opportunities",
+      "success_rate": 1.0,
+      "avg_execution_time": 3.1775853633880615,
+      "usage_count": 3,
+      "data_count": 1,
+      "example_queries": [
+        "How many failed opportunities were there in 2025?"
+      ],
+      "created_at": "2025-11-19T13:01:21.739082",
+      "last_used": "2025-12-22T14:26:04.525705"
+    },
+    "{\"complexity\": 2, \"entities\": [\"recording\"], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (r:Recording)-[:LINKED_TO]->(c:CalendarEvent) WHERE toLower(c.title) CONTAINS 'hashicorp' RETURN count(r) as hashicorp_recordings",
+      "success_rate": 1.0,
+      "avg_execution_time": 3.8687023520469666,
+      "usage_count": 3,
+      "data_count": 1,
+      "example_queries": [
+        "how many recordings available that are hashicorp related ?",
+        "How many Recording sessions have been linked to Regions other than 'West'?",
+        "what is the total recording length associated to all internal and external recordings ?"
+      ],
+      "created_at": "2025-11-19T13:31:09.674083",
+      "last_used": "2025-12-23T12:34:39.821481"
+    },
+    "{\"complexity\": 3, \"entities\": [\"recording\"], \"query_types\": [\"count_queries\", \"list_queries\"]}": {
+      "cypher_template": "MATCH (r:Recording)-[:LINKED_TO]->(c:CalendarEvent) WHERE toLower(c.title) CONTAINS 'hashicorp' RETURN count(r) as recording_count, collect(c.title) as titles",
+      "success_rate": 1.0,
+      "avg_execution_time": 1.510509967803955,
+      "usage_count": 1,
+      "data_count": 1,
+      "example_queries": [
+        "how many recordings available that are hashicorp related ? list their titles"
+      ],
+      "created_at": "2025-11-19T13:31:21.980647"
+    },
+    "{\"complexity\": 2, \"entities\": [\"product\"], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (p:Product) WHERE NOT toLower(p.vendor) CONTAINS 'terasky' RETURN count(p) as non_terasky_products",
+      "success_rate": 1.0,
+      "avg_execution_time": 4.392461359500885,
+      "usage_count": 4,
+      "data_count": 1,
+      "example_queries": [
+        "how many non terasky products do we have ?",
+        "How many Product installations are linked to Vendor 'ABC'?",
+        "What is the count of ScanMetadata records for Products manufactured after 2020?",
+        "What is the count of ScanMetadata records for Products manufactured before 2018?"
+      ],
+      "created_at": "2025-11-23T14:54:25.334190",
+      "last_used": "2025-12-22T14:29:47.783694"
+    },
+    "{\"complexity\": 3, \"entities\": [\"product\", \"deal\"], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' AND NOT toLower(p.vendor) CONTAINS 'terasky' RETURN count(DISTINCT p) as non_terasky_products_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 2.1382384300231934,
+      "usage_count": 1,
+      "data_count": 1,
+      "example_queries": [
+        "how many non terasky products that has a succesfullt deal during 2025 do we have ?"
+      ],
+      "created_at": "2025-11-23T14:54:46.776937"
+    },
+    "{\"complexity\": 5, \"entities\": [\"product\", \"deal\"], \"query_types\": [\"count_queries\", \"list_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' AND NOT toLower(p.vendor) CONTAINS 'terasky' WITH p.name as product, count(*) as deal_count ORDER BY deal_count DESC LIMIT 3 RETURN count(DISTINCT product) as total_products, collect(product) as top_3_products",
+      "success_rate": 1.0,
+      "avg_execution_time": 0.07129964977502823,
+      "usage_count": 7,
+      "data_count": 1,
+      "example_queries": [
+        "how many non terasky products that has a succesfullt deal during 2025 do we have ? list the names of the top 3",
+        "how many non terasky products that has a successful deal during 2025 do we have ? list the names of the top 3",
+        "how many hashicorp products that has a successful deal during 2025 do we have ? list the names of the top 3",
+        "how many IBM products that has a successful deal during 2025 do we have ? list the names of the top 3"
+      ],
+      "created_at": "2025-11-23T14:55:08.911770",
+      "last_used": "2025-11-23T15:13:01.290873"
+    },
+    "{\"complexity\": 2, \"entities\": [], \"query_types\": [\"list_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.opportunity_stage = 'Closed Won' AND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' WITH c.sf_name as client_name, sum(o.amount) as total_sales ORDER BY total_sales DESC LIMIT 3 RETURN client_name",
+      "success_rate": 1.0,
+      "avg_execution_time": 2.7372281551361084,
+      "usage_count": 2,
+      "data_count": 3,
+      "example_queries": [
+        "list the names of the top 3 best sellers of 2025",
+        "list the name of the top best seller of 2025"
+      ],
+      "created_at": "2025-11-23T14:55:36.504851",
+      "last_used": "2025-11-23T14:55:49.864111"
+    },
+    "{\"complexity\": 0, \"entities\": [], \"query_types\": []}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product) WHERE o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01' RETURN c.sf_name as client, p.name as product, o.opportunity_stage as stage, o.close_date as close_date, o.amount as amount ORDER BY o.close_date ASC",
+      "success_rate": 1.0,
+      "avg_execution_time": 7.798184552542807,
+      "usage_count": 16,
+      "data_count": 2019,
+      "example_queries": [
+        "what about hashicorp vault?",
+        "any other ideas ?",
+        "can you tell me the categories of playtika installations and related number on each category ?",
+        "what details can you provide on each installation ?",
+        "who are the customers that would buy vast ?"
+      ],
+      "created_at": "2025-11-23T15:13:38.993177",
+      "last_used": "2026-01-05T10:30:28.670341"
+    },
+    "{\"complexity\": 2, \"entities\": [\"deal\"], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (n) RETURN count(n) as total_nodes",
+      "success_rate": 1.0,
+      "avg_execution_time": 1.0605400800704956,
+      "usage_count": 3,
+      "data_count": 1,
+      "example_queries": [
+        "how many successful deals were made during 2025 ?",
+        "how many security related successful deals were made during 2025 ?"
+      ],
+      "created_at": "2025-12-21T15:21:58.104832",
+      "last_used": "2025-12-21T15:23:59.875671"
+    },
+    "{\"complexity\": 4, \"entities\": [\"deal\"], \"query_types\": [\"count_queries\", \"list_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'\nAND (toLower(p.name) CONTAINS 'security' OR toLower(p.sf_family) CONTAINS 'security' OR toLower(p.sf_type) CONTAINS 'security')\nWITH p.name AS product_name, count(o) AS deal_count\nORDER BY deal_count DESC\nLIMIT 3\nRETURN product_name, deal_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 2.889130115509033,
+      "usage_count": 1,
+      "data_count": 3,
+      "example_queries": [
+        "how many security related successful deals were made during 2025 ? list top 3 names"
+      ],
+      "created_at": "2025-12-21T15:24:12.323677"
+    },
+    "{\"complexity\": 5, \"entities\": [\"client\", \"product\", \"deal\"], \"query_types\": [\"list_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'\nAND NOT toLower(p.name) CONTAINS 'edp'\nWITH c.sf_name AS client_name, p.name AS product_name, toFloat(o.total_price) AS deal_amount, o.close_date AS deal_close_date\nORDER BY deal_amount DESC\nLIMIT 10\nRETURN client_name, product_name, deal_amount, deal_close_date",
+      "success_rate": 1.0,
+      "avg_execution_time": 2.528852701187134,
+      "usage_count": 1,
+      "data_count": 10,
+      "example_queries": [
+        "what are the top 10 most non edp related lucrative deals of 2025? show client name,product name, deal amount, and deal close date"
+      ],
+      "created_at": "2025-12-21T15:24:38.387298"
+    },
+    "{\"complexity\": 5, \"entities\": [\"client\", \"product\", \"deal\"], \"query_types\": [\"count_queries\", \"list_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND o.close_date >= '2025-11-01' AND o.close_date < '2025-12-01'\nAND (toLower(p.name) CONTAINS 'security' OR toLower(p.sf_family) CONTAINS 'security' OR toLower(p.sf_type) CONTAINS 'security')\nRETURN c.sf_name AS client_name, p.name AS product_name, count(o) AS successful_deals\nORDER BY successful_deals DESC",
+      "success_rate": 1.0,
+      "avg_execution_time": 5.0023438930511475,
+      "usage_count": 1,
+      "data_count": 3,
+      "example_queries": [
+        "how many successfull deal happened during nov 2025 that are security related, show client names and product"
+      ],
+      "created_at": "2025-12-22T07:20:39.533830"
+    },
+    "{\"complexity\": 5, \"entities\": [\"client\", \"product\"], \"query_types\": [\"list_queries\", \"temporal_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'\nAND toLower(p.vendor) CONTAINS 'hashicorp'\nWITH p.name AS product_name, c.sf_name AS client_name, count(o) AS deal_count\nORDER BY deal_count DESC\nLIMIT 10\nRETURN product_name, client_name, deal_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 3.087493419647217,
+      "usage_count": 1,
+      "data_count": 9,
+      "example_queries": [
+        "Which HashiCorp products were purchased in 2025? show names and top 10 clients"
+      ],
+      "created_at": "2025-12-22T07:21:41.068510"
+    },
+    "{\"complexity\": 3, \"entities\": [\"client\", \"product\"], \"query_types\": [\"temporal_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'\nAND toLower(p.vendor) CONTAINS 'hashicorp'\nRETURN DISTINCT p.name AS product_name, c.sf_name AS client_name\nORDER BY product_name, client_name",
+      "success_rate": 1.0,
+      "avg_execution_time": 0.24474158883094788,
+      "usage_count": 5,
+      "data_count": 9,
+      "example_queries": [
+        "Which HashiCorp products were purchased in 2025? name products and clients",
+        "Which HashiCorp products were purchased in 2025? name the products and clients"
+      ],
+      "created_at": "2025-12-22T07:23:39.337340",
+      "last_used": "2025-12-22T07:51:15.204569"
+    },
+    "{\"complexity\": 4, \"entities\": [\"client\"], \"query_types\": [\"list_queries\", \"filter_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[:LOCATED_IN]->(r:Region {name: \"IL\"})\nOPTIONAL MATCH (c)-[:MANAGED_BY]->(e:Employee)\nRETURN c.sf_name AS client_name, e.name AS manager_name\nORDER BY c.sf_name\nLIMIT 10",
+      "success_rate": 1.0,
+      "avg_execution_time": 2.081433057785034,
+      "usage_count": 1,
+      "data_count": 10,
+      "example_queries": [
+        "List top 10 Israeli clients with their managers"
+      ],
+      "created_at": "2025-12-22T08:01:25.892735"
+    },
+    "{\"complexity\": 5, \"entities\": [\"employee\", \"meeting\"], \"query_types\": [\"list_queries\", \"filter_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (e:Employee) RETURN e.name as name LIMIT 10",
+      "success_rate": 1.0,
+      "avg_execution_time": 4.891408197581768,
+      "usage_count": 6,
+      "data_count": 10,
+      "example_queries": [
+        "Who is the most active employee in meetings? list top 5 with activity number",
+        "Who is the most active employee in meetings? list top 5 employee names with their activity number"
+      ],
+      "created_at": "2025-12-22T08:37:19.201366",
+      "last_used": "2025-12-22T09:04:11.764621"
+    },
+    "{\"complexity\": 3, \"entities\": [\"product\"], \"query_types\": [\"temporal_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'\nWITH p.name AS product, count(o) AS deal_count\nORDER BY deal_count DESC\nLIMIT 1\nRETURN product, deal_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 4.546397715806961,
+      "usage_count": 8,
+      "data_count": 1,
+      "example_queries": [
+        "What is the most popular product in 2025?",
+        "What is the most non terasky popular product in 2025?",
+        "What is the most non-terasky popular product in 2025?",
+        "What is the most non terasky security related popular product in 2025?"
+      ],
+      "created_at": "2025-12-22T08:43:26.007538",
+      "last_used": "2025-12-22T09:05:10.500264"
+    },
+    "{\"complexity\": 2, \"entities\": [\"product\"], \"query_types\": [\"temporal_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'\nAND toLower(p.vendor) CONTAINS 'hashicorp'\nRETURN DISTINCT p.name AS product_name\nORDER BY product_name",
+      "success_rate": 1.0,
+      "avg_execution_time": 8.413200929760933,
+      "usage_count": 5,
+      "data_count": 5,
+      "example_queries": [
+        "Which HashiCorp products were purchased in 2025?",
+        "Which HashiCorp products were purchased in 2024, and by whom ?"
+      ],
+      "created_at": "2025-12-22T13:11:49.924596",
+      "last_used": "2025-12-23T11:44:09.308826"
+    },
+    "{\"complexity\": 2, \"entities\": [\"client\"], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[:LOCATED_IN]->(r:Region {name: 'North'}), (c)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nRETURN sum(toFloat(o.total_price)) AS total_revenue",
+      "success_rate": 1.0,
+      "avg_execution_time": 4.518754005432129,
+      "usage_count": 1,
+      "data_count": 1,
+      "example_queries": [
+        "What is the total revenue generated by all clients in Region 'North'?"
+      ],
+      "created_at": "2025-12-22T14:27:17.630804"
+    },
+    "{\"complexity\": 3, \"entities\": [\"employee\"], \"query_types\": [\"comparison_queries\", \"relationship_queries\"]}": {
+      "cypher_template": "MATCH (e:Employee)<-[:MANAGED_BY]-(c:Client)-[o:OPPORTUNITY]->(p:Product)\nWITH e.name AS employee, count(o) AS opportunity_count\nORDER BY opportunity_count DESC\nLIMIT 1\nRETURN employee, opportunity_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 4.48634934425354,
+      "usage_count": 1,
+      "data_count": 1,
+      "example_queries": [
+        "Which Employee has managed by the most Opportunities?"
+      ],
+      "created_at": "2025-12-22T14:27:51.718650"
+    },
+    "{\"complexity\": 1, \"entities\": [\"opportunity\"], \"query_types\": []}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)-[:REQUIRES_SKILL]->(s:Skill)\nWITH o, avg(toFloat(s.level)) AS avg_skill_level\nRETURN avg(avg_skill_level) AS overall_average_skill_level",
+      "success_rate": 1.0,
+      "avg_execution_time": 4.917355537414551,
+      "usage_count": 1,
+      "data_count": 1,
+      "example_queries": [
+        "What is the average Skill level required for all OPPORTUNITY nodes?"
+      ],
+      "created_at": "2025-12-22T14:28:12.704517"
+    },
+    "{\"complexity\": 3, \"entities\": [\"client\", \"recording\"], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (c:Client {sf_name: 'XYZ'})-[o:OPPORTUNITY]->(p:Product)\nMATCH (ce:CalendarEvent)-[:LINKED_TO]-(r:Recording)\nWHERE toLower(ce.title) CONTAINS toLower(c.sf_name) OR toLower(ce.externalParticipants) CONTAINS toLower(c.sf_name)\nRETURN count(DISTINCT r) AS recording_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 3.988138437271118,
+      "usage_count": 1,
+      "data_count": 1,
+      "example_queries": [
+        "How many Recording sessions have been linked to Client 'XYZ'?"
+      ],
+      "created_at": "2025-12-22T14:28:20.097397"
+    },
+    "{\"complexity\": 3, \"entities\": [\"client\", \"opportunity\"], \"query_types\": [\"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWITH c.sf_name AS client, count(o) AS opportunity_count\nORDER BY opportunity_count DESC\nLIMIT 1\nRETURN client, opportunity_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 5.26897668838501,
+      "usage_count": 1,
+      "data_count": 1,
+      "example_queries": [
+        "Which Client has the most OPPORTUNITY nodes linked to them?"
+      ],
+      "created_at": "2025-12-22T14:28:57.451458"
+    },
+    "{\"complexity\": 4, \"entities\": [\"product\"], \"query_types\": [\"count_queries\", \"filter_queries\", \"relationship_queries\"]}": {
+      "cypher_template": "MATCH (p:Product)<-[:HAS_INSTALLED]-(c:Client)-[:LOCATED_IN]->(r:Region)\nWHERE r.name = 'North'\nRETURN count(*) AS installation_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 4.519136667251587,
+      "usage_count": 1,
+      "data_count": 1,
+      "example_queries": [
+        "What is the count of Product installations with a Vendor that belongs to Region 'North'?"
+      ],
+      "created_at": "2025-12-22T14:29:02.693467"
+    },
+    "{\"complexity\": 1, \"entities\": [\"employee\"], \"query_types\": []}": {
+      "cypher_template": "MATCH (e:Employee)-[:INVITED_TO]->(ce:CalendarEvent)\nMATCH (e)-[:HAS_SKILL]->(s:Skill)\nWITH e, avg(s.level) AS avg_skill_level\nRETURN avg(avg_skill_level) AS overall_average_skill_level",
+      "success_rate": 1.0,
+      "avg_execution_time": 6.292719602584839,
+      "usage_count": 1,
+      "data_count": 1,
+      "example_queries": [
+        "What is the average Skill level required for all Employees who are InvitedTo CalendarEvents?"
+      ],
+      "created_at": "2025-12-22T14:29:19.198585"
+    },
+    "{\"complexity\": 3, \"entities\": [\"client\", \"product\"], \"query_types\": [\"count_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[:LOCATED_IN]->(r:Region), (c)-[:HAS_INSTALLED]->(p:Product)\nWHERE r.name = 'North'\nRETURN count(DISTINCT p) AS total_products_installed",
+      "success_rate": 1.0,
+      "avg_execution_time": 4.772285223007202,
+      "usage_count": 1,
+      "data_count": 1,
+      "example_queries": [
+        "What is the total number of Products installed by Clients in Region 'North'?"
+      ],
+      "created_at": "2025-12-22T14:29:37.163041"
+    },
+    "{\"complexity\": 2, \"entities\": [\"opportunity\"], \"query_types\": [\"comparison_queries\"]}": {
+      "cypher_template": "MATCH (e:Employee)<-[:MANAGED_BY]-(c:Client)-[o:OPPORTUNITY]->(p:Product)\nWITH e.name AS employee, count(o) AS opportunity_count\nORDER BY opportunity_count DESC\nRETURN employee, opportunity_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 3.9122265577316284,
+      "usage_count": 2,
+      "data_count": 10,
+      "example_queries": [
+        "Who has managed the most OPPORTUNITY nodes?",
+        "Which Vendor has the most OPPORTUNITY nodes linked to them?"
+      ],
+      "created_at": "2025-12-22T14:29:42.190026",
+      "last_used": "2025-12-22T14:30:06.146497"
+    },
+    "{\"complexity\": 2, \"entities\": [\"employee\"], \"query_types\": [\"comparison_queries\"]}": {
+      "cypher_template": "MATCH (ce:CalendarEvent)\nWHERE ce.owner IS NOT NULL\nWITH ce.owner AS employee, count(ce) AS event_count\nORDER BY event_count DESC\nLIMIT 1\nRETURN employee, event_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 3.0561041831970215,
+      "usage_count": 1,
+      "data_count": 1,
+      "example_queries": [
+        "Which Employee has the most CalendarEvents scheduled?"
+      ],
+      "created_at": "2025-12-22T14:29:54.444650"
+    },
+    "{\"complexity\": 1, \"entities\": [\"client\"], \"query_types\": []}": {
+      "cypher_template": "MATCH (c:Client)-[:INVITED_TO]->(ce:CalendarEvent)\nMATCH (c)-[:OPPORTUNITY]->(p:Product)-[:REQUIRES_SKILL]->(s:Skill)\nRETURN avg(s.level) AS average_skill_level",
+      "success_rate": 1.0,
+      "avg_execution_time": 11.050988867878914,
+      "usage_count": 5,
+      "data_count": 1,
+      "example_queries": [
+        "What is the average Skill level required for all Clients who are InvitedTo CalendarEvents?",
+        "what can you tell me about the client WIX ?",
+        "based on our portfolio , what commercial offers you think might be relevant for this client?",
+        "based on our portfolio and client history , what commercial offers you think might be relevant for this client? and why ?"
+      ],
+      "created_at": "2025-12-22T14:30:12.524588",
+      "last_used": "2025-12-29T13:30:56.680988"
+    },
+    "{\"complexity\": 4, \"entities\": [\"client\", \"product\", \"deal\"], \"query_types\": [\"temporal_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'\nAND toLower(p.vendor) CONTAINS 'hashicorp'\nWITH p.name AS product, c.sf_name AS client, o.close_date AS date, o.total_price AS amount\nORDER BY product, date\nWITH product, collect({client: client, date: date, amount: amount})[0..2] AS examples\nRETURN product, examples",
+      "success_rate": 1.0,
+      "avg_execution_time": 9.881520509719849,
+      "usage_count": 1,
+      "data_count": 5,
+      "example_queries": [
+        "Which HashiCorp products were purchased in 2025? give 2 client example deals wih date and sum for each"
+      ],
+      "created_at": "2025-12-23T10:46:39.110363"
+    },
+    "{\"complexity\": 5, \"entities\": [\"client\", \"product\", \"deal\"], \"query_types\": [\"filter_queries\", \"temporal_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'\nAND toLower(p.vendor) CONTAINS 'hashicorp'\nWITH p.name AS product, c.sf_name AS client, o.close_date AS date, o.total_price AS amount\nORDER BY product, date\nWITH product, collect({client: client, date: date, amount: amount})[0..2] AS examples\nRETURN product, examples",
+      "success_rate": 1.0,
+      "avg_execution_time": 8.391751766204834,
+      "usage_count": 1,
+      "data_count": 5,
+      "example_queries": [
+        "Which HashiCorp products were purchased in 2025? give 2 client example deals with date and sum for each"
+      ],
+      "created_at": "2025-12-23T10:51:34.852452"
+    },
+    "{\"complexity\": 4, \"entities\": [\"employee\", \"meeting\"], \"query_types\": [\"list_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (ce:CalendarEvent)\nWHERE ce.owner IS NOT NULL\nWITH ce.owner AS employee, collect(ce) AS meetings, count(ce) AS meeting_count\nORDER BY meeting_count DESC\nLIMIT 5\nWITH employee, meeting_count, [m IN meetings | {title: m.title, startTime: m.startTime}] AS meeting_details\nUNWIND meeting_details AS meeting\nWITH employee, meeting_count, meeting\nORDER BY employee, meeting.startTime DESC\nWITH employee, meeting_count, collect(meeting.title)[0..3] AS latest_meetings\nRETURN employee, meeting_count, latest_meetings",
+      "success_rate": 1.0,
+      "avg_execution_time": 10.06104926764965,
+      "usage_count": 6,
+      "data_count": 5,
+      "example_queries": [
+        "Who is the most top 5 active employee in meetings? list 3 latest meeting names for each",
+        "Who is the most top 5 active employee in meetings? list 3 latest meeting titles for each"
+      ],
+      "created_at": "2025-12-23T10:59:08.871884",
+      "last_used": "2025-12-23T11:32:07.136367"
+    },
+    "{\"complexity\": 3, \"entities\": [\"client\", \"deal\"], \"query_types\": [\"list_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND toLower(p.name) CONTAINS 'hashicorp boundary'\nRETURN c.sf_name AS client_name, o.close_date AS deal_date, o.total_price AS deal_amount\nORDER BY o.close_date DESC",
+      "success_rate": 1.0,
+      "avg_execution_time": 6.25727105140686,
+      "usage_count": 1,
+      "data_count": 2,
+      "example_queries": [
+        "list all clients that purchased hashicorp boundary, add client name, deal date and deal amount"
+      ],
+      "created_at": "2025-12-23T11:36:15.337794"
+    },
+    "{\"complexity\": 2, \"entities\": [\"deal\"], \"query_types\": [\"list_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE toLower(c.sf_name) CONTAINS 'applied materials'\nAND o.opportunity_stage = 'Closed Won'\nRETURN o.opportunity_name AS name, o.close_date AS date, o.total_price AS sum\nORDER BY o.close_date DESC",
+      "success_rate": 1.0,
+      "avg_execution_time": 6.785038709640503,
+      "usage_count": 5,
+      "data_count": 6,
+      "example_queries": [
+        "what deals were purchased by Applied Materials ? list name , date and sum",
+        "what deals were purchased by WIX ? list name , date and sum",
+        "now show only deals during 2024",
+        "now you show 20% success rate in cloud deals - whu did you show 100% rate in previous answer",
+        "3 last Snyk delas show deal date, amount and customer name."
+      ],
+      "created_at": "2025-12-23T12:07:01.223948",
+      "last_used": "2026-01-05T10:39:26.270033"
+    },
+    "{\"complexity\": 3, \"entities\": [\"client\", \"deal\"], \"query_types\": [\"filter_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE c.sf_name = 'Applied Materials'\nAND o.opportunity_stage = 'Closed Lost'\nRETURN o.opportunity_name AS deal_name,\no.close_date AS close_date,\ntoFloat(o.total_price) AS deal_value,\np.name AS product_name\nORDER BY o.close_date DESC",
+      "success_rate": 1.0,
+      "avg_execution_time": 8.30355715751648,
+      "usage_count": 1,
+      "data_count": 8,
+      "example_queries": [
+        "where there any lost deal attempts with this client ?"
+      ],
+      "created_at": "2025-12-23T12:07:38.000167"
+    },
+    "{\"complexity\": 1, \"entities\": [\"deal\"], \"query_types\": []}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE c.sf_name = 'Applied Materials'\nAND o.opportunity_stage = 'Closed Lost'\nRETURN o.opportunity_name AS deal_name,\np.name AS product,\no.close_date AS close_date,\no.total_price AS deal_value,\no.opportunity_stage AS stage\nORDER BY o.close_date DESC",
+      "success_rate": 1.0,
+      "avg_execution_time": 8.870755314826965,
+      "usage_count": 3,
+      "data_count": 8,
+      "example_queries": [
+        "basically all deals that are not Won or closed_Won , usually close_lost is the term",
+        "and what are the latest security related deals ?",
+        "what are the last 10 deals for vast storage"
+      ],
+      "created_at": "2025-12-23T12:08:40.850567",
+      "last_used": "2026-01-05T10:31:53.266600"
+    },
+    "{\"complexity\": 2, \"entities\": [\"recording\"], \"query_types\": [\"comparison_queries\"]}": {
+      "cypher_template": "MATCH (r:Recording)\nWHERE r.createdDateTime IS NOT NULL\nRETURN r.title, r.createdDateTime\nORDER BY r.createdDateTime DESC\nLIMIT 5",
+      "success_rate": 1.0,
+      "avg_execution_time": 6.077383279800415,
+      "usage_count": 1,
+      "data_count": 5,
+      "example_queries": [
+        "what are the top 5 newest recordings ?"
+      ],
+      "created_at": "2025-12-23T12:29:43.732800"
+    },
+    "{\"complexity\": 3, \"entities\": [\"recording\"], \"query_types\": [\"list_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (r:Recording)\nWHERE r.createdDateTime IS NOT NULL\nWITH r.title AS name, r.createdDateTime AS date, r.duration AS length\nORDER BY date DESC\nLIMIT 5\nRETURN name, date, length",
+      "success_rate": 1.0,
+      "avg_execution_time": 6.01919162273407,
+      "usage_count": 2,
+      "data_count": 5,
+      "example_queries": [
+        "what are the top 5 newest recordings ? show their name,date and length"
+      ],
+      "created_at": "2025-12-23T12:30:14.262341",
+      "last_used": "2025-12-23T12:38:31.684899"
+    },
+    "{\"complexity\": 4, \"entities\": [\"client\"], \"query_types\": [\"count_queries\", \"list_queries\", \"filter_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[:MANAGED_BY]->(e:Employee)\nWHERE c.region = 'IL'\nRETURN c.sf_name AS client_name, e.name AS account_manager\nORDER BY c.sf_name",
+      "success_rate": 1.0,
+      "avg_execution_time": 5.712825059890747,
+      "usage_count": 2,
+      "data_count": 30,
+      "example_queries": [
+        "List Israeli clients that has a account manager associated with them",
+        "show me a list of all client where Merav Ben Shalom is the account mngr"
+      ],
+      "created_at": "2025-12-23T12:39:33.591545",
+      "last_used": "2025-12-23T12:40:20.920234"
+    },
+    "{\"complexity\": 1, \"entities\": [\"product\"], \"query_types\": []}": {
+      "cypher_template": "MATCH (c:Client)-[:MANAGED_BY]->(e:Employee)\nWHERE e.name = 'Merav Ben Shalom'\nWITH c\nMATCH (c)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nWITH c, o, p\nORDER BY o.close_date DESC\nLIMIT 1\nRETURN c.sf_name AS client_name, o.close_date AS purchase_date, p.name AS product, o.total_price AS amount",
+      "success_rate": 1.0,
+      "avg_execution_time": 7.839920490980148,
+      "usage_count": 5,
+      "data_count": 1,
+      "example_queries": [
+        "which one of them purchased anything last, give me data, product and sum",
+        "what is the success ratio of delas per product",
+        "and what about security related products ?",
+        "can you see the profit margin of these products ?",
+        "what about security related products ?"
+      ],
+      "created_at": "2025-12-23T12:40:57.321034",
+      "last_used": "2026-01-05T10:37:16.117642"
+    },
+    "{\"complexity\": 1, \"entities\": [], \"query_types\": [\"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage IN ['Pipeline', 'Closed Won']\nAND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'\nWITH p.vendor AS vendor, count(o) AS opportunity_count, sum(toFloat(o.total_price)) AS total_value\nORDER BY opportunity_count DESC, total_value DESC\nLIMIT 3\nRETURN vendor, opportunity_count, total_value",
+      "success_rate": 1.0,
+      "avg_execution_time": 6.644522547721863,
+      "usage_count": 2,
+      "data_count": 3,
+      "example_queries": [
+        "what are the top 3 trending vendors of 2025 ?",
+        "who are the top 5 non terasky vendors of 2025 ?"
+      ],
+      "created_at": "2025-12-24T06:50:41.146356",
+      "last_used": "2025-12-29T13:12:06.012410"
+    },
+    "{\"complexity\": 2, \"entities\": [\"product\"], \"query_types\": [\"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'\nWITH p.name AS product, count(o) AS opportunity_count\nORDER BY opportunity_count DESC\nLIMIT 3\nRETURN product, opportunity_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 5.789125740528107,
+      "usage_count": 3,
+      "data_count": 3,
+      "example_queries": [
+        "and what about top 3 trending products ?",
+        "what about top 3 security related products ?",
+        "what are top 5 most profitable products of 2025 ?"
+      ],
+      "created_at": "2025-12-24T06:51:11.845386",
+      "last_used": "2026-01-05T10:36:22.574088"
+    },
+    "{\"complexity\": 1, \"entities\": [], \"query_types\": [\"temporal_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Lost'\nAND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'\nRETURN c.sf_name AS client_name, p.name AS product_name, o.opportunity_name AS opportunity_name, o.total_price AS deal_value, o.close_date AS close_date\nORDER BY o.total_price DESC",
+      "success_rate": 1.0,
+      "avg_execution_time": 9.4727383852005,
+      "usage_count": 2,
+      "data_count": 931,
+      "example_queries": [
+        "what are the main failed opportunities we had in 2025 and the main reasons for them",
+        "in 2025"
+      ],
+      "created_at": "2025-12-24T09:11:43.504761",
+      "last_used": "2026-01-05T10:37:51.680804"
+    },
+    "{\"complexity\": 2, \"entities\": [\"product\"], \"query_types\": [\"list_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage IN ['Closed Won', 'Closed Lost', 'Pipeline']\nWITH p.name AS product_name,\ncount(CASE WHEN o.opportunity_stage = 'Closed Won' THEN 1 END) AS won_deals,\ncount(o) AS total_deals\nWHERE total_deals > 0\nORDER BY product_name\nRETURN product_name, won_deals, total_deals,\nround(toFloat(won_deals) / total_deals * 100, 1) AS success_rate",
+      "success_rate": 1.0,
+      "avg_execution_time": 12.470872640609741,
+      "usage_count": 1,
+      "data_count": 432,
+      "example_queries": [
+        "list all products analyzed"
+      ],
+      "created_at": "2025-12-24T09:21:47.463426"
+    },
+    "{\"complexity\": 3, \"entities\": [\"product\", \"deal\"], \"query_types\": [\"filter_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage IN ['Closed Won', 'Closed Lost']\nWITH p.sf_type AS product_type,\nsum(CASE WHEN o.opportunity_stage = 'Closed Won' THEN 1 ELSE 0 END) AS won_deals,\nsum(CASE WHEN o.opportunity_stage = 'Closed Lost' THEN 1 ELSE 0 END) AS lost_deals,\ncount(o) AS total_deals\nWITH product_type, won_deals, lost_deals, total_deals,\nround(toFloat(won_deals) / total_deals * 100, 1) AS success_rate\nORDER BY success_rate DESC\nRETURN product_type, won_deals, lost_deals, total_deals, success_rate",
+      "success_rate": 1.0,
+      "avg_execution_time": 8.944228649139404,
+      "usage_count": 1,
+      "data_count": 10,
+      "example_queries": [
+        "now create a table with success rate of deals broken to products, professional services and area, cloud, on prem, security"
+      ],
+      "created_at": "2025-12-24T09:24:46.805074"
+    },
+    "{\"complexity\": 4, \"entities\": [\"client\", \"employee\", \"product\"], \"query_types\": [\"filter_queries\"]}": {
+      "cypher_template": "MATCH (s:SyncMetadata) RETURN s.type, s.last_run, s.status, s.processed, s.created, s.errors ORDER BY s.last_run DESC",
+      "success_rate": 1.0,
+      "avg_execution_time": 7.681978225708008,
+      "usage_count": 1,
+      "data_count": 5,
+      "example_queries": [
+        "this is where you can see last sync times...  (:SyncMetadata {   type: \"employee_import\" | \"product_import\" | \"client_import\" | \"bu_import\",   last_run: \"timestamp\",   status: \"success\" | \"completed_with_errors\",   processed: number,   created: number,   skipped: number,   updated: number,   errors: number })       with this cypher: MATCH (s:SyncMetadata) RETURN s.type, s.last_run, s.status, s.processed, s.created, s.errors ORDER BY s.last_run DESC"
+      ],
+      "created_at": "2025-12-24T10:07:24.622274"
+    },
+    "{\"complexity\": 3, \"entities\": [\"meeting\"], \"query_types\": [\"count_queries\", \"temporal_queries\"]}": {
+      "cypher_template": "MATCH (ce:CalendarEvent)\nWHERE toLower(ce.title) CONTAINS 'platform engineering'\nAND ce.startTime >= datetime('2025-01-01')\nRETURN count(ce) AS meeting_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 3.546262502670288,
+      "usage_count": 2,
+      "data_count": 1,
+      "example_queries": [
+        "how many meetings have been conducted around platform engineering this year?",
+        "how many meetings on vault in 2025?"
+      ],
+      "created_at": "2025-12-28T17:23:12.469645",
+      "last_used": "2025-12-28T17:23:59.338521"
+    },
+    "{\"complexity\": 2, \"entities\": [\"deal\", \"recording\"], \"query_types\": []}": {
+      "cypher_template": "MATCH (r:Recording)\nWHERE toLower(r.title) CONTAINS 'backstage'\nWITH r\nOPTIONAL MATCH (r)-[:LINKED_TO]->(ce:CalendarEvent)\nOPTIONAL MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE toLower(o.opportunity_name) CONTAINS 'backstage' OR toLower(p.name) CONTAINS 'backstage'\nRETURN r.title AS recording_title, r.createdDateTime AS created_date,\nce.title AS calendar_event_title, ce.startTime AS meeting_time,\nc.sf_name AS client_name, p.name AS product_name,\no.opportunity_name AS deal_name, o.opportunity_stage AS deal_stage,\no.total_price AS deal_value\nORDER BY r.createdDateTime DESC",
+      "success_rate": 1.0,
+      "avg_execution_time": 7.349470853805542,
+      "usage_count": 1,
+      "data_count": 4,
+      "example_queries": [
+        "what recordings exist around backstage and what deals?"
+      ],
+      "created_at": "2025-12-28T17:26:00.520615"
+    },
+    "{\"complexity\": 2, \"entities\": [\"meeting\"], \"query_types\": [\"comparison_queries\"]}": {
+      "cypher_template": "MATCH (ce:CalendarEvent)\nWHERE ce.title IS NOT NULL AND ce.title <> '' AND NOT ce.title STARTS WITH 'Teams Meeting'\nWITH toLower(ce.title) AS title_lower, count(*) AS meeting_count\nORDER BY meeting_count DESC\nLIMIT 5\nRETURN title_lower AS subject_type, meeting_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 5.168708086013794,
+      "usage_count": 1,
+      "data_count": 5,
+      "example_queries": [
+        "read all the meetings you can access, and tell me the top 5 subject types of meetings"
+      ],
+      "created_at": "2025-12-29T13:15:59.466321"
+    },
+    "{\"complexity\": 2, \"entities\": [\"product\", \"meeting\"], \"query_types\": []}": {
+      "cypher_template": "MATCH (ce:CalendarEvent)\nWHERE NOT ce.title STARTS WITH 'Teams Meeting'\nWITH toLower(ce.title) AS title_lower\nWITH CASE\nWHEN title_lower CONTAINS 'working session' THEN 'Working Sessions'\nWHEN title_lower CONTAINS 'intro' OR title_lower CONTAINS 'introduction' THEN 'Product Introductions'\nWHEN title_lower CONTAINS 'review' THEN 'Reviews'\nWHEN title_lower CONTAINS 'demo' OR title_lower CONTAINS 'demonstration' THEN 'Demos'\nWHEN title_lower CONTAINS 'kickoff' OR title_lower CONTAINS 'kick-off' THEN 'Kickoffs'\nWHEN title_lower CONTAINS 'planning' THEN 'Planning'\nWHEN title_lower CONTAINS 'standup' OR title_lower CONTAINS 'stand-up' THEN 'Standups'\nWHEN title_lower CONTAINS 'sync' OR title_lower CONTAINS 'synchronization' THEN 'Sync Meetings'\nWHEN title_lower CONTAINS 'training' THEN 'Training'\nWHEN title_lower CONTAINS 'presentation' THEN 'Presentations'\nWHEN title_lower CONTAINS 'discussion' THEN 'Discussions'\nWHEN title_lower CONTAINS 'meeting' THEN 'General Meetings'\nELSE 'Other'\nEND AS subject_type\nWITH subject_type, count(*) AS meeting_count\nORDER BY meeting_count DESC\nLIMIT 5\nRETURN subject_type, meeting_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 9.532122611999512,
+      "usage_count": 1,
+      "data_count": 5,
+      "example_queries": [
+        "im not talking about re-occuring meetings, but the subject types like: product intro, working sessions, review, etc..."
+      ],
+      "created_at": "2025-12-29T13:18:44.978199"
+    },
+    "{\"complexity\": 1, \"entities\": [\"meeting\"], \"query_types\": []}": {
+      "cypher_template": "MATCH (ce:CalendarEvent)\nWHERE ce.title IS NOT NULL\nAND NOT ce.title STARTS WITH 'Teams Meeting'\nAND NOT toLower(ce.title) CONTAINS 'demo'\nAND NOT toLower(ce.title) CONTAINS 'introduction'\nAND NOT toLower(ce.title) CONTAINS 'intro'\nAND NOT toLower(ce.title) CONTAINS 'presentation'\nAND NOT toLower(ce.title) CONTAINS 'product'\nWITH ce.title AS title,\nCASE\nWHEN toLower(ce.title) CONTAINS 'sync' OR toLower(ce.title) CONTAINS 'standup' OR toLower(ce.title) CONTAINS 'status' OR toLower(ce.title) CONTAINS 'update' OR toLower(ce.title) CONTAINS 'check-in' THEN 'Team Sync/Status'\nWHEN toLower(ce.title) CONTAINS 'review' OR toLower(ce.title) CONTAINS 'feedback' OR toLower(ce.title) CONTAINS 'retrospective' OR toLower(ce.title) CONTAINS 'debrief' THEN 'Review/Feedback'\nWHEN toLower(ce.title) CONTAINS 'planning' OR toLower(ce.title) CONTAINS 'strategy' OR toLower(ce.title) CONTAINS 'roadmap' OR toLower(ce.title) CONTAINS 'brainstorm' THEN 'Planning/Strategy'\nWHEN toLower(ce.title) CONTAINS 'training' OR toLower(ce.title) CONTAINS 'workshop' OR toLower(ce.title) CONTAINS 'learning' OR toLower(ce.title) CONTAINS 'onboarding' THEN 'Training/Learning'\nWHEN toLower(ce.title) CONTAINS 'client' OR toLower(ce.title) CONTAINS 'customer' OR toLower(ce.title) CONTAINS 'prospect' OR toLower(ce.title) CONTAINS 'sales' THEN 'Client/Sales'\nELSE 'Other'\nEND AS category\nWITH category, count(*) AS meeting_count\nORDER BY meeting_count DESC\nRETURN category, meeting_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 7.555036306381226,
+      "usage_count": 3,
+      "data_count": 6,
+      "example_queries": [
+        "can you try and categorize the remaining 428 Other meetings ?",
+        "can you try to categorise these 80 meetings and group them to similar types?",
+        "i was talking about osadeh@terasky.com meetings"
+      ],
+      "created_at": "2025-12-29T13:19:51.433971",
+      "last_used": "2025-12-29T13:24:35.579027"
+    },
+    "{\"complexity\": 3, \"entities\": [\"product\"], \"query_types\": [\"filter_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND o.close_date >= '2024-01-01' AND o.close_date < '2025-01-01'\nWITH p.name AS product, p.vendor AS vendor, count(o) AS deal_count, sum(toFloat(o.total_price)) AS total_revenue\nORDER BY deal_count DESC, total_revenue DESC\nRETURN product, vendor, deal_count, total_revenue\nLIMIT 10",
+      "success_rate": 1.0,
+      "avg_execution_time": 6.912048578262329,
+      "usage_count": 1,
+      "data_count": 10,
+      "example_queries": [
+        "what products you suggest we focus on for next year? the ones that have the most potential?"
+      ],
+      "created_at": "2025-12-29T13:32:29.470794"
+    },
+    "{\"complexity\": 3, \"entities\": [\"client\", \"product\", \"deal\"], \"query_types\": []}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nRETURN c.sf_name AS client, p.name AS product, p.vendor AS vendor, o.close_date AS date, o.total_price AS deal_size\nORDER BY o.close_date DESC\nLIMIT 3",
+      "success_rate": 1.0,
+      "avg_execution_time": 5.927706003189087,
+      "usage_count": 1,
+      "data_count": 3,
+      "example_queries": [
+        "what are the 3 latest won deals, specify client, product, vendor, date and deal size"
+      ],
+      "created_at": "2026-01-04T12:55:54.673268"
+    },
+    "{\"complexity\": 2, \"entities\": [\"client\"], \"query_types\": [\"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[:HAS_INSTALLED]->(p:Product)\nWITH c, count(p) AS installed_count\nORDER BY installed_count DESC\nLIMIT 3\nRETURN c.sf_name AS client_name, installed_count",
+      "success_rate": 1.0,
+      "avg_execution_time": 5.448624610900879,
+      "usage_count": 1,
+      "data_count": 3,
+      "example_queries": [
+        "who are the top 3 clients that has the most rich whitespace data ?"
+      ],
+      "created_at": "2026-01-04T15:02:36.356162"
+    },
+    "{\"complexity\": 2, \"entities\": [], \"query_types\": [\"list_queries\", \"filter_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[:HAS_INSTALLED]->(p:Product)\nRETURN c.sf_name AS client_name, p.name AS product_name, p.sf_family AS product_family, p.sf_type AS product_type, p.sf_business_unit AS business_unit, p.vendor AS vendor\nORDER BY p.sf_business_unit, p.sf_family, p.name",
+      "success_rate": 1.0,
+      "avg_execution_time": 8.859890460968018,
+      "usage_count": 1,
+      "data_count": 2274,
+      "example_queries": [
+        "where is this data comes from ? can you show the cypher query ?"
+      ],
+      "created_at": "2026-01-04T15:04:44.837994"
+    },
+    "{\"complexity\": 2, \"entities\": [], \"query_types\": [\"count_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nWITH c, count(DISTINCT p) AS products_sold\nORDER BY products_sold DESC\nLIMIT 3\nRETURN c.sf_name AS client, products_sold",
+      "success_rate": 1.0,
+      "avg_execution_time": 3.9795098304748535,
+      "usage_count": 1,
+      "data_count": 3,
+      "example_queries": [
+        "what top 3 accounts that has most completed whitespace ?"
+      ],
+      "created_at": "2026-01-05T10:33:15.595186"
+    },
+    "{\"complexity\": 3, \"entities\": [\"client\"], \"query_types\": [\"filter_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nWITH c.sf_name AS client, count(o) AS whitespace_entries\nORDER BY whitespace_entries DESC\nLIMIT 3\nRETURN client, whitespace_entries",
+      "success_rate": 1.0,
+      "avg_execution_time": 4.763704299926758,
+      "usage_count": 1,
+      "data_count": 3,
+      "example_queries": [
+        "who are the top 3 clients with the most whitespace entries ?"
+      ],
+      "created_at": "2026-01-05T10:33:59.117203"
+    },
+    "{\"complexity\": 4, \"entities\": [\"product\"], \"query_types\": [\"list_queries\", \"temporal_queries\", \"comparison_queries\"]}": {
+      "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'\nAND toLower(p.vendor) CONTAINS 'dell'\nWITH p.name AS product_name, sum(toFloat(o.total_price)) AS total_revenue\nORDER BY total_revenue DESC\nLIMIT 5\nRETURN product_name, total_revenue",
+      "success_rate": 1.0,
+      "avg_execution_time": 5.661284029483795,
+      "usage_count": 3,
+      "data_count": 5,
+      "example_queries": [
+        "what are top 5 products in dell show me product name , amount of money made combined for each product in 2025."
+      ],
+      "created_at": "2026-01-05T10:40:34.921866",
+      "last_used": "2026-01-05T10:44:09.854903"
+    }
+  },
+  "success_history": {},
+  "failure_analysis": {
+    "{\"complexity\": 5, \"entities\": [\"employee\", \"meeting\"], \"query_types\": [\"list_queries\", \"filter_queries\", \"comparison_queries\"]}": {
+      "failure_count": 2,
+      "error_types": {
+        "CypherSyntaxError": 2
+      },
+      "example_failures": [
+        {
+          "query": "Who is the most active employee in meetings? list top 5 employee names with their activity number",
+          "error": "{code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'WHERE': expected an expression (line 5, column 33 (offset: 145))\n\"size([event IN (:CalendarEvent) WHERE e.name IN event.internalParticipants | event]) AS activity_count\"\n                                 ^}"
+        },
+        {
+          "query": "Who is the most active employee in meetings? list top 5 employee names with their activity number",
+          "error": "{code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'WHERE': expected an expression (line 5, column 33 (offset: 145))\n\"size([event IN (:CalendarEvent) WHERE e.name IN event.internalParticipants | event]) AS activity_count\"\n                                 ^}"
+        }
+      ],
+      "first_failure": "2025-12-22T09:02:27.166189",
+      "last_failure": "2025-12-22T09:02:34.107296"
+    },
+    "{\"complexity\": 1, \"entities\": [], \"query_types\": [\"comparison_queries\"]}": {
+      "failure_count": 2,
+      "error_types": {
+        "CypherTypeError": 1,
+        "CypherSyntaxError": 1
+      },
+      "example_failures": [
+        {
+          "query": "Who is invited to the most CalendarEvents scheduled in Region 'South'?",
+          "error": "{code: Neo.ClientError.Statement.TypeError} {message: Expected a string value for `toLower`, but got: StringArray[nitzanza@payoneer.com, oried@payoneer.com]; consider converting it to a string with toString().}"
+        },
+        {
+          "query": "Which BU has the most SyncMetadata records?",
+          "error": "{code: Neo.ClientError.Statement.SyntaxError} {message: Variable `r` not defined (line 6, column 38 (offset: 203))\n\"WITH bu.name AS business_unit, count(r) AS record_count\"\n                                      ^}"
+        }
+      ],
+      "first_failure": "2025-12-22T14:28:03.909035",
+      "last_failure": "2025-12-22T14:28:25.178340"
+    },
+    "{\"complexity\": 2, \"entities\": [\"employee\"], \"query_types\": [\"count_queries\"]}": {
+      "failure_count": 1,
+      "error_types": {
+        "CypherSyntaxError": 1
+      },
+      "example_failures": [
+        {
+          "query": "How many Employee activities have been assigned to Opportunities in Region 'South'?",
+          "error": "{code: Neo.ClientError.Statement.SyntaxError} {message: Type mismatch: o defined with conflicting type Relationship (expected Node) (line 3, column 61 (offset: 158))\n\"MATCH (e:Employee)-[:MANAGED_BY|HAS_SKILL|BELONGS_TO*1..2]-(o)\"\n                                                             ^}"
+        }
+      ],
+      "first_failure": "2025-12-22T14:29:06.491896"
+    },
+    "{\"complexity\": 4, \"entities\": [\"employee\", \"meeting\"], \"query_types\": [\"list_queries\", \"comparison_queries\"]}": {
+      "failure_count": 3,
+      "error_types": {
+        "CypherSyntaxError": 3
+      },
+      "example_failures": [
+        {
+          "query": "Who is the most top 5 active employee in meetings? list 3 latest meeting names for each",
+          "error": "{code: Neo.ClientError.Statement.SyntaxError} {message: Unknown function 'apoc.coll.sortNodes' (line 6, column 31 (offset: 278))\n\"WITH employee, meeting_count, apoc.coll.sortNodes(meeting_details, 'startTime')[0..3] AS latest_meetings\"\n                               ^}"
+        },
+        {
+          "query": "Who is the most top 5 active employee in meetings? list 3 latest meeting names for each",
+          "error": "{code: Neo.ClientError.Statement.SyntaxError} {message: Expression in WITH must be aliased (use AS) (line 3, column 6 (offset: 112))\n\"WITH ce.owner, count(ce) AS meeting_count\"\n      ^}"
+        },
+        {
+          "query": "Who is the most top 5 active employee in meetings? list 3 latest meeting names for each",
+          "error": "{code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'ORDER': expected an expression, ')' or ',' (line 2, column 64 (offset: 88))\n\"WITH ce.owner AS owner, count(ce) AS meeting_count, collect(ce ORDER BY ce.startTime DESC) AS meetings\"\n                                                                ^}"
+        }
+      ],
+      "first_failure": "2025-12-23T11:02:39.053498",
+      "last_failure": "2025-12-23T11:28:39.574428"
+    },
+    "{\"complexity\": 0, \"entities\": [], \"query_types\": []}": {
+      "failure_count": 3,
+      "error_types": {
+        "CypherSyntaxError": 3
+      },
+      "example_failures": [
+        {
+          "query": "can you find anything about backstage ?",
+          "error": "{code: Neo.ClientError.Statement.SyntaxError} {message: All sub queries in an UNION must have the same return column names (line 4, column 1 (offset: 145))\n\"UNION\"\n ^}"
+        },
+        {
+          "query": "can you explain your reasoning for these suggestions ?",
+          "error": "{code: Neo.ClientError.Statement.SyntaxError} {message: Variable `c` not defined (line 8, column 20 (offset: 344))\n\"WHERE similar_c <> c AND similar_o.opportunity_stage = 'Closed Won'\"\n                    ^}"
+        },
+        {
+          "query": "is vast storage relevant for bank hapoalim?",
+          "error": "{code: Neo.ClientError.Statement.SyntaxError} {message: All sub queries in an UNION must have the same return column names (line 4, column 1 (offset: 236))\n\"UNION\"\n ^}"
+        }
+      ],
+      "first_failure": "2025-12-29T13:14:30.544226",
+      "last_failure": "2026-01-05T10:31:27.856726"
+    }
+  },
+  "last_updated": "2026-01-05T10:44:09.854961"
+}

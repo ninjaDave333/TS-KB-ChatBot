@@ -1,7 +1,7 @@
 # TSKB-RAG Schema Synchronization Guide
 
-**Version**: 2.6.0  
-**Last Updated**: 2025-11-18  
+**Version**: 2.7.0  
+**Last Updated**: 2025-12-29  
 **Purpose**: Complete schema reference for services consuming TSKB-RAG Neo4j knowledge graph
 
 ---
@@ -568,7 +568,80 @@ This document provides a comprehensive schema definition for all node types and 
 
 ---
 
-## Learned Query Patterns (Production Data)
+## Production Traces Analysis System (NEW - 2025-12-29)
+
+The TSKB-RAG system now includes comprehensive production traces analysis for systematic monitoring and improvement.
+
+### Trace Generation
+- **Source**: FastAPI `/query` endpoint via `app/core/tracing.py`
+- **Storage**: `traces.jsonl` with complete execution context
+- **Volume**: 144+ real user queries from production deployment
+- **Data**: Intent, Cypher, results, timing, routing path, LLM interactions
+
+### Analysis Tool
+- **Script**: `Tests/analyze_traces.py` for systematic production data analysis
+- **Usage**: `python -m Tests.analyze_traces --data-dir ref_data`
+- **Export**: CSV export for external analysis and reporting
+- **Automation**: CLI interface suitable for scheduled analysis
+
+### Key Metrics Analyzed
+1. **Intent Classification Performance**: Success rates by intent, routing method distribution
+2. **Query Pattern Analysis**: Common Cypher patterns (employee/calendar, client/opportunity, recording, product)
+3. **Performance Metrics**: Response times, data quality, success rates, empty result rates
+4. **Failure Pattern Identification**: Error categorization, sample failures, problematic queries
+5. **Actionable Recommendations**: Data-driven suggestions for system improvement
+
+### Integration Benefits
+- **Production Insights**: Direct analysis of real user query behavior
+- **Complete Coverage**: All production traces systematically analyzed
+- **Failure Detection**: Systematic identification of error patterns
+- **Performance Tracking**: Real-world response time and success rate analysis
+- **Intent Validation**: Actual intent classification performance measurement
+
+### Complementary Tools
+- **`Tests/analyze_question_history.py`**: Processed evaluation data analysis
+- **`Tests/analyze_traces.py`**: Raw production traces analysis
+- **Data Pipeline**: Production traces → Analysis → Recommendations → System improvements
+
+---
+
+## Comprehensive Question History Analysis System (NEW - 2025-12-29)
+
+Unified analysis tool consolidating all question history data sources for systematic self-improvement.
+
+### Data Sources Integrated
+1. **eval_results.jsonl**: Judge model evaluation scores by intent
+2. **query_patterns.json**: Learned patterns, success rates, failure analysis
+3. **self_improvement_results.json**: Intent classification performance, error patterns
+4. **production_insights.json**: User behavior patterns, data quality issues
+
+### Analysis Capabilities
+1. **Evaluation Scores Analysis**: Judge model performance by intent with overall metrics
+2. **Learned Patterns Analysis**: Pattern success rates, usage statistics, and failure analysis
+3. **Intent Classification Analysis**: Classification accuracy, error patterns, improvement opportunities
+4. **User Behavior Analysis**: Query types, refinement patterns, data quality issues
+5. **Improvement Suggestions**: Specific recommendations for prompt, keyword, and schema enhancements
+
+### Usage Examples
+```bash
+# Basic analysis report
+python -m Tests.analyze_question_history
+
+# Detailed analysis with all metrics
+python -m Tests.analyze_question_history --detailed
+
+# Export to CSV for external analysis
+python -m Tests.analyze_question_history --export-csv
+```
+
+### Key Features
+- **Unified View**: Single tool provides complete picture of system performance
+- **Data-Driven Insights**: Identifies low-scoring intents, high-failure patterns, classification issues
+- **Export Flexibility**: CSV format enables integration with external analytics tools
+- **Systematic Improvement**: Replaces manual data inspection with automated analysis
+- **Comprehensive Coverage**: Analyzes evaluation scores, learned patterns, intent accuracy, user behavior
+
+---
 
 ### Pattern Learning System
 The TSKB-RAG system automatically learns successful query patterns and stores them for reuse. As of 2025-11-17, the system has learned **6 high-performance patterns** with 96.7% average success rate.
@@ -1338,6 +1411,7 @@ When integrating with TSKB-RAG data:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.7.0 | 2025-12-29 | Added Production Traces Analysis System and Comprehensive Question History Analysis documentation |
 | 2.6.0 | 2025-11-18 | Added OAuth authentication requirements and security documentation |
 | 2.5.0 | 2025-11-17 | Added learned query patterns documentation and production analytics |
 | 2.4.0 | 2025-11-12 | Added close_date field to OPPORTUNITY for accurate temporal queries |

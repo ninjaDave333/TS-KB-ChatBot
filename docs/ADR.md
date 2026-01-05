@@ -350,6 +350,13 @@ WHERE o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'
 | 024 | Self-Improving RAG Engine Phase 4 Tracing & Evaluation | Implemented | Critical |
 | 025 | Self-Improving RAG Engine Phase 5 Evaluation Daemon | Implemented | High |
 | 026 | Answer Generation Consistency Fix | Implemented | High |
+| 027 | Self-Learning RAG Integration - Phase 1 Complete | Implemented | Critical |
+| 028 | Production Monitoring Dashboard | Implemented | High |
+| 029 | Three-Tier User Feedback System | Implemented | Medium |
+| 030 | Manual Self-Learning Analysis Tool | Implemented | High |
+| 031 | SSH Deployment Automation | Implemented | Medium |
+| 032 | Comprehensive Question History Analysis System | Implemented | High |
+| 033 | Production Traces Analysis System | Implemented | High |
 
 ---
 
@@ -1516,8 +1523,147 @@ def _is_count_query(self, query: str, data: List[Dict]) -> bool:
 
 ---
 
-**Last Updated**: 2025-11-23  
-**Next Review**: 2025-12-23
+**Last Updated**: 2025-12-29  
+**Next Review**: 2025-12-29
+
+
+## ADR-032: Comprehensive Question History Analysis System
+
+**Date**: 2025-12-29  
+**Status**: Implemented  
+**Context**: Multiple data sources containing question history needed unified analysis for systematic self-improvement
+
+**Decision**: Implement comprehensive question history analysis tool that consolidates evaluation scores, learned patterns, intent classification, and user behavior data
+
+**Problem Analysis**:
+- **Fragmented Data**: Question history scattered across multiple JSON files (eval_results.jsonl, query_patterns.json, self_improvement_results.json, production_insights.json)
+- **Manual Analysis**: Required manual inspection of multiple files to understand system performance
+- **No Unified View**: Difficult to correlate patterns across different data sources
+- **Limited Insights**: No systematic way to generate actionable improvement suggestions
+- **Export Limitations**: No way to export consolidated data for external analysis
+
+**Solution Architecture**:
+- **Unified Analyzer**: Single tool that loads and analyzes all available data sources
+- **Multi-Dimensional Analysis**: Evaluation scores, learned patterns, intent classification, user behavior
+- **Actionable Insights**: Automated generation of improvement suggestions based on data patterns
+- **Export Capabilities**: CSV export for external analysis and reporting
+- **CLI Interface**: Easy-to-use command-line tool with detailed and summary modes
+
+**Data Sources Analyzed**:
+1. **eval_results.jsonl**: Judge model evaluation scores by intent
+2. **query_patterns.json**: Learned patterns, success rates, failure analysis
+3. **self_improvement_results.json**: Intent classification performance, error patterns
+4. **production_insights.json**: User behavior patterns, data quality issues
+
+**Usage Examples**:
+```bash
+# Basic analysis
+python -m Tests.analyze_question_history
+
+# Detailed analysis with all metrics
+python -m Tests.analyze_question_history --detailed
+
+# Export to CSV for external analysis
+python -m Tests.analyze_question_history --export-csv
+```
+
+**Analysis Output Sections**:
+1. **Evaluation Scores Analysis**: Judge model performance by intent
+2. **Learned Patterns Analysis**: Pattern success rates and usage statistics
+3. **Intent Classification Analysis**: Classification accuracy and error patterns
+4. **User Behavior Analysis**: Query types and refinement patterns
+5. **Improvement Suggestions**: Actionable recommendations for system enhancement
+
+**Key Metrics Tracked**:
+- **Evaluation Scores**: Overall score, factual correctness, grounded in context, helpfulness
+- **Pattern Performance**: Success rate, usage count, execution time
+- **Intent Accuracy**: Success rate by intent, error distribution
+- **User Patterns**: Query volume by type, refinement frequency
+
+**Files Created**:
+- **Core Tool**: `Tests/analyze_question_history.py` - Comprehensive analysis engine
+- **Documentation**: Updated ADR with analysis methodology
+
+**Consequences**:
+- ✅ **Systematic Improvement**: Data-driven approach to system enhancement
+- ✅ **Unified View**: Single tool provides complete picture of system performance
+- ✅ **Actionable Insights**: Specific suggestions for prompt, keyword, and schema improvements
+- ✅ **Export Flexibility**: CSV export enables external analysis and reporting
+- ✅ **Easy Operation**: Simple CLI interface for regular analysis
+- ❌ **Data Dependency**: Requires multiple data files to be present for full analysis
+- ❌ **Manual Execution**: Requires periodic manual runs for insights
+
+---
+
+## ADR-033: Production Traces Analysis System
+
+**Date**: 2025-12-29  
+**Status**: Implemented  
+**Context**: Production traces.jsonl contains 144 real user queries but no systematic analysis tool to extract insights for system improvement
+
+**Decision**: Implement dedicated production traces analyzer to process actual user query data from the live deployment
+
+**Problem Analysis**:
+- **Production Data Gap**: 144 production traces from real users not systematically analyzed
+- **Trace Generator Identified**: FastAPI `/query` endpoint generates traces via `app/core/tracing.py`
+- **Missing Insights**: No analysis of real user query patterns, intent distribution, or failure modes
+- **Automation Need**: Manual trace inspection insufficient for continuous improvement
+
+**Solution Architecture**:
+- **Dedicated Analyzer**: Purpose-built tool for traces.jsonl analysis (`Tests/analyze_traces.py`)
+- **Production Focus**: Analyzes actual user queries from live deployment
+- **Comprehensive Metrics**: Intent performance, query patterns, failure analysis, recommendations
+- **Automation Ready**: CLI interface suitable for scheduled analysis
+
+**Data Source**:
+- **traces.jsonl**: Generated by `app/core/tracing.py` via `safe_write_trace()` in `app/api/routes.py`
+- **Production Path**: `/app/data/traces.jsonl` (mapped to persistent volume)
+- **Real User Data**: 144 actual queries from production deployment
+- **Complete Context**: Full execution traces with intent, Cypher, results, timing
+
+**Analysis Capabilities**:
+1. **Intent Classification Performance**: Success rates by intent, routing method distribution
+2. **Query Pattern Analysis**: Common Cypher patterns, AI vs learned pattern usage
+3. **Performance Metrics**: Response times, data quality, success rates
+4. **Failure Pattern Identification**: Error categorization, sample failures
+5. **Actionable Recommendations**: Data-driven suggestions for system improvement
+
+**Usage Examples**:
+```bash
+# Basic analysis
+python -m Tests.analyze_traces --data-dir ref_data
+
+# Export to CSV for external analysis
+python -m Tests.analyze_traces --data-dir ref_data --export-csv
+```
+
+**Key Metrics Tracked**:
+- **Intent Distribution**: Query count and success rate per intent type
+- **Routing Efficiency**: AI-generated vs learned pattern usage rates
+- **Query Patterns**: Employee/calendar, client/opportunity, recording, product query types
+- **Performance**: Response times, data return rates, empty result rates
+- **Failure Analysis**: Error types, failure rates, sample problematic queries
+
+**Files Created**:
+- **Core Analyzer**: `Tests/analyze_traces.py` - Production traces analysis engine
+- **Documentation**: Updated ADR with trace analysis methodology
+
+**Integration with Existing Tools**:
+- **Complements**: `Tests/analyze_question_history.py` (processed data) vs `Tests/analyze_traces.py` (raw production data)
+- **Data Pipeline**: Production traces → Analysis → Recommendations → System improvements
+- **Automation**: Both tools suitable for scheduled analysis and continuous monitoring
+
+**Consequences**:
+- ✅ **Production Insights**: Direct analysis of real user query behavior
+- ✅ **Complete Coverage**: All 144 production traces systematically analyzed
+- ✅ **Automation Ready**: CLI tool suitable for scheduled analysis
+- ✅ **Failure Detection**: Systematic identification of error patterns
+- ✅ **Performance Tracking**: Real-world response time and success rate analysis
+- ✅ **Intent Validation**: Actual intent classification performance measurement
+- ❌ **Data Dependency**: Requires traces.jsonl from production deployment
+- ❌ **Manual Execution**: Requires periodic runs for continuous insights
+
+---
 
 
 ## ADR-027: Self-Learning RAG Integration - Phase 1 Complete

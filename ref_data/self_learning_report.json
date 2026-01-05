@@ -1,0 +1,55 @@
+{
+  "timestamp": "2025-12-23T12:45:15.682476",
+  "failure_analysis": {
+    "total_queries": 37,
+    "total_failures": 3,
+    "failure_rate": 8.1,
+    "error_breakdown": {
+      "CypherTypeError": 1,
+      "CypherSyntaxError": 2
+    },
+    "error_details": {
+      "CypherTypeError": [
+        {
+          "query": "Who is invited to the most CalendarEvents scheduled in Region 'South'?",
+          "intent": "unknown",
+          "timestamp": "2025-12-22T14:28:03.908946"
+        }
+      ],
+      "CypherSyntaxError": [
+        {
+          "query": "Which BU has the most SyncMetadata records?",
+          "intent": "unknown",
+          "timestamp": "2025-12-22T14:28:25.177913"
+        },
+        {
+          "query": "How many Employee activities have been assigned to Opportunities in Region 'South'?",
+          "intent": "unknown",
+          "timestamp": "2025-12-22T14:29:06.491812"
+        }
+      ]
+    },
+    "retry_count": 0,
+    "retry_queries": []
+  },
+  "feedback_analysis": {
+    "error": "No feedback data found"
+  },
+  "intent_analysis": {
+    "intent_distribution": {
+      "strict_v1": 6,
+      "sales_v1": 6,
+      "calendar_v1": 14,
+      "product_v1": 8,
+      "unknown": 3
+    },
+    "unknown_rate": 8.1,
+    "most_common": "calendar_v1"
+  },
+  "suggestions": {
+    "prompt_rules": [],
+    "intent_keywords": [],
+    "schema_hints": [],
+    "few_shot_examples": []
+  }
+}
