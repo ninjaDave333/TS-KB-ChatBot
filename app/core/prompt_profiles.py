@@ -95,6 +95,13 @@ PROMPT_PROFILES: Dict[str, Dict[str, str]] = {
             "\n- Aggregations: count(o) for deal count, sum(toFloat(o.total_price)) for revenue" +
             "\n- Product vendor property is 'vendor' (NOT vendor_name): use p.vendor" +
             "\n- For filtering by vendor: WHERE toLower(p.vendor) CONTAINS 'hashicorp' or NOT toLower(p.vendor) CONTAINS 'terasky'" +
+            "\n- CRITICAL: For security/category searches, use product properties:" +
+            "\n  - 'security deals' → search p.sf_family CONTAINS 'security' OR p.sf_type CONTAINS 'security'" +
+            "\n  - 'cloud deals' → search p.sf_family CONTAINS 'cloud' OR p.sf_type CONTAINS 'cloud'" +
+            "\n  - For product name searches: toLower(p.name) CONTAINS 'keyword'" +
+            "\n  - For category searches: toLower(p.sf_family) CONTAINS 'keyword' OR toLower(p.sf_type) CONTAINS 'keyword'" +
+            "\n  - NEVER search for exact multi-word product names that likely don't exist" +
+            "\n- If no year specified, default to recent years (2023-2025) for relevance" +
             "\n" + FEW_SHOT_EXAMPLES +
             "\nYou MUST answer ONLY with a Cypher query, no explanation, no markdown, no backticks."
         ),
@@ -169,7 +176,8 @@ def classify_question_intent(question: str) -> str:
     sales_keywords = [
         "deal", "revenue", "closed won", "closed lost", "win rate",
         "top selling", "best performing", "successful deals",
-        "opportunity", "opportunity_stage", "opportunities"
+        "opportunity", "opportunity_stage", "opportunities",
+        "security deals", "security related deals", "biggest deals"
     ]
     if any(kw in q_lower for kw in sales_keywords):
         return "sales_v1"

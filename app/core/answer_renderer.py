@@ -97,8 +97,11 @@ def generate_empty_result_help(question: str) -> str:
     q_lower = question.lower()
     suggestions = []
     
-    if "2025" in question:
+    if "2025" in question or "2026" in question:
         suggestions.append("Try a different year (2023 or 2024)")
+    
+    if "prompt security" in q_lower:
+        suggestions.append("Try 'security', 'HashiCorp Vault', or 'Aqua Security' instead")
     
     if "backstage" in q_lower:
         suggestions.append("Try 'HashiCorp', 'AWS', or 'Microsoft' instead")
@@ -111,6 +114,10 @@ def generate_empty_result_help(question: str) -> str:
     
     if "opportunity_stage" in q_lower:
         suggestions.append("Try 'Closed Won', 'Pipeline', or 'Proposal' for stages")
+    
+    # Generic product search suggestions
+    if any(word in q_lower for word in ["product", "solution", "deals"]) and len(suggestions) == 0:
+        suggestions.append("Try broader terms like 'security', 'cloud', or 'infrastructure'")
     
     if suggestions:
         return "Suggestions: " + "; ".join(suggestions) + "."

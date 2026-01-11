@@ -32,9 +32,9 @@ ssh -i D:\Projects\aipg.pem ubuntu@aipg.dudelabz.com "<command>"
 
 ## Docker Rebuild Commands
 
-### Use build_and_run.sh Script (Recommended)
+### Use build_and_run_auto.sh Script always on new code update/change(Recommended)
 ```bash
-ssh -i D:\Projects\aipg.pem ubuntu@aipg.dudelabz.com "cd /home/ubuntu/mb-env-ProdLike/test_env/tskb-rag-chatbot && sudo ./build_and_run.sh"
+ssh -i D:\Projects\aipg.pem ubuntu@aipg.dudelabz.com "cd /home/ubuntu/mb-env-ProdLike/test_env/tskb-rag-chatbot && sudo ./use build_and_run_auto.sh"
 ```
 
 ### Manual Rebuild Container
