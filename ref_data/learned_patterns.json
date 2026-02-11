@@ -1,0 +1,88 @@
+[
+  {
+    "id": "pattern_0",
+    "intent": "product_v1",
+    "pattern_type": "top_ranking",
+    "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'\nAND toLower(p.vendor) CONTAINS 'dell'\nWITH p.name AS product_name, sum(toFloat(o.total_price)) AS total_revenue\nORDER BY total_revenue DESC\nLIMIT 5\nRETURN product_name, total_revenue",
+    "trigger_keywords": [
+      "product",
+      "top",
+      "products",
+      "dell",
+      "show"
+    ],
+    "example_questions": [
+      "what are top 5 products in dell show me product name , amount of money made combined for each product in 2025.",
+      "what are top 5 products in dell show me product name , amount of money made combined for each product in 2025.",
+      "what are top 5 products in dell show me product name , amount of money made combined for each product in 2025."
+    ],
+    "usage_count": 3,
+    "confidence": 0.6,
+    "sample_answer": "Based on Dell's 2025 performance data, here are the **top 5 products by revenue**:\n\n1. **Dell EMC Data Domain** - $1,515,147 (the clear leader, generating over $1.5M)\n2. **DellEMC Storage Maintenance** - $272,014 \n3. **Dell EMC SC Storage** - $236,250\n4. **Dell EMC Servers** - $236,016\n5. **DellEMC Server Maintenance** - $140,121\n\n**Key insights:**\n- Dell EMC Data Domain dominates with nearly **6x more revenue** than the second-place product\n- Storage and server products (both hardware and maint"
+  },
+  {
+    "id": "pattern_0",
+    "intent": "sales_v1",
+    "pattern_type": "top_ranking",
+    "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND toLower(p.name) CONTAINS 'prompt'\nWITH c.sf_name AS client_name, o.close_date AS deal_date, toFloat(o.total_price) AS deal_amount\nORDER BY deal_amount DESC\nLIMIT 3\nRETURN client_name, deal_date, deal_amount",
+    "trigger_keywords": [
+      "deals",
+      "deal",
+      "top",
+      "biggest",
+      "prompt"
+    ],
+    "example_questions": [
+      "what are the top 3 biggest Prompt Security deals? list client name, deal date, and deal amount",
+      "look for deals over all time not just 2026"
+    ],
+    "usage_count": 2,
+    "confidence": 0.4,
+    "sample_answer": "Based on the available data, there is only **one Prompt Security deal** recorded:\n\n**Elementor** - Deal closed on **January 1, 2026** for **$10,000**\n\nSince only one deal is present in the results, this represents the complete list of Prompt Security deals rather than a \"top 3\" ranking. The deal with Elementor appears to be scheduled for early 2026.",
+    "manually_corrected": true
+  },
+  {
+    "id": "pattern_0",
+    "intent": "sales_v1",
+    "pattern_type": "top_ranking",
+    "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND toLower(p.name) CONTAINS 'prompt'\nWITH c.sf_name AS client_name, o.close_date AS deal_date, toFloat(o.total_price) AS deal_profit\nORDER BY deal_profit DESC\nLIMIT 3\nRETURN client_name, deal_date, deal_profit",
+    "trigger_keywords": [
+      "deal",
+      "list",
+      "top",
+      "biggest",
+      "deals"
+    ],
+    "example_questions": [
+      "list top 3 biggest deals, show client name, deal date and deal profit",
+      "list top 3 biggest prompt security deals, show client name, deal date and deal profit",
+      "list top 3 biggest prompt security deals, show client name, deal date and deal profit"
+    ],
+    "usage_count": 3,
+    "confidence": 0.6,
+    "sample_answer": "Based on the query results, here are the top deals by profit:\n\n**Top Deal:**\n- **Elementor** - Deal closed on January 1, 2026 with a profit of **$10,000**\n\nIt appears there is only one deal record in the current dataset, so this represents the complete list of available deals rather than a top 3 ranking. The Elementor deal shows a future date (2026), which may indicate this is either projected/planned business or test data.",
+    "manually_corrected": true
+  },
+  {
+    "id": "pattern_0",
+    "intent": "sales_v1",
+    "pattern_type": "top_ranking",
+    "cypher_template": "MATCH (c:Client)-[o:OPPORTUNITY]->(p:Product)\nWHERE o.opportunity_stage = 'Closed Won'\nAND o.close_date >= '2025-01-01' AND o.close_date < '2026-01-01'\nAND toLower(p.sf_line_of_business) CONTAINS 'cloud&devops'\nWITH c.sf_name AS client_name, o.close_date AS deal_date, toFloat(o.total_price) AS deal_profit\nORDER BY deal_profit DESC\nLIMIT 3\nRETURN client_name, deal_date, deal_profit",
+    "trigger_keywords": [
+      "deal",
+      "list",
+      "top",
+      "biggest",
+      "security"
+    ],
+    "example_questions": [
+      "list top 3 biggest \"prompt security\" deals during 2025, show client name, deal date and deal profit",
+      "list top 3 biggest security related deals during 2025, show client name, deal date and deal profit",
+      "list top 3 biggest security related deals during 2025, show client name, deal date and deal profit"
+    ],
+    "usage_count": 4,
+    "confidence": 0.8,
+    "sample_answer": "There are no matching results for that question. Suggestions: Try a different year (2023 or 2024); Try 'security', 'HashiCorp Vault', or 'Aqua Security' instead.",
+    "manually_corrected": true
+  }
+]

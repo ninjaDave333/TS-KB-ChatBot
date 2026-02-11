@@ -1523,8 +1523,26 @@ def _is_count_query(self, query: str, data: List[Dict]) -> bool:
 
 ---
 
-**Last Updated**: 2025-12-29  
-**Next Review**: 2025-12-29
+### ADR-034: Enhanced Product Search Logic (2026-01-13)
+
+**Status**: Accepted  
+**Context**: Security product queries were failing because the system searched product names instead of product categories. Users asking for "security deals" found no results even though security products exist in the database.
+
+**Decision**: Enhanced product search to use `sf_family` and `sf_type` fields for category-based searches instead of just product names.
+
+**Implementation**:
+- Updated sales_v1 prompt profile with category search guidance
+- Added specific examples: "security deals" → search `p.sf_family CONTAINS 'security' OR p.sf_type CONTAINS 'security'`
+- Enhanced intent classification to route security queries to sales_v1
+- Added input validation to reject invalid queries with helpful error messages
+
+**Consequences**: 
+- ✅ Security product queries now find actual results
+- ✅ Better user experience with specific error suggestions
+- ✅ Proper intent routing for product category searches
+- ⚠️ Requires understanding of database schema structure
+
+---
 
 
 ## ADR-032: Comprehensive Question History Analysis System

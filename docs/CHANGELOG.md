@@ -5,6 +5,30 @@ All notable changes to the TSKB-RAG Chatbot System will be documented in this fi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 2026-01-13 - Production Fixes and Improvements
+
+### Added
+- **Enhanced Product Search Logic**: Security deals now search `sf_family` and `sf_type` fields instead of product names
+- **Input Validation**: Invalid queries ("crap !", "test", etc.) now rejected with HTTP 400 error
+- **Better Empty Result Messages**: Specific suggestions for common issues:
+  - 2025/2026 queries → suggest 2023/2024
+  - "prompt security" → suggest "security", "HashiCorp Vault", "Aqua Security"
+  - "backstage" → suggest "HashiCorp", "AWS", "Microsoft"
+- **Enhanced Intent Classification**: Added keywords for better routing:
+  - "security deals", "security related deals", "biggest deals" → sales_v1
+  - "opportunity", "opportunity_stage", "opportunities" → sales_v1
+
+### Fixed
+- **Security Product Queries**: "list security deals" now properly searches product categories
+- **Product Category Search**: Uses `toLower(p.sf_family) CONTAINS 'security' OR toLower(p.sf_type) CONTAINS 'security'`
+- **Intent Misclassification**: Security-related queries now properly routed to sales_v1 intent
+
+### Technical
+- Updated `app/core/prompt_profiles.py` with enhanced search guidance
+- Updated `app/core/answer_renderer.py` with better error messages
+- Updated `app/api/routes.py` with input validation
+- Deployed using `build_and_run_auto.sh` for full container rebuild
+
 ## [Unreleased]
 
 ### Added - Production Traces Analysis System (2025-12-29)

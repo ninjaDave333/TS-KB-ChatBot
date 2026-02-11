@@ -5,6 +5,8 @@ Integrates with Adaptive Query Classifier and Dynamic Query Detector
 
 from typing import Dict, List, Any, Optional, Tuple
 import json
+import os
+from pathlib import Path
 from datetime import datetime
 from .adaptive_query_classifier import AdaptiveQueryClassifier
 from .dynamic_query_detector import DynamicQueryDetector
@@ -20,6 +22,26 @@ class EnhancedQueryGenerator(QueryGenerator):
         self.detector = DynamicQueryDetector(self.classifier)
         self.optimizer = SmartQueryOptimizer()
         self.query_history = []
+        self._load_learned_patterns()
+    
+    def _load_learned_patterns(self):
+        """Load patterns from metrics_pattern_analyzer"""
+        patterns_file = Path("data/learned_patterns.json")
+        if patterns_file.exists():
+            with open(patterns_file, 'r', encoding='utf-8') as f:
+                learned = json.load(f)
+            for p in learned:
+                self.classifier.query_patterns[json.dumps({
+                    "intent": p['intent'],
+                    "keywords": p['trigger_keywords'][:3]
+                })] = {
+                    'cypher_template': p['cypher_template'],
+                    'success_rate': p['confidence'],
+                    'usage_count': p['usage_count'],
+                    'example_queries': p['example_questions'],
+                    'manually_approved': True
+                }
+            print(f"Loaded {len(learned)} learned patterns")
     
     def generate_cypher_with_learning(self, query: str) -> Dict[str, Any]:
         """Generate Cypher with learning capabilities"""

@@ -11,7 +11,14 @@
 **Problem**: 76 queries (40.9% of traffic), 78.9% success rate  
 **Impact**: Largest volume, lowest success rate  
 **Target**: Increase to 90%+ success rate  
-**Status**: ✅ DEPLOYED to dev environment  
+**Status**: ✅ DEPLOYED with additional fixes
+
+### Completed Fixes (2026-01-13):
+- [x] **Enhanced Intent Classification**: Added missing keywords ("opportunity", "calendarevent", "backstage")
+- [x] **Input Validation**: Reject invalid queries like "crap !" with HTTP 400 error
+- [x] **Better Error Messages**: Specific suggestions for empty results (2025→2023/2024, backstage→HashiCorp)
+- [x] **Security Product Search**: Fixed to use sf_family/sf_type instead of product names
+- [x] **Product Category Matching**: Enhanced search for security, cloud, and other product categories  
 
 ### Root Cause Analysis Required
 1. **Analyze Failed General Queries**:
